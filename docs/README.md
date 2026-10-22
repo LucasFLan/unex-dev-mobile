@@ -1,4 +1,4 @@
-# ServSoft 🛠️
+# ChamaAí 🛠️
 
 **ServSoft** é uma plataforma de prestação de serviços desenvolvida para conectar clientes que necessitam de reparos ou obras rápidas a profissionais autônomos verificados, garantindo segurança, agilidade e transparência.
 
