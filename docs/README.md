@@ -1,6 +1,6 @@
 # ChamaAí 🛠️
 
-**ServSoft** é uma plataforma de prestação de serviços desenvolvida para conectar clientes que necessitam de reparos ou obras rápidas a profissionais autônomos verificados, garantindo segurança, agilidade e transparência.
+**ChamaAí** é uma plataforma de prestação de serviços desenvolvida para conectar clientes que necessitam de reparos ou obras rápidas a profissionais autônomos verificados, garantindo segurança, agilidade e transparência.
 
 Este repositório contém o código-fonte do projeto, desenvolvido como trabalho acadêmico no Centro Universitário de Excelência.
 
@@ -11,7 +11,7 @@ Este repositório contém o código-fonte do projeto, desenvolvido como trabalho
 ## 💻 Arquitetura e Tecnologias
 O projeto adota uma estrutura de *monorepo* integrando:
 * **Backend:** Java (Spring Boot) para gestão de dados,regras de negócio e integrações.
-* **Mobile:** Aplicativo cliente/prestador desenvolvido em React Native.
+* **Mobile:** Aplicativo cliente/prestador desenvolvido em Next JS.
 
 ## 👥 Equipe Desenvolvedora
 * César Filipe Gomes da Silva
