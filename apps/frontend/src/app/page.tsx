@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Logo from "../../public/logo.svg";
 import Input from "@/components/Input";
+import Button from "@/components/Button";
+import { Lock, Mail } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-center bg-white p-6">
+    <main className="flex min-h-screen w-full flex-col items-center justify-center p-6">
       <div className="flex w-full max-w-md flex-col gap-8">
 
         <div className="flex flex-col items-center justify-center">
@@ -26,7 +28,7 @@ export default function Home() {
             Bem-vindo ao ChamaAí
           </h2>
 
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-slate-500">
             Encontre ou ofereça serviços de forma simples e segura.
           </p>
         </div>
@@ -34,25 +36,21 @@ export default function Home() {
         <form className="flex w-full flex-col gap-5">
 
           <div className="flex flex-col gap-2">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-gray-700"
-            >
-              E-mail
-            </label>
-
-            <Input type="email" placeholder="seu@email.com"/>
+            <Input 
+              type="email" 
+              placeholder="seu@email.com" 
+              labelText="E-mail"
+              icon={<Mail size={17}/>}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label
-              htmlFor="senha"
-              className="text-sm font-medium text-gray-700"
-            >
-              Senha
-            </label>
-
-            <Input type="password" placeholder="Digite sua senha"/>
+            <Input 
+              type="password" 
+              placeholder="Digite sua senha" 
+              labelText="Senha"
+              icon={<Lock size={17}/>}  
+            />
           </div>
 
           <div className="flex justify-end">
@@ -64,17 +62,12 @@ export default function Home() {
             </a>
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-principal px-4 py-3 font-semibold text-white transition hover:opacity-90"
-          >
-            Entrar
-          </button>
+          <Button text="Entrar" type="submit"/>
 
           <p className="text-center text-sm text-gray-600">
             Ainda não tem uma conta?{" "}
             <a
-              href="/cadastro"
+              href="/register"
               className="font-semibold text-principal hover:underline"
             >
               Criar conta
