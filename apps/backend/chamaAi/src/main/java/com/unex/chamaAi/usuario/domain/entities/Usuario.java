@@ -1,5 +1,7 @@
 package com.unex.chamaAi.usuario.domain.entities;
 
+import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
+import com.unex.chamaAi.usuario.domain.exceptions.ContaJaVerificadaException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
@@ -9,6 +11,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Usuario {
+
+    private static final int TAMANHO_MAXIMO_NOME = 150;
+    private static final int TAMANHO_MAXIMO_TELEFONE = 20;
 
     private final UUID id;
     private String nome;
@@ -27,7 +32,7 @@ public class Usuario {
         this.senha = Objects.requireNonNull(senha, "A senha é obrigatória.");
         this.nome = validarNome(nome);
         this.dataNascimento = validarDataNascimento(dataNascimento);
-        this.telefone = telefone;
+        this.telefone = validarTelefone(telefone);
         this.verificado = verificado;
     }
 
@@ -50,7 +55,7 @@ public class Usuario {
     }
 
     public void alterarTelefone(String novoTelefone) {
-        this.telefone = novoTelefone;
+        this.telefone = validarTelefone(novoTelefone);
     }
 
     public void alterarSenha(SenhaHash novaSenha) {
@@ -68,22 +73,35 @@ public class Usuario {
 
     public void verificarConta() {
         if (this.verificado) {
-            throw new IllegalStateException("Usuário já está verificado.");
+            throw new ContaJaVerificadaException();
         }
         this.verificado = true;
     }
 
     private static String validarNome(String nome) {
         if (nome == null || nome.isBlank()) {
-            throw new IllegalArgumentException("Nome é obrigatório.");
+            throw new DadoInvalidoException("Nome é obrigatório.");
         }
-        return nome.trim();
+        String nomeSemEspacos = nome.trim();
+        if (nomeSemEspacos.length() > TAMANHO_MAXIMO_NOME) {
+            throw new DadoInvalidoException("O nome deve ter no máximo " + TAMANHO_MAXIMO_NOME + " caracteres.");
+        }
+        return nomeSemEspacos;
+    }
+
+    private static String validarTelefone(String telefone) {
+        if (telefone != null && telefone.length() > TAMANHO_MAXIMO_TELEFONE) {
+            throw new DadoInvalidoException("O telefone deve ter no máximo " + TAMANHO_MAXIMO_TELEFONE + " caracteres.");
+        }
+        return telefone;
     }
 
     private static LocalDate validarDataNascimento(LocalDate dataNascimento) {
-        Objects.requireNonNull(dataNascimento, "A data de nascimento é obrigatória.");
+        if (dataNascimento == null) {
+            throw new DadoInvalidoException("A data de nascimento é obrigatória.");
+        }
         if (dataNascimento.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("A data de nascimento não pode estar no futuro.");
+            throw new DadoInvalidoException("A data de nascimento não pode estar no futuro.");
         }
         return dataNascimento;
     }

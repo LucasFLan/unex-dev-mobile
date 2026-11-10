@@ -1,5 +1,7 @@
 package com.unex.chamaAi.usuario.domain.entities;
 
+import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
+import com.unex.chamaAi.usuario.domain.exceptions.ContaJaVerificadaException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
@@ -38,10 +40,26 @@ class UsuarioTest {
 
     @Test
     void nomeEmBrancoLancaExcecao() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DadoInvalidoException.class,
                 () -> Usuario.criar("  ", NASCIMENTO, CPF, EMAIL, SENHA, null));
         Usuario usuario = novoUsuario();
-        assertThrows(IllegalArgumentException.class, () -> usuario.alterarNome(null));
+        assertThrows(DadoInvalidoException.class, () -> usuario.alterarNome(null));
+    }
+
+    @Test
+    void nomeRespeitaTamanhoMaximo() {
+        assertDoesNotThrow(() -> Usuario.criar("a".repeat(150), NASCIMENTO, CPF, EMAIL, SENHA, null));
+        assertThrows(DadoInvalidoException.class,
+                () -> Usuario.criar("a".repeat(151), NASCIMENTO, CPF, EMAIL, SENHA, null));
+    }
+
+    @Test
+    void telefoneRespeitaTamanhoMaximo() {
+        assertDoesNotThrow(() -> Usuario.criar("João", NASCIMENTO, CPF, EMAIL, SENHA, "1".repeat(20)));
+        assertThrows(DadoInvalidoException.class,
+                () -> Usuario.criar("João", NASCIMENTO, CPF, EMAIL, SENHA, "1".repeat(21)));
+        Usuario usuario = novoUsuario();
+        assertThrows(DadoInvalidoException.class, () -> usuario.alterarTelefone("1".repeat(21)));
     }
 
     @Test
@@ -49,12 +67,12 @@ class UsuarioTest {
         assertThrows(NullPointerException.class, () -> Usuario.criar("João", NASCIMENTO, null, EMAIL, SENHA, null));
         assertThrows(NullPointerException.class, () -> Usuario.criar("João", NASCIMENTO, CPF, null, SENHA, null));
         assertThrows(NullPointerException.class, () -> Usuario.criar("João", NASCIMENTO, CPF, EMAIL, null, null));
-        assertThrows(NullPointerException.class, () -> Usuario.criar("João", null, CPF, EMAIL, SENHA, null));
+        assertThrows(DadoInvalidoException.class, () -> Usuario.criar("João", null, CPF, EMAIL, SENHA, null));
     }
 
     @Test
     void dataNascimentoNoFuturoLancaExcecao() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(DadoInvalidoException.class,
                 () -> Usuario.criar("João", LocalDate.now().plusDays(1), CPF, EMAIL, SENHA, null));
     }
 
@@ -63,7 +81,7 @@ class UsuarioTest {
         Usuario usuario = novoUsuario();
         usuario.verificarConta();
         assertTrue(usuario.isVerificado());
-        assertThrows(IllegalStateException.class, usuario::verificarConta);
+        assertThrows(ContaJaVerificadaException.class, usuario::verificarConta);
     }
 
     @Test

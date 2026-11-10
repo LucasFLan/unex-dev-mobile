@@ -1,5 +1,6 @@
 package com.unex.chamaAi.usuario.domain.valueobjects;
 
+import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -21,7 +22,7 @@ class ValueObjectsTest {
     @NullAndEmptySource
     @ValueSource(strings = {"111.111.111-11", "529.982.247-24", "123", "5299822472512"})
     void cpfInvalidoLancaExcecao(String entrada) {
-        assertThrows(IllegalArgumentException.class, () -> new Cpf(entrada));
+        assertThrows(DadoInvalidoException.class, () -> new Cpf(entrada));
     }
 
     @Test
@@ -38,7 +39,7 @@ class ValueObjectsTest {
     @NullAndEmptySource
     @ValueSource(strings = {"joao", "joao@", "@unex.com", "joao@unex", "joao silva@unex.com"})
     void emailInvalidoLancaExcecao(String entrada) {
-        assertThrows(IllegalArgumentException.class, () -> new Email(entrada));
+        assertThrows(DadoInvalidoException.class, () -> new Email(entrada));
     }
 
     @ParameterizedTest
@@ -51,7 +52,21 @@ class ValueObjectsTest {
     @NullAndEmptySource
     @ValueSource(strings = {"Se1!", "senha123!", "SenhaForte!", "Senha1234"})
     void senhaFracaLancaExcecao(String entrada) {
-        assertThrows(IllegalArgumentException.class, () -> new Senha(entrada));
+        assertThrows(DadoInvalidoException.class, () -> new Senha(entrada));
+    }
+
+    @Test
+    void emailRespeitaTamanhoMaximo() {
+        String dominio = "@unex.edu.br";
+        assertDoesNotThrow(() -> new Email("a".repeat(254 - dominio.length()) + dominio));
+        assertThrows(DadoInvalidoException.class, () -> new Email("a".repeat(255 - dominio.length()) + dominio));
+    }
+
+    @Test
+    void senhaRespeitaLimiteDeBytes() {
+        assertDoesNotThrow(() -> new Senha("Aa1!" + "x".repeat(68)));
+        assertThrows(DadoInvalidoException.class, () -> new Senha("Aa1!" + "x".repeat(69)));
+        assertThrows(DadoInvalidoException.class, () -> new Senha("Aa1!" + "é".repeat(35)));
     }
 
     @Test

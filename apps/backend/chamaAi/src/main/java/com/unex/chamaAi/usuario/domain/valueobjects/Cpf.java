@@ -1,16 +1,18 @@
 package com.unex.chamaAi.usuario.domain.valueobjects;
 
+import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
+
 public record Cpf(String valor) {
 
     public Cpf {
         if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException("O CPF é obrigatório.");
+            throw new DadoInvalidoException("O CPF é obrigatório.");
         }
 
         valor = valor.replaceAll("\\D", "");
 
         if (!valido(valor)) {
-            throw new IllegalArgumentException("CPF inválido.");
+            throw new DadoInvalidoException("CPF inválido.");
         }
     }
 
