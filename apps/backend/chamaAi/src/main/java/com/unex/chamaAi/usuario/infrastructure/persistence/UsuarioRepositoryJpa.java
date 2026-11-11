@@ -6,10 +6,12 @@ import com.unex.chamaAi.usuario.domain.exceptions.EmailJaCadastradoException;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
+import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class UsuarioRepositoryJpa implements UsuarioRepository {
@@ -34,8 +36,13 @@ public class UsuarioRepositoryJpa implements UsuarioRepository {
     }
 
     @Override
+    public Optional<Usuario> buscarPorId(UUID id) {
+        return springData.findById(id).map(UsuarioRepositoryJpa::paraDominio);
+    }
+
+    @Override
     public Optional<Usuario> buscarPorCpf(String cpf) {
-        return Optional.empty();
+        return springData.findByCpf(new Cpf(cpf).valor()).map(UsuarioRepositoryJpa::paraDominio);
     }
 
     @Override
@@ -58,5 +65,11 @@ public class UsuarioRepositoryJpa implements UsuarioRepository {
         return new UsuarioJpaEntity(usuario.getId(), usuario.getNome(), usuario.getDataNascimento(),
                 usuario.getCpf().valor(), usuario.getEmail().valor(), usuario.getSenha().valor(),
                 usuario.getTelefone(), usuario.isVerificado());
+    }
+
+    private static Usuario paraDominio(UsuarioJpaEntity entidade) {
+        return Usuario.reconstituir(entidade.getId(), entidade.getNome(), entidade.getDataNascimento(),
+                new Cpf(entidade.getCpf()), new Email(entidade.getEmail()), new SenhaHash(entidade.getSenhaHash()),
+                entidade.getTelefone(), entidade.isVerificado());
     }
 }

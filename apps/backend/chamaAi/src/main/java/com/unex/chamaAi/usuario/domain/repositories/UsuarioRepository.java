@@ -5,12 +5,15 @@ import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UsuarioRepository {
 
     boolean existePorCpf(Cpf cpf);
 
     boolean existePorEmail(Email email);
+
+    Optional<Usuario> buscarPorId(UUID id);
 
     Optional<Usuario> buscarPorCpf(String cpf);
 

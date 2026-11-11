@@ -11,10 +11,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -125,5 +130,90 @@ class UsuarioControllerTest {
         cadastrar(corpo(CPF, EMAIL, SENHA).replace("2000-01-01", "01/01/2000"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("Corpo da requisição inválido."));
+    }
+
+    private String cadastrarERetornarId() throws Exception {
+        String resposta = cadastrar(corpo(CPF, EMAIL, SENHA)).andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return JSON.readTree(resposta).get("id").asString();
+    }
+
+    private static final ObjectMapper JSON = new ObjectMapper();
+
+    @Test
+    void visualizaPerfilSemExporSenha() throws Exception {
+        String id = cadastrarERetornarId();
+
+        mockMvc.perform(get("/usuarios/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.nome").value("João"))
+                .andExpect(jsonPath("$.dataNascimento").value("2000-01-01"))
+                .andExpect(jsonPath("$.cpf").value("52998224725"))
+                .andExpect(jsonPath("$.email").value(EMAIL))
+                .andExpect(jsonPath("$.telefone").value("71999999999"))
+                .andExpect(jsonPath("$.verificado").value(false))
+                .andExpect(jsonPath("$.senha").doesNotExist())
+                .andExpect(jsonPath("$.senhaHash").doesNotExist());
+    }
+
+    @Test
+    void perfilInexistenteRetorna404EIdMalformadoRetorna400() throws Exception {
+        mockMvc.perform(get("/usuarios/{id}", UUID.randomUUID()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("Usuário não encontrado."));
+        mockMvc.perform(get("/usuarios/nao-e-uuid")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void editaPerfil() throws Exception {
+        String id = cadastrarERetornarId();
+
+        mockMvc.perform(put("/usuarios/{id}", id).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"nome": "João Silva", "dataNascimento": "1999-05-10", "telefone": "71888888888"}
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("João Silva"))
+                .andExpect(jsonPath("$.dataNascimento").value("1999-05-10"))
+                .andExpect(jsonPath("$.telefone").value("71888888888"))
+                .andExpect(jsonPath("$.email").value(EMAIL));
+
+        assertEquals("João Silva", springData.findById(UUID.fromString(id)).orElseThrow().getNome());
+    }
+
+    @Test
+    void editarComNomeVazioRetorna400() throws Exception {
+        String id = cadastrarERetornarId();
+
+        mockMvc.perform(put("/usuarios/{id}", id).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"nome": " ", "dataNascimento": "1999-05-10"}
+                        """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void alteraSenha() throws Exception {
+        String id = cadastrarERetornarId();
+        String hashAntigo = springData.findById(UUID.fromString(id)).orElseThrow().getSenhaHash();
+
+        mockMvc.perform(patch("/usuarios/{id}/senha", id).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"senhaAtual": "%s", "novaSenha": "NovaSenha456@"}
+                        """.formatted(SENHA)))
+                .andExpect(status().isNoContent());
+
+        String hashNovo = springData.findById(UUID.fromString(id)).orElseThrow().getSenhaHash();
+        assertNotEquals(hashAntigo, hashNovo);
+        assertTrue(hashNovo.startsWith("$2"));
+    }
+
+    @Test
+    void senhaAtualIncorretaRetorna422() throws Exception {
+        String id = cadastrarERetornarId();
+
+        mockMvc.perform(patch("/usuarios/{id}/senha", id).contentType(MediaType.APPLICATION_JSON).content("""
+                        {"senhaAtual": "Errada123!", "novaSenha": "NovaSenha456@"}
+                        """))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.detail").value("Senha atual incorreta."));
     }
 }

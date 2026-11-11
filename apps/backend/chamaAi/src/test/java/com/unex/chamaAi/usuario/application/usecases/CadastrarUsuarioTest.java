@@ -6,18 +6,10 @@ import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.usuario.domain.entities.Usuario;
 import com.unex.chamaAi.usuario.domain.exceptions.CpfJaCadastradoException;
 import com.unex.chamaAi.usuario.domain.exceptions.EmailJaCadastradoException;
-import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
-import com.unex.chamaAi.usuario.domain.services.CriptografadorSenha;
-import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
-import com.unex.chamaAi.usuario.domain.valueobjects.Email;
-import com.unex.chamaAi.usuario.domain.valueobjects.Senha;
-import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,8 +34,8 @@ class CadastrarUsuarioTest {
     void cadastraUsuarioNaoVerificado() {
         UsuarioCadastrado resultado = cadastrarUsuario.executar(comando(CPF, EMAIL));
 
-        assertEquals(1, usuarios.salvos.size());
-        Usuario salvo = usuarios.salvos.getFirst();
+        assertEquals(1, usuarios.salvos().size());
+        Usuario salvo = usuarios.salvos().getFirst();
         assertEquals(salvo.getId(), resultado.id());
         assertEquals("João", resultado.nome());
         assertEquals(EMAIL, resultado.email());
@@ -54,7 +46,7 @@ class CadastrarUsuarioTest {
     void senhaEhSalvaCriptografada() {
         cadastrarUsuario.executar(comando(CPF, EMAIL));
 
-        assertEquals("hash:" + SENHA, usuarios.salvos.getFirst().getSenha().valor());
+        assertEquals("hash:" + SENHA, usuarios.salvos().getFirst().getSenha().valor());
     }
 
     @Test
@@ -63,7 +55,7 @@ class CadastrarUsuarioTest {
 
         assertThrows(CpfJaCadastradoException.class,
                 () -> cadastrarUsuario.executar(comando("52998224725", OUTRO_EMAIL)));
-        assertEquals(1, usuarios.salvos.size());
+        assertEquals(1, usuarios.salvos().size());
     }
 
     @Test
@@ -72,7 +64,7 @@ class CadastrarUsuarioTest {
 
         assertThrows(EmailJaCadastradoException.class,
                 () -> cadastrarUsuario.executar(comando(OUTRO_CPF, "JOAO@unex.edu.br")));
-        assertEquals(1, usuarios.salvos.size());
+        assertEquals(1, usuarios.salvos().size());
     }
 
     @Test
@@ -87,49 +79,11 @@ class CadastrarUsuarioTest {
 
         invalidos.forEach(invalido ->
                 assertThrows(DadoInvalidoException.class, () -> cadastrarUsuario.executar(invalido)));
-        assertTrue(usuarios.salvos.isEmpty());
+        assertTrue(usuarios.salvos().isEmpty());
     }
 
     @Test
     void senhaNaoApareceNoToStringDoComando() {
         assertFalse(comando(CPF, EMAIL).toString().contains(SENHA));
-    }
-
-    private static class UsuarioRepositoryEmMemoria implements UsuarioRepository {
-
-        private final List<Usuario> salvos = new ArrayList<>();
-
-        @Override
-        public boolean existePorCpf(Cpf cpf) {
-            return salvos.stream().anyMatch(usuario -> usuario.getCpf().equals(cpf));
-        }
-
-        @Override
-        public boolean existePorEmail(Email email) {
-            return salvos.stream().anyMatch(usuario -> usuario.getEmail().equals(email));
-        }
-
-        @Override
-        public Optional<Usuario> buscarPorCpf(String cpf) {
-            return salvos.stream().filter(usuario -> usuario.getCpf().valor().equals(cpf)).findFirst();
-        }
-
-        @Override
-        public void salvar(Usuario usuario) {
-            salvos.add(usuario);
-        }
-    }
-
-    private static class CriptografadorSenhaFake implements CriptografadorSenha {
-
-        @Override
-        public SenhaHash criptografar(Senha senha) {
-            return new SenhaHash("hash:" + senha.valor());
-        }
-
-        @Override
-        public boolean confere(Senha senha, SenhaHash hash) {
-            return hash.valor().equals("hash:" + senha.valor());
-        }
     }
 }
