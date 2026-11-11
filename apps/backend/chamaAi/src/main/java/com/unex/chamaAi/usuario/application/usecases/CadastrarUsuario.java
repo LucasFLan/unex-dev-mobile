@@ -1,5 +1,7 @@
 package com.unex.chamaAi.usuario.application.usecases;
 
+import com.unex.chamaAi.usuario.application.dto.CadastrarUsuarioCommand;
+import com.unex.chamaAi.usuario.application.dto.UsuarioCadastrado;
 import com.unex.chamaAi.usuario.domain.entities.Usuario;
 import com.unex.chamaAi.usuario.domain.exceptions.CpfJaCadastradoException;
 import com.unex.chamaAi.usuario.domain.exceptions.EmailJaCadastradoException;

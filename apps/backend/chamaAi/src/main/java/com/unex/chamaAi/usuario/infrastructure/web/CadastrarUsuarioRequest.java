@@ -1,6 +1,6 @@
 package com.unex.chamaAi.usuario.infrastructure.web;
 
-import com.unex.chamaAi.usuario.application.usecases.CadastrarUsuarioCommand;
+import com.unex.chamaAi.usuario.application.dto.CadastrarUsuarioCommand;
 
 import java.time.LocalDate;
 
