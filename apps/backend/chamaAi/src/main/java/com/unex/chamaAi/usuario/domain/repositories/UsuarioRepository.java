@@ -17,5 +17,7 @@ public interface UsuarioRepository {
 
     Optional<Usuario> buscarPorCpf(String cpf);
 
+    Optional<Usuario> buscarPorEmail(Email email);
+
     void salvar(Usuario usuario);
 }

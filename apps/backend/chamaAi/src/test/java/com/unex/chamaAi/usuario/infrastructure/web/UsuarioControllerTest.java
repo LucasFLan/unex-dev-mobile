@@ -153,6 +153,7 @@ class UsuarioControllerTest {
                 .andExpect(jsonPath("$.email").value(EMAIL))
                 .andExpect(jsonPath("$.telefone").value("71999999999"))
                 .andExpect(jsonPath("$.verificado").value(false))
+                .andExpect(jsonPath("$.papel").value("USUARIO"))
                 .andExpect(jsonPath("$.senha").doesNotExist())
                 .andExpect(jsonPath("$.senhaHash").doesNotExist());
     }

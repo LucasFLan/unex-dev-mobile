@@ -41,4 +41,7 @@ public class UsuarioJpaEntity {
 
     @Column(nullable = false)
     private boolean verificado;
+
+    @Column(nullable = false, length = 20)
+    private String papel;
 }

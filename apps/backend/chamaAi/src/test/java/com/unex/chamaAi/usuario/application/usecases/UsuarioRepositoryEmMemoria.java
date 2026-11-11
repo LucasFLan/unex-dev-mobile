@@ -46,6 +46,11 @@ class UsuarioRepositoryEmMemoria implements UsuarioRepository {
     }
 
     @Override
+    public Optional<Usuario> buscarPorEmail(Email email) {
+        return usuarios.values().stream().filter(usuario -> usuario.getEmail().equals(email)).findFirst();
+    }
+
+    @Override
     public void salvar(Usuario usuario) {
         usuarios.put(usuario.getId(), usuario);
         quantidadeDeSalvamentos++;

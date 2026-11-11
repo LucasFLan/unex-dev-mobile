@@ -4,6 +4,7 @@ import com.unex.chamaAi.usuario.application.usecases.AlterarSenhaUsuario;
 import com.unex.chamaAi.usuario.application.usecases.BuscarPerfilUsuario;
 import com.unex.chamaAi.usuario.application.usecases.CadastrarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.EditarPerfilUsuario;
+import com.unex.chamaAi.usuario.application.usecases.PromoverUsuarioParaAdmin;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
 import com.unex.chamaAi.usuario.domain.services.CriptografadorSenha;
 import org.springframework.context.annotation.Bean;
@@ -30,5 +31,10 @@ public class UsuarioConfig {
     @Bean
     public AlterarSenhaUsuario alterarSenhaUsuario(UsuarioRepository usuarios, CriptografadorSenha criptografador) {
         return new AlterarSenhaUsuario(usuarios, criptografador);
+    }
+
+    @Bean
+    public PromoverUsuarioParaAdmin promoverUsuarioParaAdmin(UsuarioRepository usuarios) {
+        return new PromoverUsuarioParaAdmin(usuarios);
     }
 }

@@ -12,4 +12,6 @@ public interface UsuarioSpringDataRepository extends JpaRepository<UsuarioJpaEnt
     boolean existsByEmail(String email);
 
     Optional<UsuarioJpaEntity> findByCpf(String cpf);
+
+    Optional<UsuarioJpaEntity> findByEmail(String email);
 }

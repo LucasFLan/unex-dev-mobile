@@ -6,6 +6,7 @@ import com.unex.chamaAi.usuario.domain.exceptions.CpfJaCadastradoException;
 import com.unex.chamaAi.usuario.domain.exceptions.EmailJaCadastradoException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
+import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +64,7 @@ class UsuarioRepositoryJpaTest {
         assertEquals(SENHA.valor(), salvo.getSenhaHash());
         assertEquals("71999999999", salvo.getTelefone());
         assertFalse(salvo.isVerificado());
+        assertEquals("USUARIO", salvo.getPapel());
     }
 
     @Test
@@ -130,5 +132,17 @@ class UsuarioRepositoryJpaTest {
     void buscaDeUsuarioInexistenteRetornaVazio() {
         assertTrue(repositorio.buscarPorId(UUID.randomUUID()).isEmpty());
         assertTrue(repositorio.buscarPorCpf(OUTRO_CPF.valor()).isEmpty());
+    }
+
+    @Test
+    void buscaPorEmailEPersistePapel() {
+        Usuario usuario = novoUsuario(CPF, EMAIL);
+        usuario.promoverParaAdmin();
+        repositorio.salvar(usuario);
+
+        Usuario encontrado = repositorio.buscarPorEmail(EMAIL).orElseThrow();
+        assertEquals(usuario, encontrado);
+        assertEquals(Papel.ADMIN, encontrado.getPapel());
+        assertTrue(repositorio.buscarPorEmail(OUTRO_EMAIL).isEmpty());
     }
 }

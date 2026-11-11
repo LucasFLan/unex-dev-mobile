@@ -51,6 +51,7 @@ class PerfilUsuarioUseCasesTest {
         assertEquals("joao@unex.edu.br", perfil.email());
         assertEquals("71999999999", perfil.telefone());
         assertFalse(perfil.verificado());
+        assertEquals("USUARIO", perfil.papel());
         assertFalse(perfil.toString().contains(SENHA));
     }
 
