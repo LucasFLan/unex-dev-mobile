@@ -13,9 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -113,8 +113,9 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void rotaInexistenteRetorna404() throws Exception {
-        mockMvc.perform(get("/rota-inexistente")).andExpect(status().isNotFound());
+    void rotaInexistenteRetorna404ParaUsuarioLogado() throws Exception {
+        String token = cadastrarELogar();
+        mockMvc.perform(get("/rota-inexistente").header(AUTHORIZATION, token)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -132,19 +133,30 @@ class UsuarioControllerTest {
                 .andExpect(jsonPath("$.detail").value("Corpo da requisição inválido."));
     }
 
-    private String cadastrarERetornarId() throws Exception {
-        String resposta = cadastrar(corpo(CPF, EMAIL, SENHA)).andExpect(status().isCreated())
+    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final String NOVA_SENHA = "NovaSenha456@";
+
+    private String login(String email, String senha) throws Exception {
+        String resposta = mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "senha": "%s"}
+                                """.formatted(email, senha)))
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-        return JSON.readTree(resposta).get("id").asString();
+        return "Bearer " + JSON.readTree(resposta).get("accessToken").asString();
     }
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private String cadastrarELogar() throws Exception {
+        cadastrar(corpo(CPF, EMAIL, SENHA)).andExpect(status().isCreated());
+        return login(EMAIL, SENHA);
+    }
 
     @Test
-    void visualizaPerfilSemExporSenha() throws Exception {
-        String id = cadastrarERetornarId();
+    void visualizaPerfilDoUsuarioLogadoSemExporSenha() throws Exception {
+        String token = cadastrarELogar();
+        String id = springData.findAll().getFirst().getId().toString();
 
-        mockMvc.perform(get("/usuarios/{id}", id))
+        mockMvc.perform(get("/usuarios/me").header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.nome").value("João"))
@@ -159,61 +171,87 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void perfilInexistenteRetorna404EIdMalformadoRetorna400() throws Exception {
-        mockMvc.perform(get("/usuarios/{id}", UUID.randomUUID()))
+    void perfilDeUsuarioRemovidoRetorna404() throws Exception {
+        String token = cadastrarELogar();
+        springData.deleteAll();
+
+        mockMvc.perform(get("/usuarios/me").header(AUTHORIZATION, token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.detail").value("Usuário não encontrado."));
-        mockMvc.perform(get("/usuarios/nao-e-uuid")).andExpect(status().isBadRequest());
     }
 
     @Test
-    void editaPerfil() throws Exception {
-        String id = cadastrarERetornarId();
+    void rotasDePerfilExigemToken() throws Exception {
+        mockMvc.perform(get("/usuarios/me")).andExpect(status().isUnauthorized());
+        mockMvc.perform(put("/usuarios/me").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(patch("/usuarios/me/senha").contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isUnauthorized());
+    }
 
-        mockMvc.perform(put("/usuarios/{id}", id).contentType(MediaType.APPLICATION_JSON).content("""
-                        {"nome": "João Silva", "dataNascimento": "1999-05-10", "telefone": "71888888888"}
-                        """))
+    @Test
+    void naoExisteMaisRotaDePerfilPorId() throws Exception {
+        String token = cadastrarELogar();
+        String id = springData.findAll().getFirst().getId().toString();
+
+        mockMvc.perform(get("/usuarios/{id}", id).header(AUTHORIZATION, token)).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void editaPerfilDoUsuarioLogado() throws Exception {
+        String token = cadastrarELogar();
+
+        mockMvc.perform(put("/usuarios/me").header(AUTHORIZATION, token).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome": "João Silva", "dataNascimento": "1999-05-10", "telefone": "71888888888"}
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nome").value("João Silva"))
                 .andExpect(jsonPath("$.dataNascimento").value("1999-05-10"))
                 .andExpect(jsonPath("$.telefone").value("71888888888"))
                 .andExpect(jsonPath("$.email").value(EMAIL));
 
-        assertEquals("João Silva", springData.findById(UUID.fromString(id)).orElseThrow().getNome());
+        assertEquals("João Silva", springData.findAll().getFirst().getNome());
     }
 
     @Test
     void editarComNomeVazioRetorna400() throws Exception {
-        String id = cadastrarERetornarId();
+        String token = cadastrarELogar();
 
-        mockMvc.perform(put("/usuarios/{id}", id).contentType(MediaType.APPLICATION_JSON).content("""
-                        {"nome": " ", "dataNascimento": "1999-05-10"}
-                        """))
+        mockMvc.perform(put("/usuarios/me").header(AUTHORIZATION, token).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome": " ", "dataNascimento": "1999-05-10"}
+                                """))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void alteraSenha() throws Exception {
-        String id = cadastrarERetornarId();
-        String hashAntigo = springData.findById(UUID.fromString(id)).orElseThrow().getSenhaHash();
+    void alteraSenhaEPassaALogarComANova() throws Exception {
+        String token = cadastrarELogar();
 
-        mockMvc.perform(patch("/usuarios/{id}/senha", id).contentType(MediaType.APPLICATION_JSON).content("""
-                        {"senhaAtual": "%s", "novaSenha": "NovaSenha456@"}
-                        """.formatted(SENHA)))
+        mockMvc.perform(patch("/usuarios/me/senha").header(AUTHORIZATION, token).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"senhaAtual": "%s", "novaSenha": "%s"}
+                                """.formatted(SENHA, NOVA_SENHA)))
                 .andExpect(status().isNoContent());
 
-        String hashNovo = springData.findById(UUID.fromString(id)).orElseThrow().getSenhaHash();
-        assertNotEquals(hashAntigo, hashNovo);
-        assertTrue(hashNovo.startsWith("$2"));
+        assertTrue(springData.findAll().getFirst().getSenhaHash().startsWith("$2"));
+        login(EMAIL, NOVA_SENHA);
+        mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email": "%s", "senha": "%s"}
+                                """.formatted(EMAIL, SENHA)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void senhaAtualIncorretaRetorna422() throws Exception {
-        String id = cadastrarERetornarId();
+        String token = cadastrarELogar();
 
-        mockMvc.perform(patch("/usuarios/{id}/senha", id).contentType(MediaType.APPLICATION_JSON).content("""
-                        {"senhaAtual": "Errada123!", "novaSenha": "NovaSenha456@"}
-                        """))
+        mockMvc.perform(patch("/usuarios/me/senha").header(AUTHORIZATION, token).contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"senhaAtual": "Errada123!", "novaSenha": "%s"}
+                                """.formatted(NOVA_SENHA)))
                 .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.detail").value("Senha atual incorreta."));
     }

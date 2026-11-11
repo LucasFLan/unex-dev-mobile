@@ -3,6 +3,7 @@ package com.unex.chamaAi.shared.infrastructure.web;
 import com.unex.chamaAi.shared.domain.exceptions.ConflitoException;
 import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.shared.domain.exceptions.DominioException;
+import com.unex.chamaAi.shared.domain.exceptions.NaoAutenticadoException;
 import com.unex.chamaAi.shared.domain.exceptions.RecursoNaoEncontradoException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(RecursoNaoEncontradoException.class)
     public ProblemDetail naoEncontrado(RecursoNaoEncontradoException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(NaoAutenticadoException.class)
+    public ResponseEntity<ProblemDetail> naoAutenticado(NaoAutenticadoException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .body(ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage()));
     }
 
     @ExceptionHandler(ConflitoException.class)

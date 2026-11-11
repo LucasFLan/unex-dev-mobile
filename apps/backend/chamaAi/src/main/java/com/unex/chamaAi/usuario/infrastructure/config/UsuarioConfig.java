@@ -1,6 +1,8 @@
 package com.unex.chamaAi.usuario.infrastructure.config;
 
+import com.unex.chamaAi.usuario.application.ports.EmissorToken;
 import com.unex.chamaAi.usuario.application.usecases.AlterarSenhaUsuario;
+import com.unex.chamaAi.usuario.application.usecases.AutenticarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.BuscarPerfilUsuario;
 import com.unex.chamaAi.usuario.application.usecases.CadastrarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.EditarPerfilUsuario;
@@ -36,5 +38,11 @@ public class UsuarioConfig {
     @Bean
     public PromoverUsuarioParaAdmin promoverUsuarioParaAdmin(UsuarioRepository usuarios) {
         return new PromoverUsuarioParaAdmin(usuarios);
+    }
+
+    @Bean
+    public AutenticarUsuario autenticarUsuario(UsuarioRepository usuarios, CriptografadorSenha criptografador,
+                                               EmissorToken emissorToken) {
+        return new AutenticarUsuario(usuarios, criptografador, emissorToken);
     }
 }
