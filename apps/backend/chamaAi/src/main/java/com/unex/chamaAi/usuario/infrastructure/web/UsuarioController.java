@@ -7,9 +7,10 @@ import com.unex.chamaAi.usuario.application.usecases.BuscarPerfilUsuario;
 import com.unex.chamaAi.usuario.application.usecases.CadastrarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.EditarPerfilUsuario;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-// TODO: quando o Spring Security entrar, trocar /{id} por /me (id vindo do usuário autenticado).
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
@@ -43,19 +43,24 @@ public class UsuarioController {
         return cadastrarUsuario.executar(request.paraComando());
     }
 
-    @GetMapping("/{id}")
-    public PerfilUsuario visualizarPerfil(@PathVariable UUID id) {
-        return buscarPerfilUsuario.executar(id);
+    @GetMapping("/me")
+    public PerfilUsuario visualizarPerfil(@AuthenticationPrincipal Jwt jwt) {
+        return buscarPerfilUsuario.executar(usuarioLogado(jwt));
     }
 
-    @PutMapping("/{id}")
-    public PerfilUsuario editarPerfil(@PathVariable UUID id, @RequestBody EditarPerfilRequest request) {
-        return editarPerfilUsuario.executar(id, request.paraComando());
+    @PutMapping("/me")
+    public PerfilUsuario editarPerfil(@AuthenticationPrincipal Jwt jwt, @RequestBody EditarPerfilRequest request) {
+        return editarPerfilUsuario.executar(usuarioLogado(jwt), request.paraComando());
     }
 
-    @PatchMapping("/{id}/senha")
+    @PatchMapping("/me/senha")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void alterarSenha(@PathVariable UUID id, @RequestBody AlterarSenhaRequest request) {
-        alterarSenhaUsuario.executar(id, request.paraComando());
+    public void alterarSenha(@AuthenticationPrincipal Jwt jwt, @RequestBody AlterarSenhaRequest request) {
+        alterarSenhaUsuario.executar(usuarioLogado(jwt), request.paraComando());
+    }
+
+    /** O "sub" do token é o id do usuário (ver JwtEmissorToken). */
+    private static UUID usuarioLogado(Jwt jwt) {
+        return UUID.fromString(jwt.getSubject());
     }
 }
