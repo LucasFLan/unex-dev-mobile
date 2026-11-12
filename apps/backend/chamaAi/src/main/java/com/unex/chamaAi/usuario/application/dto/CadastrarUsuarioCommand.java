@@ -1,4 +1,4 @@
-package com.unex.chamaAi.usuario.application.usecases;
+package com.unex.chamaAi.usuario.application.dto;
 
 import java.time.LocalDate;
 

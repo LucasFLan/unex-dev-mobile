@@ -12,7 +12,7 @@ public class BuscarUsuarioPorCpf {
         this.usuarios = usuarios;
     }
 
-    public Usuario execute(Cpf cpf) {
+    public Usuario executar(Cpf cpf) {
         boolean usuarioExiste = usuarios.existePorCpf(cpf);
         if (!usuarioExiste) {
             throw new UsuarioNaoEncontradoException("Usuario nao encontrado");

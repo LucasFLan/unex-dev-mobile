@@ -1,0 +1,3 @@
+ALTER TABLE usuarios
+    ADD COLUMN papel VARCHAR(20) NOT NULL DEFAULT 'USUARIO',
+    ADD CONSTRAINT ck_usuarios_papel CHECK (papel IN ('USUARIO', 'ADMIN'));

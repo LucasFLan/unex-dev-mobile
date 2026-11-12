@@ -4,6 +4,7 @@ import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.usuario.domain.exceptions.ContaJaVerificadaException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
+import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
 
 import java.time.LocalDate;
@@ -23,9 +24,10 @@ public class Usuario {
     private SenhaHash senha;
     private String telefone;
     private boolean verificado;
+    private Papel papel;
 
     private Usuario(UUID id, String nome, LocalDate dataNascimento, Cpf cpf, Email email,
-                    SenhaHash senha, String telefone, boolean verificado) {
+                    SenhaHash senha, String telefone, boolean verificado, Papel papel) {
         this.id = Objects.requireNonNull(id, "O id é obrigatório.");
         this.cpf = Objects.requireNonNull(cpf, "O CPF é obrigatório.");
         this.email = Objects.requireNonNull(email, "O email é obrigatório.");
@@ -34,16 +36,17 @@ public class Usuario {
         this.dataNascimento = validarDataNascimento(dataNascimento);
         this.telefone = validarTelefone(telefone);
         this.verificado = verificado;
+        this.papel = Objects.requireNonNull(papel, "O papel é obrigatório.");
     }
 
     public static Usuario criar(String nome, LocalDate dataNascimento, Cpf cpf, Email email,
                                 SenhaHash senha, String telefone) {
-        return new Usuario(UUID.randomUUID(), nome, dataNascimento, cpf, email, senha, telefone, false);
+        return new Usuario(UUID.randomUUID(), nome, dataNascimento, cpf, email, senha, telefone, false, Papel.USUARIO);
     }
 
     public static Usuario reconstituir(UUID id, String nome, LocalDate dataNascimento, Cpf cpf, Email email,
-                                       SenhaHash senha, String telefone, boolean verificado) {
-        return new Usuario(id, nome, dataNascimento, cpf, email, senha, telefone, verificado);
+                                       SenhaHash senha, String telefone, boolean verificado, Papel papel) {
+        return new Usuario(id, nome, dataNascimento, cpf, email, senha, telefone, verificado, papel);
     }
 
     public void alterarNome(String novoNome) {
@@ -76,6 +79,14 @@ public class Usuario {
             throw new ContaJaVerificadaException();
         }
         this.verificado = true;
+    }
+
+    public void promoverParaAdmin() {
+        this.papel = Papel.ADMIN;
+    }
+
+    public boolean isAdmin() {
+        return papel == Papel.ADMIN;
     }
 
     private static String validarNome(String nome) {
@@ -136,6 +147,10 @@ public class Usuario {
 
     public boolean isVerificado() {
         return verificado;
+    }
+
+    public Papel getPapel() {
+        return papel;
     }
 
     @Override

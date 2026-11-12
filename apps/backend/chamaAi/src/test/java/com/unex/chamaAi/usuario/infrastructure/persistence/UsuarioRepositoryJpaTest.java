@@ -6,6 +6,7 @@ import com.unex.chamaAi.usuario.domain.exceptions.CpfJaCadastradoException;
 import com.unex.chamaAi.usuario.domain.exceptions.EmailJaCadastradoException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
+import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,6 +64,7 @@ class UsuarioRepositoryJpaTest {
         assertEquals(SENHA.valor(), salvo.getSenhaHash());
         assertEquals("71999999999", salvo.getTelefone());
         assertFalse(salvo.isVerificado());
+        assertEquals("USUARIO", salvo.getPapel());
     }
 
     @Test
@@ -105,5 +108,41 @@ class UsuarioRepositoryJpaTest {
         assertThrows(EmailJaCadastradoException.class,
                 () -> repositorio.salvar(novoUsuario(OUTRO_CPF, EMAIL)));
         assertEquals(1, springData.count());
+    }
+
+    @Test
+    void buscaPorIdECpfReconstituiUsuario() {
+        Usuario usuario = novoUsuario(CPF, EMAIL);
+        repositorio.salvar(usuario);
+
+        Usuario porId = repositorio.buscarPorId(usuario.getId()).orElseThrow();
+        assertEquals(usuario, porId);
+        assertEquals("João", porId.getNome());
+        assertEquals(NASCIMENTO, porId.getDataNascimento());
+        assertEquals(CPF, porId.getCpf());
+        assertEquals(EMAIL, porId.getEmail());
+        assertEquals(SENHA, porId.getSenha());
+        assertEquals("71999999999", porId.getTelefone());
+        assertFalse(porId.isVerificado());
+
+        assertEquals(usuario, repositorio.buscarPorCpf("529.982.247-25").orElseThrow());
+    }
+
+    @Test
+    void buscaDeUsuarioInexistenteRetornaVazio() {
+        assertTrue(repositorio.buscarPorId(UUID.randomUUID()).isEmpty());
+        assertTrue(repositorio.buscarPorCpf(OUTRO_CPF.valor()).isEmpty());
+    }
+
+    @Test
+    void buscaPorEmailEPersistePapel() {
+        Usuario usuario = novoUsuario(CPF, EMAIL);
+        usuario.promoverParaAdmin();
+        repositorio.salvar(usuario);
+
+        Usuario encontrado = repositorio.buscarPorEmail(EMAIL).orElseThrow();
+        assertEquals(usuario, encontrado);
+        assertEquals(Papel.ADMIN, encontrado.getPapel());
+        assertTrue(repositorio.buscarPorEmail(OUTRO_EMAIL).isEmpty());
     }
 }

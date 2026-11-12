@@ -4,6 +4,7 @@ import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.usuario.domain.exceptions.ContaJaVerificadaException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
+import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
 import org.junit.jupiter.api.Test;
 
@@ -28,14 +29,31 @@ class UsuarioTest {
         Usuario usuario = novoUsuario();
         assertNotNull(usuario.getId());
         assertFalse(usuario.isVerificado());
+        assertEquals(Papel.USUARIO, usuario.getPapel());
+        assertFalse(usuario.isAdmin());
+    }
+
+    @Test
+    void promoverParaAdminAlteraPapel() {
+        Usuario usuario = novoUsuario();
+        usuario.promoverParaAdmin();
+        assertEquals(Papel.ADMIN, usuario.getPapel());
+        assertTrue(usuario.isAdmin());
+    }
+
+    @Test
+    void papelEhObrigatorioAoReconstituir() {
+        assertThrows(NullPointerException.class,
+                () -> Usuario.reconstituir(UUID.randomUUID(), "João", NASCIMENTO, CPF, EMAIL, SENHA, null, false, null));
     }
 
     @Test
     void reconstituirMantemEstado() {
         UUID id = UUID.randomUUID();
-        Usuario usuario = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA, null, true);
+        Usuario usuario = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA, null, true, Papel.ADMIN);
         assertEquals(id, usuario.getId());
         assertTrue(usuario.isVerificado());
+        assertTrue(usuario.isAdmin());
     }
 
     @Test
@@ -104,8 +122,8 @@ class UsuarioTest {
     @Test
     void igualdadePorId() {
         UUID id = UUID.randomUUID();
-        Usuario a = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA, null, false);
-        Usuario b = Usuario.reconstituir(id, "Outro", NASCIMENTO, CPF, EMAIL, SENHA, null, true);
+        Usuario a = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA, null, false, Papel.USUARIO);
+        Usuario b = Usuario.reconstituir(id, "Outro", NASCIMENTO, CPF, EMAIL, SENHA, null, true, Papel.USUARIO);
         assertEquals(a, b);
         assertNotEquals(a, novoUsuario());
     }
