@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { Clock3, MapPin } from "lucide-react";
-import {
-  type ServiceRequest,
-} from "@/lib/marketplace";
-import {formatPrice} from "@/lib/format";
-import {formatDistance, formatRelativeTime} from "@/lib/format";
+import { RelativeTime } from "@/components/RelativeTime";
+import { type ServiceRequest } from "@/lib/marketplace";
+import {formatPrice, formatDistance} from "@/lib/format";
 
 export function RequestCard({ request }: { request: ServiceRequest }) {
   return (
@@ -22,12 +20,9 @@ export function RequestCard({ request }: { request: ServiceRequest }) {
           )}
         </div>
 
-        <span
-          className="flex shrink-0 items-center gap-1 text-[10px] text-slate-500"
-          suppressHydrationWarning
-        >
+        <span className="flex shrink-0 items-center gap-1 text-[10px] text-slate-500">
           <Clock3 size={10} aria-hidden="true" />
-          {formatRelativeTime(request.createdAt)}
+          <RelativeTime isoDate={request.createdAt} />
         </span>
       </div>
 

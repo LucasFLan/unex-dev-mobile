@@ -11,6 +11,7 @@ import {
   LockKeyhole,
   Eye,
   EyeOff,
+  Phone,
 } from "lucide-react";
 
 import Button from "@/components/Button";
@@ -73,6 +74,13 @@ const Register = () => {
             placeholder="DD/MM/AAAA"
             type="text"
             icon={<CalendarDays size={17} />}
+          />
+
+          <Input
+            labelText="Telefone"
+            placeholder="(00) 90000-0000"
+            type="tel"
+            icon={<Phone size={17} />}
           />
 
           <Input

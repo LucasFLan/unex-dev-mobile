@@ -17,9 +17,17 @@ import {
 import Button from "@/components/Button";
 import Image from "next/image";
 import Chuveiro from "@/../public/chuveiro.jpg";
+import { getMockRequest } from "@/lib/mocks";
+import { notFound } from "next/navigation";
 
-export default function ServiceDetails() {
+export default async function ServiceDetails({params}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
+  const {id} = await params;
+
+  const request = getMockRequest(Number(id))
+  if (!request) notFound();
 
   const [showProposal, setShowProposal] = useState(false);
 
@@ -42,7 +50,6 @@ export default function ServiceDetails() {
       <div className="mx-auto min-h-screen w-full max-w-md pb-24">
 
         <header className="flex h-15.5 items-center justify-between px-4">
-
           <button
             type="button"
             onClick={() => router.back()}
