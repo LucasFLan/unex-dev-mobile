@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import { initials } from "@/lib/marketplace";
-import { formatShortDate, type Review } from "@/lib/perfil";
+import { type Review } from "@/lib/perfil";
+import { formatShortDate } from "@/lib/format";
 
 export function ReviewCard({ review }: { review: Review }) {
   return (
