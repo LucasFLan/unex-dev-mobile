@@ -81,7 +81,6 @@ export default function HistoricoPage() {
     setFilters((f) => ({
       ...f,
       type: f.type === type ? null : type,
-      // "Meus anúncios" e "Contratei" são excludentes
       mine: type === "Contratei" ? false : f.mine,
     }));
 

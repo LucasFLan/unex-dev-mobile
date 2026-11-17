@@ -1,12 +1,50 @@
-import type { Professional, ServiceRequest } from "@/lib/marketplace";
+import type { Professional, ProfessionalDetail, ServiceRequest, ServiceRequestDetail } from "@/lib/marketplace";
 import type {Service} from "@/lib/services"
+import { Review, UserProfile } from "./perfil";
 
 const minutesAgo = (minutes: number) =>
   new Date(Date.now() - minutes * 60_000).toISOString();
 
 const daysAgo = (days: number) => minutesAgo(days * 24 * 60);
 
-export const currentUser = { name: "Lucas" };
+
+export const mockProfile: UserProfile = {
+  id: 1,
+  name: "Lucas",
+  email: "lucas@email.com",
+  phone: "75999990000",
+  neighborhood: "Centro",
+  bio: "Eletricista e montador de móveis há 8 anos. Atendo residências e pequenos comércios, com orçamento sem compromisso e garantia do serviço.",
+  verified: true,
+  memberSince: "2026-03-12",
+  rating: 4.9,
+  reviewsCount: 12,
+  completedServices: 27,
+  categories: ["Eletricista", "Montador"],
+};
+
+export const mockReviews: Review[] = [
+  {
+    id: 1,
+    authorName: "Marina S.",
+    rating: 5,
+    comment:
+      "Pontual e muito caprichoso. Instalou as tomadas da cozinha e deixou tudo limpo.",
+    category: "Eletricista",
+    createdAt: "2026-10-20T14:30:00Z",
+  },
+  {
+    id: 2,
+    authorName: "Roberto C.",
+    rating: 4,
+    comment: "Montou o guarda-roupa rápido, só atrasou um pouco na chegada.",
+    category: "Montador",
+    createdAt: "2026-10-05T09:10:00Z",
+  },
+];
+
+export const currentUser = mockProfile;
+
 
 export const mockProfessionals: Professional[] = [
   {
@@ -46,7 +84,6 @@ export const mockProfessionals: Professional[] = [
     createdAt: daysAgo(5),
   },
 ];
-
 export const mockRequests: ServiceRequest[] = [
   {
     id: 1,
@@ -72,6 +109,57 @@ export const mockRequests: ServiceRequest[] = [
     price: 250,
   },
 ];
+
+const requestExtras: Record<
+  number,
+  Omit<ServiceRequestDetail, keyof ServiceRequest>
+> = {
+  1: {
+    client: {
+      name: "Mariana Lopes",
+      rating: 4.8,
+      reviewsCount: 14,
+      verified: true,
+      memberSince: "2024-03-10",
+      requestsCount: 5,
+    },
+    proposalsCount: 2,
+    // TODO(API): URLs reais das fotos enviadas pelo cliente.
+    photos: ["/chuveiro.jpg", "/chuveiro.jpg", "/chuveiro.jpg"],
+    preferredDate: "2026-11-12",
+    requirements: [
+      "Três tomadas na cozinha",
+      "Troca do chuveiro no banheiro social",
+      "O chuveiro novo já está comprado",
+    ],
+  },
+  2: {
+    client: {
+      name: "Paulo H.",
+      rating: null,
+      reviewsCount: 0,
+      verified: false,
+      memberSince: "2026-11-02",
+      requestsCount: 1,
+    },
+    proposalsCount: 0,
+    photos: ["/chuveiro.jpg"],
+    preferredDate: null,
+    requirements: [
+      "Quarto de 12 m², paredes e teto",
+      "Tinta fornecida pelo cliente",
+      "Móveis serão retirados antes",
+    ],
+  },
+};
+
+export function getMockRequest(id: number): ServiceRequestDetail | undefined {
+  const base = mockRequests.find((request) => request.id === id);
+  const extra = requestExtras[id];
+ 
+  return base && extra ? { ...base, ...extra } : undefined;
+}
+ 
 
 export const mockServices: Service[] = [
   {
@@ -143,3 +231,111 @@ export const mockServices: Service[] = [
     category: "paint",
   },
 ];
+
+const professionalExtras: Record<
+  number,
+  Omit<ProfessionalDetail, keyof Professional>
+> = {
+  1: {
+    description:
+      "Instalação, troca e reparo de tomadas, interruptores, chuveiros e luminárias em casas e apartamentos. O atendimento inclui avaliação no local, orçamento sem compromisso e garantia de 90 dias. O material pode ser incluso ou fornecido por você.",
+    priceUnit: "visita",
+    serviceRadiusKm: 10,
+    verified: true,
+    memberSince: "2025-08-04",
+    completedServices: 64,
+    availability: "Seg a sáb, 8h às 18h",
+    services: [
+      { name: "Visita técnica e orçamento", price: 80, unit: "visita" },
+      { name: "Instalação de tomada ou interruptor", price: 35, unit: "unidade" },
+      { name: "Instalação de chuveiro elétrico", price: 90, unit: null },
+      { name: "Troca de disjuntor", price: 60, unit: "unidade" },
+    ],
+    reviews: [
+      {
+        id: 1,
+        authorName: "Marina S.",
+        rating: 5,
+        comment:
+          "Pontual e muito caprichoso. Instalou as tomadas da cozinha e deixou tudo limpo.",
+        category: "Eletricista",
+        createdAt: "2026-10-20T14:30:00Z",
+      },
+      {
+        id: 2,
+        authorName: "Roberto C.",
+        rating: 5,
+        comment: "Resolveu o problema do quadro de luz no mesmo dia.",
+        category: "Eletricista",
+        createdAt: "2026-10-11T09:10:00Z",
+      },
+      {
+        id: 3,
+        authorName: "Helena T.",
+        rating: 4,
+        comment: "Bom serviço e preço justo. Só demorou um pouco para chegar.",
+        category: "Eletricista",
+        createdAt: "2026-09-28T16:45:00Z",
+      },
+    ],
+  },
+  2: {
+    description:
+      "Limpeza completa de casas e apartamentos, com rotina semanal, quinzenal ou faxina avulsa. Levo meus próprios produtos de limpeza, se você preferir.",
+    priceUnit: null,
+    serviceRadiusKm: 8,
+    verified: true,
+    memberSince: "2025-11-18",
+    completedServices: 41,
+    availability: "Seg a sex, 7h às 16h",
+    services: [
+      { name: "Limpeza completa (até 60 m²)", price: 120, unit: null },
+      { name: "Limpeza pós-obra", price: 250, unit: null },
+      { name: "Passar roupa", price: 20, unit: "hora" },
+    ],
+    reviews: [
+      {
+        id: 1,
+        authorName: "Camila R.",
+        rating: 5,
+        comment: "Deixou o apartamento impecável. Super recomendo!",
+        category: "Diarista",
+        createdAt: "2026-10-26T11:00:00Z",
+      },
+      {
+        id: 2,
+        authorName: "Diego P.",
+        rating: 5,
+        comment: "Muito atenciosa e organizada.",
+        category: "Diarista",
+        createdAt: "2026-10-09T15:20:00Z",
+      },
+    ],
+  },
+  3: {
+    description:
+      "Reparos hidráulicos e instalações: vazamentos, entupimentos, troca de torneiras e registros. Atendimento rápido, com diagnóstico no local e orçamento antes de começar.",
+    priceUnit: "visita",
+    serviceRadiusKm: 15,
+    verified: false,
+    memberSince: "2026-02-09",
+    completedServices: 30,
+    availability: "Todos os dias, inclusive plantão",
+    services: [
+      { name: "Visita e diagnóstico", price: 90, unit: "visita" },
+      { name: "Desentupimento de pia ou ralo", price: 110, unit: null },
+      { name: "Conserto de vazamento", price: 130, unit: null },
+    ],
+    reviews: [],
+  },
+};
+ 
+// TODO(API): GET /profissionais/{id}
+export function getMockProfessional(
+  id: number
+): ProfessionalDetail | undefined {
+  const base = mockProfessionals.find((professional) => professional.id === id);
+  const extra = professionalExtras[id];
+ 
+  return base && extra ? { ...base, ...extra } : undefined;
+}

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft,
   Search,
   BriefcaseBusiness,
   LayoutGrid,
@@ -18,11 +17,11 @@ import {
   X
 } from "lucide-react";
 import Button from "@/components/Button";
+import { BackButton } from "@/components/BackButton";
 
 type AdType = "procurar" | "oferecer";
 
 export default function CreateAd() {
-  const router = useRouter();
 
   const [adType, setAdType] = useState<AdType>("procurar");
   const [category, setCategory] = useState("");
@@ -95,14 +94,7 @@ export default function CreateAd() {
       <div className="mx-auto min-h-screen w-full max-w-md pb-24">
 
         <header className="flex h-14.5 items-center justify-between px-4">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label="Voltar"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200"
-          >
-            <ArrowLeft size={17} />
-          </button>
+          <BackButton/>
 
           <h1 className="text-[11px] font-semibold">
             Criar anúncio

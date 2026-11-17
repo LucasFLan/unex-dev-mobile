@@ -1,5 +1,6 @@
 import type { CategoryName } from "@/lib/categories";
 import { normalize } from "@/lib/format";
+import { Review } from "./perfil";
 
 export type Professional = {
   id: number;
@@ -24,6 +25,43 @@ export type ServiceRequest = {
   neighborhood: string;
   distanceKm: number;
   price: number;
+};
+
+export type RequestClient = {
+  name: string;
+  rating: number | null;
+  reviewsCount: number;
+  verified: boolean;
+  memberSince: string;
+  requestsCount: number;
+};
+
+export type ServiceRequestDetail = ServiceRequest & {
+  client: RequestClient;
+  proposalsCount: number;
+  /** URLs das fotos enviadas pelo cliente (pode ser vazio) */
+  photos: string[];
+  /** Data ISO (AAAA-MM-DD); null = a combinar */
+  preferredDate: string | null;
+  /** Informações extras que o cliente listou. */
+  requirements: string[];
+};
+export type ProfessionalService = {
+  name: string;
+  price: number;
+  unit: string | null;
+};
+
+export type ProfessionalDetail = Professional & {
+  description: string;
+  priceUnit: string | null;
+  serviceRadiusKm: number;
+  verified: boolean;
+  memberSince: string;
+  completedServices: number;
+  availability: string;
+  services: ProfessionalService[];
+  reviews: Review[];
 };
 
 export const SORT_OPTIONS = [

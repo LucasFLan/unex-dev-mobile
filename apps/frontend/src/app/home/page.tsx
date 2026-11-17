@@ -11,10 +11,10 @@ import {
 import Link from "next/link";
 import { Bell, Search, SlidersHorizontal, X } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
-import { CategoryList } from "@/components/CategoryList";
-import { FiltersPanel } from "@/components/FiltersPanel";
-import { ProfessionalCard } from "@/components/ProfessionalCard";
-import { RequestCard } from "@/components/RequestCard";
+import { CategoryList } from "@/components/Home/CategoryList";
+import { FiltersPanel } from "@/components/Home/FiltersPanel";
+import { ProfessionalCard } from "@/components/Home/ProfessionalCard";
+import { RequestCard } from "@/components/Home/RequestCard";
 import { useDismissable } from "@/hooks/useDismissable";
 import { useHomeFilters } from "@/hooks/useHomeFilters";
 import {
