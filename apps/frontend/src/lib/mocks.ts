@@ -1,18 +1,24 @@
-import type { Professional, ProfessionalDetail, ServiceRequest, ServiceRequestDetail } from "@/lib/marketplace";
-import type {Service} from "@/lib/services"
-import { Review, UserProfile } from "./perfil";
+import type {
+  Professional,
+  ProfessionalDetail,
+  ServiceRequest,
+  ServiceRequestDetail,
+} from "@/lib/marketplace";
+import type { Review, UserProfile } from "@/lib/perfil";
+import { Service } from "./services";
 
 const minutesAgo = (minutes: number) =>
   new Date(Date.now() - minutes * 60_000).toISOString();
 
 const daysAgo = (days: number) => minutesAgo(days * 24 * 60);
 
-
 export const mockProfile: UserProfile = {
   id: 1,
   name: "Lucas",
   email: "lucas@email.com",
   phone: "75999990000",
+  cpf: "12345678909",
+  birthDate: "1996-04-18",
   neighborhood: "Centro",
   bio: "Eletricista e montador de móveis há 8 anos. Atendo residências e pequenos comércios, com orçamento sem compromisso e garantia do serviço.",
   verified: true,
@@ -42,8 +48,6 @@ export const mockReviews: Review[] = [
     createdAt: "2026-10-05T09:10:00Z",
   },
 ];
-
-export const currentUser = mockProfile;
 
 
 export const mockProfessionals: Professional[] = [
@@ -84,6 +88,7 @@ export const mockProfessionals: Professional[] = [
     createdAt: daysAgo(5),
   },
 ];
+
 export const mockRequests: ServiceRequest[] = [
   {
     id: 1,
@@ -92,7 +97,7 @@ export const mockRequests: ServiceRequest[] = [
     createdAt: minutesAgo(15),
     title: "Instalar 3 tomadas e um chuveiro",
     description:
-      "Preciso de alguém para instalar tomadas na cozinha e trocar o chuveiro do banheiro.",
+      "Preciso de um eletricista para instalar 3 tomadas novas na cozinha (bancada da pia) e trocar o chuveiro do banheiro, que queimou. Já comprei o chuveiro novo (220V). A fiação está aparente em um dos pontos. Disponível para receber o profissional hoje à tarde ou amanhã pela manhã.",
     neighborhood: "Boa Vista",
     distanceKm: 3,
     price: 150,
@@ -124,7 +129,6 @@ const requestExtras: Record<
       requestsCount: 5,
     },
     proposalsCount: 2,
-    // TODO(API): URLs reais das fotos enviadas pelo cliente.
     photos: ["/chuveiro.jpg", "/chuveiro.jpg", "/chuveiro.jpg"],
     preferredDate: "2026-11-12",
     requirements: [
@@ -143,7 +147,7 @@ const requestExtras: Record<
       requestsCount: 1,
     },
     proposalsCount: 0,
-    photos: ["/chuveiro.jpg"],
+    photos: [],
     preferredDate: null,
     requirements: [
       "Quarto de 12 m², paredes e teto",
@@ -156,81 +160,9 @@ const requestExtras: Record<
 export function getMockRequest(id: number): ServiceRequestDetail | undefined {
   const base = mockRequests.find((request) => request.id === id);
   const extra = requestExtras[id];
- 
+
   return base && extra ? { ...base, ...extra } : undefined;
 }
- 
-
-export const mockServices: Service[] = [
-  {
-    id: 1,
-    date: "2026-10-14",
-    type: "Procuro",
-    status: "Ativo",
-    title: "Montagem de guarda-roupa 6 portas",
-    description: "Publicado hoje · Montador",
-    price: "R$ 200",
-    category: "wrench",
-    action: "Sem propostas",
-  },
-  {
-    id: 2,
-    date: "2026-10-13",
-    type: "Procuro",
-    status: "Ativo",
-    title: "Pintura de quarto 3x4 m",
-    description: "Publicado ontem · Pintor",
-    payment: "A combinar",
-    category: "paint",
-    proposals: 3,
-    action: "Propostas",
-  },
-  {
-    id: 3,
-    date: "2026-10-10",
-    type: "Ofereço",
-    status: "Ativo",
-    title: "Eletricista residencial e instalações",
-    description: "Publicado em 10 out · Eletricista",
-    price: "R$ 80",
-    payment: "/ visita",
-    category: "zap",
-    proposals: 2,
-    action: "Solicitações",
-  },
-  {
-    id: 4,
-    date: "2026-10-02",
-    type: "Contratei",
-    status: "Concluído",
-    title: "Conserto de vazamento na pia",
-    description: "com João R. · 02 out · Encanador",
-    price: "R$ 70",
-    category: "drop",
-    rating: true,
-  },
-  {
-    id: 5,
-    date: "2026-09-15",
-    type: "Contratei",
-    status: "Concluído",
-    title: "Limpeza completa de apartamento",
-    description: "com Ana Paula · 15 set · Diarista",
-    price: "R$ 120",
-    category: "sparkles",
-    rating: true,
-  },
-  {
-    id: 6,
-    date: "2026-09-08",
-    type: "Contratei",
-    status: "Cancelado",
-    title: "Pintura de sala",
-    description: "com Pedro A. · 08 set · Pintor",
-    price: "R$ 350",
-    category: "paint",
-  },
-];
 
 const professionalExtras: Record<
   number,
@@ -329,13 +261,83 @@ const professionalExtras: Record<
     reviews: [],
   },
 };
- 
-// TODO(API): GET /profissionais/{id}
+
 export function getMockProfessional(
   id: number
 ): ProfessionalDetail | undefined {
   const base = mockProfessionals.find((professional) => professional.id === id);
   const extra = professionalExtras[id];
- 
+
   return base && extra ? { ...base, ...extra } : undefined;
 }
+
+export const mockServices: Service[] = [
+  {
+    id: 1,
+    date: "2026-10-14",
+    type: "Procuro",
+    status: "Ativo",
+    title: "Montagem de guarda-roupa 6 portas",
+    description: "Publicado hoje · Montador",
+    price: "R$ 200",
+    category: "wrench",
+    action: "Sem propostas",
+  },
+  {
+    id: 2,
+    date: "2026-10-13",
+    type: "Procuro",
+    status: "Ativo",
+    title: "Pintura de quarto 3x4 m",
+    description: "Publicado ontem · Pintor",
+    payment: "A combinar",
+    category: "paint",
+    proposals: 3,
+    action: "Propostas",
+  },
+  {
+    id: 3,
+    date: "2026-10-10",
+    type: "Ofereço",
+    status: "Ativo",
+    title: "Eletricista residencial e instalações",
+    description: "Publicado em 10 out · Eletricista",
+    price: "R$ 80",
+    payment: "/ visita",
+    category: "zap",
+    proposals: 2,
+    action: "Solicitações",
+  },
+  {
+    id: 4,
+    date: "2026-10-02",
+    type: "Contratei",
+    status: "Concluído",
+    title: "Conserto de vazamento na pia",
+    description: "com João R. · 02 out · Encanador",
+    price: "R$ 70",
+    category: "drop",
+    rating: true,
+  },
+  {
+    id: 5,
+    date: "2026-09-15",
+    type: "Contratei",
+    status: "Concluído",
+    title: "Limpeza completa de apartamento",
+    description: "com Ana Paula · 15 set · Diarista",
+    price: "R$ 120",
+    category: "sparkles",
+    rating: true,
+  },
+  {
+    id: 6,
+    date: "2026-09-08",
+    type: "Contratei",
+    status: "Cancelado",
+    title: "Pintura de sala",
+    description: "com Pedro A. · 08 set · Pintor",
+    price: "R$ 350",
+    category: "paint",
+  },
+];

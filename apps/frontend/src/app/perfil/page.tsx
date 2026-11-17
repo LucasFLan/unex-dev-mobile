@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import {
+  ArrowLeft,
   BadgeCheck,
   Mail,
   MapPin,
@@ -11,14 +13,23 @@ import { Block } from "@/components/Block";
 import { InfoRow } from "@/components/InfoRow";
 import { ReviewCard } from "@/components/ReviewCard";
 import { CATEGORY_META } from "@/lib/categories";
-import { formatPhone } from "@/lib/perfil";
+import { formatPhone } from "@/lib/format";
 import { initials } from "@/lib/marketplace";
 import { formatMonth, formatRating } from "@/lib/format";
 import { mockProfile, mockReviews } from "@/lib/mocks";
-import { BackButton } from "@/components/BackButton";
+import { getCurrentUser } from "@/lib/user";
 
-export default function PerfilPage() {
-  const profile = mockProfile;
+async function PerfilContent() {
+  const user = await getCurrentUser();
+
+  const profile = {
+    ...mockProfile,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    cpf: user.cpf,
+    birthDate: user.birthDate,
+  };
   const reviews = mockReviews;
 
   const stats = [
@@ -43,11 +54,18 @@ export default function PerfilPage() {
     <main className="min-h-dvh bg-fundo pb-10 text-slate-800">
       <div className="mx-auto w-full max-w-lg">
         <header className="sticky top-0 z-20 flex items-center gap-1 bg-fundo px-2 pb-2 pt-3">
-          <BackButton/>
+          <Link
+            href="/menu"
+            aria-label="Voltar para o menu"
+            className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            <ArrowLeft size={19} aria-hidden="true" />
+          </Link>
           <h1 className="text-[17px] font-bold tracking-tight">Meu perfil</h1>
         </header>
 
         <div className="space-y-4 px-3.5">
+          {/* Identificação */}
           <section className="flex flex-col items-center rounded-xl border border-slate-200 bg-white px-4 py-5 text-center shadow-sm">
             <span
               className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-2xl font-bold text-blue-600"
@@ -155,5 +173,13 @@ export default function PerfilPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function PerfilPage() {
+  return (
+    <Suspense fallback={<main className="min-h-dvh bg-fundo" />}>
+      <PerfilContent />
+    </Suspense>
   );
 }

@@ -3,6 +3,8 @@ export const SESSION_COOKIE = "token";
 export const ENDPOINTS = {
   login: "/auth/login",
   register: "/usuarios",
+  updateUser: "/usuarios/me",
+  me: "/usuarios/me",
 } as const;
 
 export const FIELDS = {

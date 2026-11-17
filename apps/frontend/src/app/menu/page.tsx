@@ -1,5 +1,4 @@
-"use client";
-
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -15,12 +14,11 @@ import {
   Star,
   User,
 } from "lucide-react";
+import { logout } from "@/app/actions";
 import { BottomNav } from "@/components/BottomNav";
 import { MenuSection, type MenuItem } from "@/components/MenuSection";
 import { initials } from "@/lib/marketplace";
-import { currentUser } from "@/lib/mocks";
-import { useTransition } from "react";
-import { logout } from "@/app/actions"
+import { getCurrentUser } from "@/lib/user";
 
 const SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
@@ -105,14 +103,8 @@ const SECTIONS: { title: string; items: MenuItem[] }[] = [
   },
 ];
 
-export default function MenuPage() {
-  const [isPending, startTransition] = useTransition();
-
-  const handleLogout = () => {
-    startTransition(async () => {
-      await logout();
-    });
-  };
+async function MenuContent() {
+  const user = await getCurrentUser();
 
   return (
     <main className="min-h-dvh bg-fundo pb-28 text-slate-800">
@@ -127,13 +119,13 @@ export default function MenuPage() {
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600"
             aria-hidden="true"
           >
-            {initials(currentUser.name)}
+            {initials(user.name)}
           </span>
 
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold">{currentUser.name}</p>
+            <p className="truncate text-sm font-bold">{user.name}</p>
             <p className="truncate text-[11px] text-slate-500">
-              {currentUser.email}
+              {user.email}
             </p>
             <p className="mt-0.5 text-[11px] font-medium text-blue-600">
               Ver perfil
@@ -156,18 +148,27 @@ export default function MenuPage() {
             />
           ))}
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-red-500 shadow-sm active:bg-red-50"
-          >
-            <LogOut size={15} aria-hidden="true" />
-            {isPending ? "Saindo..." : "Sair da conta"} 
-          </button>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-red-500 shadow-sm active:bg-red-50"
+            >
+              <LogOut size={15} aria-hidden="true" />
+              Sair da conta
+            </button>
+          </form>
         </div>
       </div>
 
       <BottomNav />
     </main>
+  );
+}
+
+export default function MenuPage() {
+  return (
+    <Suspense fallback={<main className="min-h-dvh bg-fundo" />}>
+      <MenuContent />
+    </Suspense>
   );
 }
