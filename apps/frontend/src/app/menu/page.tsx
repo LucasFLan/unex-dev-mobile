@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Bell,
   ChevronRight,
@@ -20,6 +19,8 @@ import { BottomNav } from "@/components/BottomNav";
 import { MenuSection, type MenuItem } from "@/components/MenuSection";
 import { initials } from "@/lib/marketplace";
 import { currentUser } from "@/lib/mocks";
+import { useTransition } from "react";
+import { logout } from "@/app/actions"
 
 const SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
@@ -105,10 +106,12 @@ const SECTIONS: { title: string; items: MenuItem[] }[] = [
 ];
 
 export default function MenuPage() {
-  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
-    router.push("/login");
+    startTransition(async () => {
+      await logout();
+    });
   };
 
   return (
@@ -159,7 +162,7 @@ export default function MenuPage() {
             className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-red-500 shadow-sm active:bg-red-50"
           >
             <LogOut size={15} aria-hidden="true" />
-            Sair da conta
+            {isPending ? "Saindo..." : "Sair da conta"} 
           </button>
         </div>
       </div>
