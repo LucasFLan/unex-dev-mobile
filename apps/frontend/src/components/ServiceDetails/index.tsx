@@ -16,7 +16,7 @@ import { BackButton } from "@/components/BackButton";
 import Button from "@/components/Button";
 import { RelativeTime } from "@/components/RelativeTime";
 import { initials, type ServiceRequestDetail } from "@/lib/marketplace";
-import { formatShortDate } from "@/lib/perfil";
+import { formatShortDate } from "@/lib/format";
 import {formatPrice, formatDistance, formatRating} from "@/lib/format";
 
 export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
@@ -222,7 +222,7 @@ export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
                 <div className="absolute left-[20%] -top-5 h-[140px] w-[5px] rotate-[-12deg] bg-white" />
               </div>
 
-              <div className="absolute left-1/2 top-1/2 flex h-[68px] w-[68px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-blue-300 bg-blue-200/50">
+              <div className="absolute left-1/2 top-1/2 flex h-17 w-17 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-blue-300 bg-blue-200/50">
                 <MapPin size={15} fill="#2563EB" className="text-white" />
               </div>
             </div>
