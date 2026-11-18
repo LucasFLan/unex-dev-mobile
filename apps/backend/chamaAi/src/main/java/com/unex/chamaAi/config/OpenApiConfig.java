@@ -23,6 +23,8 @@ public class OpenApiConfig {
     public static final String ESQUEMA_BEARER = "bearerAuth";
     public static final String TAG_AUTENTICACAO = "Autenticação";
     public static final String TAG_USUARIOS = "Usuários";
+    public static final String TAG_ANUNCIOS = "Anúncios";
+    public static final String TAG_CATEGORIAS = "Categorias";
 
     private static final String RESPOSTA_ERRO_INTERNO = "ErroInterno";
     private static final String SCHEMA_PROBLEM_DETAIL = "#/components/schemas/ProblemDetail";
@@ -53,7 +55,7 @@ public class OpenApiConfig {
             |---|---|
             | 400 | Dado inválido (regra de validação) ou corpo JSON malformado |
             | 401 | Token ausente, inválido ou expirado, ou credenciais de login erradas |
-            | 403 | Usuário autenticado sem permissão (ex.: rotas `/admin/**` sem papel ADMIN) |
+            | 403 | Usuário autenticado sem permissão (ex.: editar anúncio de outra pessoa, rotas `/admin/**` sem ADMIN) |
             | 404 | Recurso não encontrado |
             | 409 | Conflito com dado já existente (ex.: CPF ou email duplicado) |
             | 422 | Regra de negócio violada (ex.: senha atual incorreta) |
@@ -69,6 +71,9 @@ public class OpenApiConfig {
                         .description(DESCRICAO))
                 .addTagsItem(new Tag().name(TAG_AUTENTICACAO).description("Login e emissão do token de acesso"))
                 .addTagsItem(new Tag().name(TAG_USUARIOS).description("Cadastro e perfil do usuário logado"))
+                .addTagsItem(new Tag().name(TAG_ANUNCIOS).description(
+                        "Ofertas de serviço (prestador) e pedidos de serviço (cliente)"))
+                .addTagsItem(new Tag().name(TAG_CATEGORIAS).description("Categorias de serviço dos anúncios"))
                 .components(new Components()
                         .addSecuritySchemes(ESQUEMA_BEARER, new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
@@ -84,7 +89,10 @@ public class OpenApiConfig {
                                 "tokenInvalido", ExemplosDeErro.TOKEN_INVALIDO))
                         .addResponses("UsuarioNaoEncontrado", respostaDeErro(
                                 "O token é válido, mas o usuário dono dele não existe mais.",
-                                "usuarioNaoEncontrado", ExemplosDeErro.USUARIO_NAO_ENCONTRADO)))
+                                "usuarioNaoEncontrado", ExemplosDeErro.USUARIO_NAO_ENCONTRADO))
+                        .addResponses("AnuncioNaoEncontrado", respostaDeErro(
+                                "Anúncio inexistente, ou inativo e o solicitante não é o autor.",
+                                "anuncioNaoEncontrado", ExemplosDeErro.ANUNCIO_NAO_ENCONTRADO)))
                 // Por padrão toda rota exige token; as públicas removem o requisito com @SecurityRequirements().
                 .addSecurityItem(new SecurityRequirement().addList(ESQUEMA_BEARER));
     }

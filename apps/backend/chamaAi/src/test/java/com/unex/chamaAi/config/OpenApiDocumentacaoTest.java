@@ -63,8 +63,16 @@ class OpenApiDocumentacaoTest {
     }
 
     @Test
+    void rotasPublicasDeAnunciosNaoExigemToken() {
+        assertTrue(operacao("/anuncios", "get").path("security").isEmpty());
+        assertTrue(operacao("/categorias", "get").path("security").isEmpty());
+    }
+
+    @Test
     void rotasProtegidasDocumentam401() {
-        for (String[] rota : new String[][]{{"/usuarios/me", "get"}, {"/usuarios/me", "put"}, {"/usuarios/me/senha", "patch"}}) {
+        for (String[] rota : new String[][]{{"/usuarios/me", "get"}, {"/usuarios/me", "put"}, {"/usuarios/me/senha", "patch"},
+                {"/anuncios", "post"}, {"/anuncios/{id}", "put"}, {"/anuncios/{id}", "delete"},
+                {"/usuarios/me/anuncios", "get"}}) {
             assertTrue(operacao(rota[0], rota[1]).path("responses").has("401"), rota[1] + " " + rota[0] + " sem 401");
         }
     }
@@ -97,14 +105,26 @@ class OpenApiDocumentacaoTest {
         assertTrue(spec.path("components").path("schemas").path("CadastrarUsuarioRequest").path("required")
                 .toString().contains("senha"));
         for (String schema : List.of("CadastrarUsuarioRequest", "EditarPerfilRequest", "AlterarSenhaRequest",
-                "LoginRequest", "UsuarioCadastradoResponse", "PerfilUsuarioResponse", "TokenAcessoResponse")) {
+                "LoginRequest", "UsuarioCadastradoResponse", "PerfilUsuarioResponse", "TokenAcessoResponse",
+                "AnuncioRequest", "AnuncioResponse", "CategoriaResponse", "PaginaAnunciosResponse")) {
             JsonNode propriedades = spec.path("components").path("schemas").path(schema).path("properties");
             assertFalse(propriedades.isEmpty(), schema + " não está na especificação");
             propriedades.properties().forEach(campo -> {
                 String nome = schema + "." + campo.getKey();
                 assertFalse(campo.getValue().path("description").isMissingNode(), nome + " sem descrição");
-                assertFalse(campo.getValue().path("example").isMissingNode(), nome + " sem exemplo");
+                // Objetos e listas aninhados são exemplificados pelos próprios schemas.
+                boolean escalar = !campo.getValue().has("$ref") && !campo.getValue().path("type").toString().contains("\"array\"");
+                assertTrue(!escalar || campo.getValue().has("example"), nome + " sem exemplo");
             });
+        }
+    }
+
+    @Test
+    void edicaoEExclusaoDeAnuncioDocumentam403E404() {
+        for (String metodo : List.of("put", "delete")) {
+            JsonNode respostas = operacao("/anuncios/{id}", metodo).path("responses");
+            assertTrue(respostas.has("403"), metodo + " /anuncios/{id} sem 403");
+            assertTrue(respostas.has("404"), metodo + " /anuncios/{id} sem 404");
         }
     }
 

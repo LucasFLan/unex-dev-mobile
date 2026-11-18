@@ -1,5 +1,6 @@
 package com.unex.chamaAi.shared.infrastructure.web;
 
+import com.unex.chamaAi.shared.domain.exceptions.AcessoNegadoException;
 import com.unex.chamaAi.shared.domain.exceptions.ConflitoException;
 import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.shared.domain.exceptions.DominioException;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -36,6 +38,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .body(ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, e.getMessage()));
     }
 
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ProblemDetail acessoNegado(AcessoNegadoException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
     @ExceptionHandler(ConflitoException.class)
     public ProblemDetail conflito(ConflitoException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
@@ -56,6 +63,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers,
                                                                   HttpStatusCode status, WebRequest request) {
         ProblemDetail corpo = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Corpo da requisição inválido.");
+        return handleExceptionInternal(ex, corpo, headers, status, request);
+    }
+
+    /** Parâmetro de rota ou query com formato errado (ex.: id que não é UUID). */
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,
+                                                        HttpStatusCode status, WebRequest request) {
+        String parametro = ex.getPropertyName() == null ? "informado" : "'" + ex.getPropertyName() + "'";
+        ProblemDetail corpo = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "Parâmetro " + parametro + " com formato inválido.");
         return handleExceptionInternal(ex, corpo, headers, status, request);
     }
 }
