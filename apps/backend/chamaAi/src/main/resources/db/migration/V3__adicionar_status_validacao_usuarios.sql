@@ -1,0 +1,2 @@
+ALTER TABLE usuarios
+    ADD COLUMN status_validacao VARCHAR(20) NOT NULL DEFAULT 'PENDENTE';

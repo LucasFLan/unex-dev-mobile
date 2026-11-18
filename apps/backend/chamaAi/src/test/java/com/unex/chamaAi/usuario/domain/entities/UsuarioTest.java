@@ -2,10 +2,12 @@ package com.unex.chamaAi.usuario.domain.entities;
 
 import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.usuario.domain.exceptions.ContaJaVerificadaException;
+import com.unex.chamaAi.usuario.domain.exceptions.StatusValidacaoInvalidoException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
 import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
+import com.unex.chamaAi.usuario.domain.valueobjects.StatusValidacao;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -25,35 +27,84 @@ class UsuarioTest {
     }
 
     @Test
-    void criarGeraIdENaoVerificado() {
+    void criarGeraIdNaoVerificadoEPendente() {
         Usuario usuario = novoUsuario();
         assertNotNull(usuario.getId());
         assertFalse(usuario.isVerificado());
         assertEquals(Papel.USUARIO, usuario.getPapel());
         assertFalse(usuario.isAdmin());
+        assertEquals(StatusValidacao.PENDENTE, usuario.getStatusValidacao());
+        assertFalse(usuario.isAprovado());
     }
 
     @Test
-    void promoverParaAdminAlteraPapel() {
+    void promoverParaAdminAlteraPapelEAprovaStatus() {
         Usuario usuario = novoUsuario();
         usuario.promoverParaAdmin();
         assertEquals(Papel.ADMIN, usuario.getPapel());
         assertTrue(usuario.isAdmin());
+        assertEquals(StatusValidacao.APROVADO, usuario.getStatusValidacao());
+        assertTrue(usuario.isAprovado());
+    }
+
+    @Test
+    void aprovarAlteraStatusParaAprovado() {
+        Usuario usuario = novoUsuario();
+        usuario.aprovar();
+        assertEquals(StatusValidacao.APROVADO, usuario.getStatusValidacao());
+        assertTrue(usuario.isAprovado());
+    }
+
+    @Test
+    void aprovarUsuarioJaAprovadoLancaExcecao() {
+        Usuario usuario = novoUsuario();
+        usuario.aprovar();
+        assertThrows(StatusValidacaoInvalidoException.class, usuario::aprovar);
+    }
+
+    @Test
+    void reprovarAlteraStatusParaReprovado() {
+        Usuario usuario = novoUsuario();
+        usuario.reprovar();
+        assertEquals(StatusValidacao.REPROVADO, usuario.getStatusValidacao());
+        assertFalse(usuario.isAprovado());
+    }
+
+    @Test
+    void reprovarUsuarioJaReprovadoOuAprovadoLancaExcecao() {
+        Usuario usuarioReprovado = novoUsuario();
+        usuarioReprovado.reprovar();
+        assertThrows(StatusValidacaoInvalidoException.class, usuarioReprovado::reprovar);
+
+        Usuario usuarioAprovado = novoUsuario();
+        usuarioAprovado.aprovar();
+        assertThrows(StatusValidacaoInvalidoException.class, usuarioAprovado::reprovar);
     }
 
     @Test
     void papelEhObrigatorioAoReconstituir() {
         assertThrows(NullPointerException.class,
-                () -> Usuario.reconstituir(UUID.randomUUID(), "João", NASCIMENTO, CPF, EMAIL, SENHA, null, false, null));
+                () -> Usuario.reconstituir(UUID.randomUUID(), "João", NASCIMENTO, CPF, EMAIL, SENHA,
+                        null, false, null, StatusValidacao.PENDENTE));
+    }
+
+    @Test
+    void statusValidacaoEhObrigatorioAoReconstituir() {
+        assertThrows(NullPointerException.class,
+                () -> Usuario.reconstituir(UUID.randomUUID(), "João", NASCIMENTO, CPF, EMAIL, SENHA,
+                        null, false, Papel.USUARIO, null));
     }
 
     @Test
     void reconstituirMantemEstado() {
         UUID id = UUID.randomUUID();
-        Usuario usuario = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA, null, true, Papel.ADMIN);
+        Usuario usuario = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA,
+                null, true, Papel.ADMIN, StatusValidacao.APROVADO);
         assertEquals(id, usuario.getId());
         assertTrue(usuario.isVerificado());
         assertTrue(usuario.isAdmin());
+        assertEquals(StatusValidacao.APROVADO, usuario.getStatusValidacao());
+        assertTrue(usuario.isAprovado());
     }
 
     @Test
@@ -122,8 +173,10 @@ class UsuarioTest {
     @Test
     void igualdadePorId() {
         UUID id = UUID.randomUUID();
-        Usuario a = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA, null, false, Papel.USUARIO);
-        Usuario b = Usuario.reconstituir(id, "Outro", NASCIMENTO, CPF, EMAIL, SENHA, null, true, Papel.USUARIO);
+        Usuario a = Usuario.reconstituir(id, "João", NASCIMENTO, CPF, EMAIL, SENHA,
+                null, false, Papel.USUARIO, StatusValidacao.PENDENTE);
+        Usuario b = Usuario.reconstituir(id, "Outro", NASCIMENTO, CPF, EMAIL, SENHA,
+                null, true, Papel.USUARIO, StatusValidacao.APROVADO);
         assertEquals(a, b);
         assertNotEquals(a, novoUsuario());
     }

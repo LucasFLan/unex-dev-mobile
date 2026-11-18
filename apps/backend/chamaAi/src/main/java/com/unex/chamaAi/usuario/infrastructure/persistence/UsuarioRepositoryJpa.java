@@ -8,6 +8,7 @@ import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
 import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
+import com.unex.chamaAi.usuario.domain.valueobjects.StatusValidacao;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
@@ -70,12 +71,14 @@ public class UsuarioRepositoryJpa implements UsuarioRepository {
     private static UsuarioJpaEntity paraEntidade(Usuario usuario) {
         return new UsuarioJpaEntity(usuario.getId(), usuario.getNome(), usuario.getDataNascimento(),
                 usuario.getCpf().valor(), usuario.getEmail().valor(), usuario.getSenha().valor(),
-                usuario.getTelefone(), usuario.isVerificado(), usuario.getPapel().name());
+                usuario.getTelefone(), usuario.isVerificado(), usuario.getPapel().name(),
+                usuario.getStatusValidacao().name());
     }
 
     private static Usuario paraDominio(UsuarioJpaEntity entidade) {
         return Usuario.reconstituir(entidade.getId(), entidade.getNome(), entidade.getDataNascimento(),
                 new Cpf(entidade.getCpf()), new Email(entidade.getEmail()), new SenhaHash(entidade.getSenhaHash()),
-                entidade.getTelefone(), entidade.isVerificado(), Papel.valueOf(entidade.getPapel()));
+                entidade.getTelefone(), entidade.isVerificado(), Papel.valueOf(entidade.getPapel()),
+                StatusValidacao.valueOf(entidade.getStatusValidacao()));
     }
 }

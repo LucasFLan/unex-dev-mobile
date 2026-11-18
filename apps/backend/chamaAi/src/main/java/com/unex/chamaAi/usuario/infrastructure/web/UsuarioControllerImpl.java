@@ -1,9 +1,11 @@
 package com.unex.chamaAi.usuario.infrastructure.web;
 
 import com.unex.chamaAi.usuario.application.usecases.AlterarSenhaUsuario;
+import com.unex.chamaAi.usuario.application.usecases.AprovarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.BuscarPerfilUsuario;
 import com.unex.chamaAi.usuario.application.usecases.CadastrarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.EditarPerfilUsuario;
+import com.unex.chamaAi.usuario.application.usecases.ReprovarUsuario;
 import com.unex.chamaAi.usuario.infrastructure.web.dto.request.AlterarSenhaRequest;
 import com.unex.chamaAi.usuario.infrastructure.web.dto.request.CadastrarUsuarioRequest;
 import com.unex.chamaAi.usuario.infrastructure.web.dto.request.EditarPerfilRequest;
@@ -21,13 +23,18 @@ public class UsuarioControllerImpl implements UsuarioController {
     private final BuscarPerfilUsuario buscarPerfilUsuario;
     private final EditarPerfilUsuario editarPerfilUsuario;
     private final AlterarSenhaUsuario alterarSenhaUsuario;
+    private final AprovarUsuario aprovarUsuario;
+    private final ReprovarUsuario reprovarUsuario;
 
     public UsuarioControllerImpl(CadastrarUsuario cadastrarUsuario, BuscarPerfilUsuario buscarPerfilUsuario,
-                                 EditarPerfilUsuario editarPerfilUsuario, AlterarSenhaUsuario alterarSenhaUsuario) {
+                                 EditarPerfilUsuario editarPerfilUsuario, AlterarSenhaUsuario alterarSenhaUsuario,
+                                 AprovarUsuario aprovarUsuario, ReprovarUsuario reprovarUsuario) {
         this.cadastrarUsuario = cadastrarUsuario;
         this.buscarPerfilUsuario = buscarPerfilUsuario;
         this.editarPerfilUsuario = editarPerfilUsuario;
         this.alterarSenhaUsuario = alterarSenhaUsuario;
+        this.aprovarUsuario = aprovarUsuario;
+        this.reprovarUsuario = reprovarUsuario;
     }
 
     @Override
@@ -50,7 +57,16 @@ public class UsuarioControllerImpl implements UsuarioController {
         alterarSenhaUsuario.executar(usuarioLogado(jwt), request.paraComando());
     }
 
-    /** O "sub" do token é o id do usuário (ver JwtEmissorToken). */
+    @Override
+    public void aprovar(UUID id) {
+        aprovarUsuario.executar(id);
+    }
+
+    @Override
+    public void reprovar(UUID id) {
+        reprovarUsuario.executar(id);
+    }
+
     private static UUID usuarioLogado(Jwt jwt) {
         return UUID.fromString(jwt.getSubject());
     }

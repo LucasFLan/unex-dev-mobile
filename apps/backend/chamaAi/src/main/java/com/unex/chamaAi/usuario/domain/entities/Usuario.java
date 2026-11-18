@@ -2,10 +2,12 @@ package com.unex.chamaAi.usuario.domain.entities;
 
 import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.usuario.domain.exceptions.ContaJaVerificadaException;
+import com.unex.chamaAi.usuario.domain.exceptions.StatusValidacaoInvalidoException;
 import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
 import com.unex.chamaAi.usuario.domain.valueobjects.Email;
 import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
+import com.unex.chamaAi.usuario.domain.valueobjects.StatusValidacao;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -25,9 +27,11 @@ public class Usuario {
     private String telefone;
     private boolean verificado;
     private Papel papel;
+    private StatusValidacao statusValidacao;
 
     private Usuario(UUID id, String nome, LocalDate dataNascimento, Cpf cpf, Email email,
-                    SenhaHash senha, String telefone, boolean verificado, Papel papel) {
+                    SenhaHash senha, String telefone, boolean verificado, Papel papel,
+                    StatusValidacao statusValidacao) {
         this.id = Objects.requireNonNull(id, "O id é obrigatório.");
         this.cpf = Objects.requireNonNull(cpf, "O CPF é obrigatório.");
         this.email = Objects.requireNonNull(email, "O email é obrigatório.");
@@ -37,16 +41,20 @@ public class Usuario {
         this.telefone = validarTelefone(telefone);
         this.verificado = verificado;
         this.papel = Objects.requireNonNull(papel, "O papel é obrigatório.");
+        this.statusValidacao = Objects.requireNonNull(statusValidacao, "O status de validação é obrigatório.");
     }
 
     public static Usuario criar(String nome, LocalDate dataNascimento, Cpf cpf, Email email,
                                 SenhaHash senha, String telefone) {
-        return new Usuario(UUID.randomUUID(), nome, dataNascimento, cpf, email, senha, telefone, false, Papel.USUARIO);
+        return new Usuario(UUID.randomUUID(), nome, dataNascimento, cpf, email, senha,
+                telefone, false, Papel.USUARIO, StatusValidacao.PENDENTE);
     }
 
     public static Usuario reconstituir(UUID id, String nome, LocalDate dataNascimento, Cpf cpf, Email email,
-                                       SenhaHash senha, String telefone, boolean verificado, Papel papel) {
-        return new Usuario(id, nome, dataNascimento, cpf, email, senha, telefone, verificado, papel);
+                                       SenhaHash senha, String telefone, boolean verificado, Papel papel,
+                                       StatusValidacao statusValidacao) {
+        return new Usuario(id, nome, dataNascimento, cpf, email, senha,
+                telefone, verificado, papel, statusValidacao);
     }
 
     public void alterarNome(String novoNome) {
@@ -83,10 +91,34 @@ public class Usuario {
 
     public void promoverParaAdmin() {
         this.papel = Papel.ADMIN;
+        if (this.statusValidacao != StatusValidacao.APROVADO) {
+            this.statusValidacao = StatusValidacao.APROVADO;
+        }
     }
 
     public boolean isAdmin() {
         return papel == Papel.ADMIN;
+    }
+
+    public void aprovar() {
+        if (this.statusValidacao == StatusValidacao.APROVADO) {
+            throw new StatusValidacaoInvalidoException("O usuário já está aprovado.");
+        }
+        this.statusValidacao = StatusValidacao.APROVADO;
+    }
+
+    public void reprovar() {
+        if (this.statusValidacao == StatusValidacao.REPROVADO) {
+            throw new StatusValidacaoInvalidoException("O usuário já está reprovado.");
+        }
+        if (this.statusValidacao == StatusValidacao.APROVADO) {
+            throw new StatusValidacaoInvalidoException("Não é possível reprovar um usuário já aprovado.");
+        }
+        this.statusValidacao = StatusValidacao.REPROVADO;
+    }
+
+    public boolean isAprovado() {
+        return this.statusValidacao == StatusValidacao.APROVADO;
     }
 
     private static String validarNome(String nome) {
@@ -151,6 +183,10 @@ public class Usuario {
 
     public Papel getPapel() {
         return papel;
+    }
+
+    public StatusValidacao getStatusValidacao() {
+        return statusValidacao;
     }
 
     @Override
