@@ -44,4 +44,7 @@ public class UsuarioJpaEntity {
 
     @Column(nullable = false, length = 20)
     private String papel;
+
+    @Column(name = "status_validacao", nullable = false, length = 20)
+    private String statusValidacao;
 }

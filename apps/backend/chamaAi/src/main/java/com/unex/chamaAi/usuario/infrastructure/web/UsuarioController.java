@@ -21,11 +21,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.util.UUID;
 
 @Tag(name = OpenApiConfig.TAG_USUARIOS)
 @RequestMapping("/usuarios")
@@ -33,15 +36,20 @@ public interface UsuarioController {
 
     @Operation(summary = "Cadastrar usuário",
             description = """
-                    Cria uma conta com papel `USUARIO` e `verificado = false`. Rota pública.
+                    Cria uma conta com papel `USUARIO`, `verificado = false` e status `PENDENTE`. Rota pública.
 
                     Regras:
-                    - **nome**: obrigatório, até 150 caracteres.
-                    - **dataNascimento**: obrigatória, `yyyy-MM-dd`, não pode estar no futuro.
-                    - **cpf**: obrigatório e válido (dígitos verificadores), com ou sem máscara; único.
-                    - **email**: obrigatório, formato válido, até 254 caracteres; único.
-                    - **senha**: 8+ caracteres, com maiúscula, número e caractere especial; até 72 bytes.
-                    - **telefone**: opcional, até 20 caracteres.""",
+- **nome**: obrigatório, até 150 caracteres.
+
+- **dataNascimento**: obrigatória, `yyyy-MM-dd`, não pode estar no futuro.
+
+- **cpf**: obrigatório e válido (dígitos verificadores), com ou sem máscara; único.
+
+- **email**: obrigatório, formato válido, até 254 caracteres; único.
+
+- **senha**: 8+ caracteres, com maiúscula, número e caractere especial; até 72 bytes.
+
+- **telefone**: opcional, até 20 caracteres.""",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(
                     examples = @ExampleObject(name = "cadastro", value = """
                             {"nome": "João da Silva", "dataNascimento": "2000-01-31", "cpf": "529.982.247-25",
@@ -127,4 +135,26 @@ public interface UsuarioController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void alterarSenha(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
                       @RequestBody AlterarSenhaRequest request);
+
+    @Operation(summary = "Aprovar usuário",
+            description = "Altera o status de validação do usuário para `APROVADO`. Restrito a `ADMIN`.")
+    @ApiResponse(responseCode = "204", description = "Usuário aprovado.")
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/UsuarioNaoEncontrado")
+    @ApiResponse(responseCode = "409", description = "O usuário já está aprovado.", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @PatchMapping("/{id}/aprovar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void aprovar(@PathVariable UUID id);
+
+    @Operation(summary = "Reprovar usuário",
+            description = "Altera o status de validação do usuário para `REPROVADO`. Restrito a `ADMIN`.")
+    @ApiResponse(responseCode = "204", description = "Usuário reprovado.")
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/UsuarioNaoEncontrado")
+    @ApiResponse(responseCode = "409", description = "O usuário já está reprovado ou aprovado.", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @PatchMapping("/{id}/reprovar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void reprovar(@PathVariable UUID id);
 }
