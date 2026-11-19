@@ -5,6 +5,18 @@ export const ENDPOINTS = {
   register: "/usuarios",
   updateUser: "/usuarios/me",
   me: "/usuarios/me",
+  categories: "/categorias",
+  ads: "/anuncios",
+} as const;
+
+export const AD_FIELDS = {
+  type: "tipo", 
+  categoryId: "categoriaId", 
+  title: "titulo", 
+  description: "descricao", 
+  price: "preco", 
+  city: "cidade", 
+  state: "uf", 
 } as const;
 
 export const FIELDS = {

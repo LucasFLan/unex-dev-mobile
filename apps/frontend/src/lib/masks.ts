@@ -31,3 +31,8 @@ export function isoToBr(isoDate: string) {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate);
   return match ? `${match[3]}/${match[2]}/${match[1]}` : isoDate;
 }
+
+export function maskDecimal(value: string) {
+  const [integer, ...rest] = value.replace(/[^\d,]/g, "").split(",");
+  return rest.length > 0 ? `${integer},${rest.join("").slice(0, 2)}` : integer;
+}
