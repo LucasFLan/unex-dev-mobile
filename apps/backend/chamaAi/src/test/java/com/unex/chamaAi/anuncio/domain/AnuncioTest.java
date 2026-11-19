@@ -72,6 +72,31 @@ class AnuncioTest {
     }
 
     @Test
+    void desativarEAtivarAlteramEstadoEDataSoQuandoMudam() throws InterruptedException {
+        Anuncio anuncio = novo("Eletricista", "desc");
+        var criadoEm = anuncio.getAtualizadoEm();
+
+        anuncio.ativar();
+        assertTrue(anuncio.isAtivo());
+        assertEquals(criadoEm, anuncio.getAtualizadoEm());
+
+        Thread.sleep(2);
+        anuncio.desativar();
+        assertFalse(anuncio.isAtivo());
+        assertTrue(anuncio.getAtualizadoEm().isAfter(criadoEm));
+        assertFalse(anuncio.visivelPara(UUID.randomUUID()));
+
+        var desativadoEm = anuncio.getAtualizadoEm();
+        anuncio.desativar();
+        assertEquals(desativadoEm, anuncio.getAtualizadoEm());
+
+        Thread.sleep(2);
+        anuncio.ativar();
+        assertTrue(anuncio.isAtivo());
+        assertTrue(anuncio.getAtualizadoEm().isAfter(desativadoEm));
+    }
+
+    @Test
     void anuncioInativoSoEhVisivelParaOAutor() {
         Anuncio inativo = Anuncio.reconstituir(UUID.randomUUID(), AUTOR, CATEGORIA, TipoAnuncio.OFERTA, "Título",
                 "desc", null, SALVADOR, false, java.time.Instant.now(), java.time.Instant.now());

@@ -1,5 +1,6 @@
 package com.unex.chamaAi.anuncio.infrastructure.config;
 
+import com.unex.chamaAi.anuncio.application.usecases.AlterarAtivacaoAnuncio;
 import com.unex.chamaAi.anuncio.application.usecases.BuscarAnuncio;
 import com.unex.chamaAi.anuncio.application.usecases.CriarAnuncio;
 import com.unex.chamaAi.anuncio.application.usecases.EditarAnuncio;
@@ -43,6 +44,11 @@ public class AnuncioConfig {
     @Bean
     public ExcluirAnuncio excluirAnuncio(AnuncioRepository anuncios) {
         return new ExcluirAnuncio(anuncios);
+    }
+
+    @Bean
+    public AlterarAtivacaoAnuncio alterarAtivacaoAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
+        return new AlterarAtivacaoAnuncio(anuncios, categorias);
     }
 
     @Bean

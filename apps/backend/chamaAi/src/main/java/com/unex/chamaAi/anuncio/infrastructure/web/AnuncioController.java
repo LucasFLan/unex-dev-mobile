@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -180,6 +181,48 @@ public interface AnuncioController {
     void excluir(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
                  @Parameter(description = "Id do anúncio.", example = "7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e")
                  @PathVariable UUID id);
+
+    String ANUNCIO_INATIVO_EXEMPLO = """
+            {"id": "7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e", "tipo": "OFERTA", "titulo": "Eletricista residencial",
+             "descricao": "Instalação de chuveiros, tomadas e quadros de luz.", "preco": 150.00,
+             "categoria": {"id": "0b9d3c4e-6f1a-4c2b-8d7e-5a4b3c2d1e0f", "slug": "eletricista", "nome": "Eletricista"},
+             "cidade": "Salvador", "uf": "BA", "ativo": false, "autorId": "3f2b6c1e-8a4d-4e0b-9c7a-1d2e3f4a5b6c",
+             "criadoEm": "2026-11-16T21:30:00.123456Z", "atualizadoEm": "2026-11-18T14:05:00.654321Z"}""";
+
+    @Operation(summary = "Ativar anúncio",
+            description = """
+                    Só o autor pode ativar. O anúncio volta a aparecer na listagem pública e no detalhe para
+                    qualquer pessoa. Ativar um anúncio que já está ativo não é erro (nada muda).""")
+    @ApiResponse(responseCode = "200", description = "Anúncio ativo.", content = @Content(
+            schema = @Schema(implementation = AnuncioResponse.class),
+            examples = @ExampleObject(name = "ativo", value = ANUNCIO_EXEMPLO)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "403", description = "O anúncio pertence a outro usuário.", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class),
+            examples = @ExampleObject(name = "acessoNegado", value = ExemplosDeErro.ACESSO_NEGADO_ANUNCIO)))
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/AnuncioNaoEncontrado")
+    @PatchMapping("/anuncios/{id}/ativar")
+    AnuncioResponse ativar(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
+                           @Parameter(description = "Id do anúncio.", example = "7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e")
+                           @PathVariable UUID id);
+
+    @Operation(summary = "Desativar anúncio",
+            description = """
+                    Só o autor pode desativar. O anúncio some da listagem pública e o detalhe passa a responder
+                    404 para quem não é o autor; ele continua em `GET /usuarios/me/anuncios`. Desativar um
+                    anúncio que já está inativo não é erro (nada muda).""")
+    @ApiResponse(responseCode = "200", description = "Anúncio inativo.", content = @Content(
+            schema = @Schema(implementation = AnuncioResponse.class),
+            examples = @ExampleObject(name = "inativo", value = ANUNCIO_INATIVO_EXEMPLO)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "403", description = "O anúncio pertence a outro usuário.", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class),
+            examples = @ExampleObject(name = "acessoNegado", value = ExemplosDeErro.ACESSO_NEGADO_ANUNCIO)))
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/AnuncioNaoEncontrado")
+    @PatchMapping("/anuncios/{id}/desativar")
+    AnuncioResponse desativar(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
+                              @Parameter(description = "Id do anúncio.", example = "7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e")
+                              @PathVariable UUID id);
 
     @Operation(summary = "Listar meus anúncios",
             description = "Anúncios do usuário do token, **incluindo os inativos**, do mais recente para o mais antigo.")

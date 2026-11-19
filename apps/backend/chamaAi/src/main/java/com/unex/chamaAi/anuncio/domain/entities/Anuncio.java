@@ -69,6 +69,23 @@ public class Anuncio {
         this.atualizadoEm = agora();
     }
 
+    /** Idempotente: só mexe em atualizadoEm quando o estado muda. */
+    public void ativar() {
+        alterarAtivo(true);
+    }
+
+    /** Idempotente: só mexe em atualizadoEm quando o estado muda. */
+    public void desativar() {
+        alterarAtivo(false);
+    }
+
+    private void alterarAtivo(boolean novoAtivo) {
+        if (ativo != novoAtivo) {
+            ativo = novoAtivo;
+            atualizadoEm = agora();
+        }
+    }
+
     public boolean pertenceA(UUID usuarioId) {
         return autorId.equals(usuarioId);
     }
