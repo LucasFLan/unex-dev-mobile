@@ -17,3 +17,10 @@ export function isPastDate(value: string) {
     time < Date.now()
   );
 }
+
+export const PASSWORD_RULE_MESSAGE =
+  "A senha deve ter no mínimo 8 caracteres, com letras e números.";
+
+export function isValidPassword(value: string) {
+  return value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value);
+}

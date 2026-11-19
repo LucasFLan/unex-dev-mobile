@@ -22,7 +22,7 @@ export function RequestCard({ request }: { request: ServiceRequest }) {
 
         <span className="flex shrink-0 items-center gap-1 text-[10px] text-slate-500">
           <Clock3 size={10} aria-hidden="true" />
-          <RelativeTime isoDate={request.createdAt} />
+          {/* <RelativeTime isoDate={request.createdAt} /> */}
         </span>
       </div>
 
@@ -43,7 +43,7 @@ export function RequestCard({ request }: { request: ServiceRequest }) {
         <span className="flex min-w-0 items-center gap-1 text-[10px] text-slate-500">
           <MapPin size={11} className="shrink-0" aria-hidden="true" />
           <span className="truncate">
-            {request.neighborhood} · {formatDistance(request.distanceKm)}
+            {request.location}
           </span>
         </span>
 

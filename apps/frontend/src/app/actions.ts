@@ -9,7 +9,13 @@ import {
   extractToken,
 } from "@/lib/api-contract";
 import { clearSessionToken, setSessionToken } from "@/lib/session";
-import { isPastDate, onlyDigits, toIsoDate } from "@/lib/validators";
+import {
+  PASSWORD_RULE_MESSAGE,
+  isPastDate,
+  isValidPassword,
+  onlyDigits,
+  toIsoDate,
+} from "@/lib/validators";
 
 export type AuthState = {
   error: string;
@@ -27,6 +33,8 @@ const CONNECTION_ERROR =
 
 const field = (formData: FormData, key: string) =>
   String(formData.get(key) ?? "").trim();
+
+
 
 async function post(path: string, body: Record<string, string>) {
   try {
@@ -119,11 +127,8 @@ export async function register(
   if (!isPastDate(dataNascimento)) {
     return { error: "Data de nascimento inválida.", values };
   }
-  if (senha.length < 8 || !/[A-Za-z]/.test(senha) || !/\d/.test(senha)) {
-    return {
-      error: "A senha deve ter no mínimo 8 caracteres, com letras e números.",
-      values,
-    };
+  if (!isValidPassword(senha)) {
+    return { error: PASSWORD_RULE_MESSAGE, values };
   }
   if (formData.has("confirmar") && senha !== confirmar) {
     return { error: "As senhas não conferem.", values };

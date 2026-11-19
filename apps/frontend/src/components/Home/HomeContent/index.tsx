@@ -21,7 +21,7 @@ import {
   filterProfessionals,
   filterRequests,
 } from "@/lib/marketplace";
-import { mockProfessionals, mockRequests } from "@/lib/mocks";
+import { AnuncioItem } from "@/lib/ads";
 
 const carousel =
   "flex gap-2.5 overflow-x-auto px-5 pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden";
@@ -78,7 +78,12 @@ function EmptyState({
   );
 }
 
-export function HomeContent({ userName }: { userName: string }) {
+type HomeContentProps = {
+  userName: string;
+  anuncios: AnuncioItem[];
+};
+
+export function HomeContent({ userName, anuncios }: HomeContentProps) {
   const {
     filters,
     hasActiveFilters,
@@ -95,15 +100,43 @@ export function HomeContent({ userName }: { userName: string }) {
   const closeFilters = useCallback(() => setShowFilters(false), []);
   useDismissable(filtersRef, showFilters, closeFilters);
 
-  const professionals = useMemo(
-    () => filterProfessionals(mockProfessionals, filters),
-    [filters]
-  );
-  const requests = useMemo(
-    () => filterRequests(mockRequests, filters),
-    [filters]
-  );
+const professionals = useMemo(() => {
+  const ofertas = anuncios
+    .filter((anuncio) => anuncio.tipo === "OFERTA")
+    .map((anuncio) => ({
+      id: anuncio.id,
+      category: anuncio.categoria.nome,
+      name: anuncio.titulo,
+      service: anuncio.descricao,
+      location: `${anuncio.cidade}, ${anuncio.uf}`,
+      price: anuncio.preco,
+      rating: 0,
+      reviews: 0,
+      distance: 0,
+      createdAt: anuncio.criadoEm,
+    }));
 
+  return filterProfessionals(ofertas, filters);
+}, [anuncios, filters]);
+
+const requests = useMemo(() => {
+  const pedidos = anuncios
+    .filter((anuncio) => anuncio.tipo === "PEDIDO")
+    .map((anuncio) => ({
+      id: anuncio.id,
+      category: anuncio.categoria.nome,
+      urgent: false,
+      time: anuncio.criadoEm,
+      title: anuncio.titulo,
+      description: anuncio.descricao,
+      location: `${anuncio.cidade}, ${anuncio.uf}`,
+      distance: 0,
+      price: anuncio.preco,
+      createdAt: anuncio.criadoEm,
+    }));
+
+  return filterRequests(pedidos, filters);
+}, [anuncios, filters]);
   const onClear = hasActiveFilters ? clearFilters : undefined;
   const priceFilterActive = filters.maxPrice !== null;
 
@@ -125,7 +158,6 @@ export function HomeContent({ userName }: { userName: string }) {
             </button>
           </div>
 
-          {/* Busca + filtros: o painel ancora neste container */}
           <div ref={filtersRef} className="relative mt-4">
             <div className="flex gap-2">
               <div className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3">
