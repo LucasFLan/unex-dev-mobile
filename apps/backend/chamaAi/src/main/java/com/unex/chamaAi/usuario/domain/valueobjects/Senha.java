@@ -3,13 +3,10 @@ package com.unex.chamaAi.usuario.domain.valueobjects;
 import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 
 public record Senha(String valor) {
 
-    private static final Pattern REGEX_COMPLEXIDADE =
-            Pattern.compile("^(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$");
-
+    private static final int TAMANHO_MINIMO = 8;
     private static final int TAMANHO_MAXIMO_BYTES = 72;
 
     public Senha {
@@ -21,13 +18,25 @@ public record Senha(String valor) {
             throw new DadoInvalidoException("A senha não pode ultrapassar " + TAMANHO_MAXIMO_BYTES + " bytes.");
         }
 
-        if (!REGEX_COMPLEXIDADE.matcher(valor).matches()) {
-            throw new DadoInvalidoException("A senha deve ter no mínimo 8 caracteres, uma letra maiúscula, um número e um caractere especial.");
+        if (valor.length() < TAMANHO_MINIMO) {
+            throw new DadoInvalidoException("A senha deve ter no mínimo " + TAMANHO_MINIMO + " caracteres.");
+        }
+
+        if (valor.chars().noneMatch(Character::isUpperCase)) {
+            throw new DadoInvalidoException("A senha deve conter pelo menos uma letra maiúscula.");
+        }
+
+        if (valor.chars().noneMatch(Character::isDigit)) {
+            throw new DadoInvalidoException("A senha deve conter pelo menos um número.");
+        }
+
+        if (valor.chars().allMatch(Character::isLetterOrDigit)) {
+            throw new DadoInvalidoException("A senha deve conter pelo menos um caractere especial.");
         }
     }
 
     @Override
     public String toString() {
-        return "Senha[****]";
+        return "Senha[*****]";
     }
 }
