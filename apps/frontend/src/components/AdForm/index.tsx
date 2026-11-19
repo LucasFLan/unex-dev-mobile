@@ -236,7 +236,7 @@ export function AdForm({ categories }: { categories: Category[] }) {
             <section className="mt-4">
               <div className="mb-1 flex items-center justify-between">
                 <label htmlFor="titulo" className="text-[9px] font-medium">
-                  Título do anúncio
+                  {isOffering ? "Nome do prestador" : "Título do anúncio"}
                 </label>
 
                 <span className="text-[8px] text-slate-400">
@@ -258,8 +258,8 @@ export function AdForm({ categories }: { categories: Category[] }) {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder={
                     isOffering
-                      ? "Ex.: Eletricista residencial e predial"
-                      : "Ex.: Eletricista para instalar chuveiro"
+                      ? "Ex.: Carlos pedreiro"
+                      : "Ex.: Eletricista residencial e predial"
                   }
                   className="w-full bg-transparent text-[9px] outline-none placeholder:text-slate-400"
                 />

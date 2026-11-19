@@ -66,17 +66,16 @@ export function ProfessionalCard({
           <span className="font-semibold text-slate-800">
             {formatRating(professional.rating)}
           </span>
-          <span>({professional.reviewsCount}) ·</span>
+          <span>20 ·</span>
           <span className="truncate">
-            {professional.neighborhood} ·{" "}
-            {formatDistance(professional.distanceKm)}
+            {professional.location} ·{" "}
           </span>
         </div>
 
         <p className="mt-1.5 text-[10px] text-slate-500">
           A partir de{" "}
           <strong className="text-xs text-slate-900">
-            {formatPrice(professional.priceFrom)}
+            {formatPrice(professional.price)}
           </strong>
         </p>
       </div>

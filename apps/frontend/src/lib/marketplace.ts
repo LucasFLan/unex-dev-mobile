@@ -3,28 +3,47 @@ import { normalize } from "@/lib/format";
 import { Review } from "./perfil";
 
 export type Professional = {
-  id: number;
+  id: string;
+  category: string;
   name: string;
-  category: CategoryName;
   service: string;
+  location: string;
+  price: number;
   rating: number;
-  reviewsCount: number;
-  neighborhood: string;
-  distanceKm: number;
-  priceFrom: number;
+  reviews: number;
+  distance: number;
   createdAt: string;
 };
 
+export type AnuncioMarketplace = {
+  id: string; 
+  tipo: "OFERTA" | "PEDIDO";
+  titulo: string;
+  descricao: string;
+  preco: number;
+  categoria: {
+    id: string;
+    slug: string;
+    nome: string;
+  };
+  cidade: string;
+  uf: string;
+  ativo: boolean;
+  autorId: string;
+  criadoEm: string;
+};
+
 export type ServiceRequest = {
-  id: number;
-  category: CategoryName;
+  id: string;
+  category: string;
   urgent: boolean;
-  createdAt: string;
+  time: string;
   title: string;
   description: string;
-  neighborhood: string;
-  distanceKm: number;
+  location: string;
+  distance: number;
   price: number;
+  createdAt: string;
 };
 
 export type RequestClient = {
@@ -106,7 +125,7 @@ export function filterProfessionals(
       if (filters.category && professional.category !== filters.category) {
         return false;
       }
-      if (filters.maxPrice !== null && professional.priceFrom > filters.maxPrice) {
+      if (filters.maxPrice !== null && professional.price > filters.maxPrice) {
         return false;
       }
       return true;
@@ -114,9 +133,9 @@ export function filterProfessionals(
     .sort((a, b) => {
       switch (filters.sort) {
         case "menor-preco":
-          return a.priceFrom - b.priceFrom;
-        case "melhor-avaliados":
-          return b.rating - a.rating || b.reviewsCount - a.reviewsCount;
+          return a.price - b.price;
+        // case "melhor-avaliados":
+        //   return b.rating - a.rating || b.reviewsCount - a.reviewsCount;
         default:
           return newestFirst(a, b);
       }
