@@ -72,6 +72,7 @@ class OpenApiDocumentacaoTest {
     void rotasProtegidasDocumentam401() {
         for (String[] rota : new String[][]{{"/usuarios/me", "get"}, {"/usuarios/me", "put"}, {"/usuarios/me/senha", "patch"},
                 {"/anuncios", "post"}, {"/anuncios/{id}", "put"}, {"/anuncios/{id}", "delete"},
+                {"/anuncios/{id}/ativar", "patch"}, {"/anuncios/{id}/desativar", "patch"},
                 {"/usuarios/me/anuncios", "get"}}) {
             assertTrue(operacao(rota[0], rota[1]).path("responses").has("401"), rota[1] + " " + rota[0] + " sem 401");
         }
@@ -125,6 +126,11 @@ class OpenApiDocumentacaoTest {
             JsonNode respostas = operacao("/anuncios/{id}", metodo).path("responses");
             assertTrue(respostas.has("403"), metodo + " /anuncios/{id} sem 403");
             assertTrue(respostas.has("404"), metodo + " /anuncios/{id} sem 404");
+        }
+        for (String acao : List.of("ativar", "desativar")) {
+            JsonNode respostas = operacao("/anuncios/{id}/" + acao, "patch").path("responses");
+            assertTrue(respostas.has("403"), "patch /anuncios/{id}/" + acao + " sem 403");
+            assertTrue(respostas.has("404"), "patch /anuncios/{id}/" + acao + " sem 404");
         }
     }
 

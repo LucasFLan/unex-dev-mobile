@@ -1,6 +1,7 @@
 package com.unex.chamaAi.anuncio.infrastructure.web;
 
 import com.unex.chamaAi.anuncio.application.dto.ListarAnunciosQuery;
+import com.unex.chamaAi.anuncio.application.usecases.AlterarAtivacaoAnuncio;
 import com.unex.chamaAi.anuncio.application.usecases.BuscarAnuncio;
 import com.unex.chamaAi.anuncio.application.usecases.CriarAnuncio;
 import com.unex.chamaAi.anuncio.application.usecases.EditarAnuncio;
@@ -25,16 +26,18 @@ public class AnuncioControllerImpl implements AnuncioController {
     private final ListarMeusAnuncios listarMeusAnuncios;
     private final EditarAnuncio editarAnuncio;
     private final ExcluirAnuncio excluirAnuncio;
+    private final AlterarAtivacaoAnuncio alterarAtivacaoAnuncio;
 
     public AnuncioControllerImpl(CriarAnuncio criarAnuncio, BuscarAnuncio buscarAnuncio, ListarAnuncios listarAnuncios,
                                  ListarMeusAnuncios listarMeusAnuncios, EditarAnuncio editarAnuncio,
-                                 ExcluirAnuncio excluirAnuncio) {
+                                 ExcluirAnuncio excluirAnuncio, AlterarAtivacaoAnuncio alterarAtivacaoAnuncio) {
         this.criarAnuncio = criarAnuncio;
         this.buscarAnuncio = buscarAnuncio;
         this.listarAnuncios = listarAnuncios;
         this.listarMeusAnuncios = listarMeusAnuncios;
         this.editarAnuncio = editarAnuncio;
         this.excluirAnuncio = excluirAnuncio;
+        this.alterarAtivacaoAnuncio = alterarAtivacaoAnuncio;
     }
 
     @Override
@@ -62,6 +65,16 @@ public class AnuncioControllerImpl implements AnuncioController {
     @Override
     public void excluir(Jwt jwt, UUID id) {
         excluirAnuncio.executar(id, usuarioLogado(jwt), ehAdmin(jwt));
+    }
+
+    @Override
+    public AnuncioResponse ativar(Jwt jwt, UUID id) {
+        return AnuncioResponse.de(alterarAtivacaoAnuncio.executar(id, usuarioLogado(jwt), true));
+    }
+
+    @Override
+    public AnuncioResponse desativar(Jwt jwt, UUID id) {
+        return AnuncioResponse.de(alterarAtivacaoAnuncio.executar(id, usuarioLogado(jwt), false));
     }
 
     @Override

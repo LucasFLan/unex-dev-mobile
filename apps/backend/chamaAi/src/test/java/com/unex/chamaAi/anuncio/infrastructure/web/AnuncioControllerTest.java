@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -243,6 +244,38 @@ class AnuncioControllerTest {
                 .andExpect(status().isNoContent());
 
         assertEquals(0, anuncios.count());
+    }
+
+    @Test
+    void autorDesativaEReativaAnuncio() throws Exception {
+        String joao = joao();
+        String maria = maria();
+        String id = criarEObterId(joao, corpo("OFERTA", eletricistaId, "100", "Salvador", "BA"));
+
+        mockMvc.perform(patch("/anuncios/{id}/desativar", id)).andExpect(status().isUnauthorized());
+        mockMvc.perform(patch("/anuncios/{id}/desativar", id).header(AUTHORIZATION, maria))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.detail").value("Você não tem permissão para alterar este anúncio."));
+
+        mockMvc.perform(patch("/anuncios/{id}/desativar", id).header(AUTHORIZATION, joao))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(false));
+        mockMvc.perform(get("/anuncios")).andExpect(jsonPath("$.totalItens").value(0));
+        mockMvc.perform(get("/anuncios/{id}", id)).andExpect(status().isNotFound());
+        mockMvc.perform(get("/anuncios/{id}", id).header(AUTHORIZATION, joao))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(false));
+        mockMvc.perform(get("/usuarios/me/anuncios").header(AUTHORIZATION, joao))
+                .andExpect(jsonPath("$.totalItens").value(1));
+        mockMvc.perform(patch("/anuncios/{id}/ativar", id).header(AUTHORIZATION, maria))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(patch("/anuncios/{id}/ativar", id).header(AUTHORIZATION, joao))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(true));
+        mockMvc.perform(patch("/anuncios/{id}/ativar", id).header(AUTHORIZATION, joao))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/anuncios")).andExpect(jsonPath("$.totalItens").value(1));
     }
 
     @Test

@@ -35,6 +35,7 @@ class AnuncioUseCasesTest {
     private final ListarMeusAnuncios listarMeus = new ListarMeusAnuncios(anuncios, categorias);
     private final EditarAnuncio editar = new EditarAnuncio(anuncios, categorias);
     private final ExcluirAnuncio excluir = new ExcluirAnuncio(anuncios);
+    private final AlterarAtivacaoAnuncio alterarAtivacao = new AlterarAtivacaoAnuncio(anuncios, categorias);
     private final ListarCategorias listarCategorias = new ListarCategorias(categorias);
 
     private Categoria eletricista;
@@ -177,6 +178,33 @@ class AnuncioUseCasesTest {
 
         assertTrue(anuncios.dados.isEmpty());
         assertThrows(AnuncioNaoEncontradoException.class, () -> excluir.executar(doAutor, AUTOR, false));
+    }
+
+    @Test
+    void autorDesativaEReativaOProprioAnuncio() {
+        UUID id = criarOferta(AUTOR).id();
+
+        assertFalse(alterarAtivacao.executar(id, AUTOR, false).ativo());
+        assertThrows(AnuncioNaoEncontradoException.class, () -> buscar.executar(id, OUTRO));
+        assertEquals(0, listar.executar(new ListarAnunciosQuery(null, null, null, null, null, null)).totalItens());
+        assertEquals(1, listarMeus.executar(AUTOR, null, null).totalItens());
+
+        assertFalse(alterarAtivacao.executar(id, AUTOR, false).ativo());
+        assertTrue(alterarAtivacao.executar(id, AUTOR, true).ativo());
+        assertEquals(1, listar.executar(new ListarAnunciosQuery(null, null, null, null, null, null)).totalItens());
+    }
+
+    @Test
+    void outroUsuarioNaoAlteraAtivacao() {
+        UUID ativo = criarOferta(AUTOR).id();
+        UUID inativo = criarOferta(AUTOR).id();
+        alterarAtivacao.executar(inativo, AUTOR, false);
+
+        assertThrows(AcessoNegadoAnuncioException.class, () -> alterarAtivacao.executar(ativo, OUTRO, false));
+        assertThrows(AnuncioNaoEncontradoException.class, () -> alterarAtivacao.executar(inativo, OUTRO, true));
+        assertThrows(AnuncioNaoEncontradoException.class,
+                () -> alterarAtivacao.executar(UUID.randomUUID(), AUTOR, true));
+        assertTrue(buscar.executar(ativo, OUTRO).ativo());
     }
 
     @Test
