@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { apiFetch } from "@/lib/api";
-import { ENDPOINTS, AD_FIELDS, FIELDS } from "@/lib/api-contract";
+import { ENDPOINTS, AD_FIELDS } from "@/lib/api-contract";
 
 export type AnuncioItem = {
   id: string;
@@ -60,7 +60,6 @@ export const getAnuncios = cache(async (): Promise<AnuncioItem[]> => {
   let result;
 
   try {
-    // Utilizando a rota pública mapeada no seu api-contract
     result = await apiFetch(ENDPOINTS.ads, { method: "GET" });
   } catch {
     throw new Error("Não foi possível conectar ao servidor.");
@@ -70,7 +69,6 @@ export const getAnuncios = cache(async (): Promise<AnuncioItem[]> => {
     throw new Error(`Falha ao carregar os anúncios (status ${result.status}).`);
   }
 
-  // A API Java retorna uma página paginada com a propriedade "itens"
   const data = result.data as AnunciosPageResponse;
   const rawList = Array.isArray(data?.itens) ? data.itens : [];
 
