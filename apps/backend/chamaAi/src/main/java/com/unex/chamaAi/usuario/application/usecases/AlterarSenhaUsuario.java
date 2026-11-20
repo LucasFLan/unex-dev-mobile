@@ -22,13 +22,13 @@ public class AlterarSenhaUsuario {
     }
 
     public void executar(UUID id, AlterarSenhaCommand comando) {
-        Senha novaSenha = new Senha(comando.novaSenha());
         Usuario usuario = usuarios.buscarPorId(id).orElseThrow(UsuarioNaoEncontradoException::new);
 
         if (!senhaAtualConfere(comando.senhaAtual(), usuario)) {
             throw new SenhaAtualIncorretaException();
         }
 
+        Senha novaSenha = new Senha(comando.novaSenha());
         usuario.alterarSenha(criptografador.criptografar(novaSenha));
         usuarios.salvar(usuario);
     }
