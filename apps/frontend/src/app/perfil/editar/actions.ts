@@ -38,9 +38,6 @@ export async function updateProfile(
   const dataNascimento = toIsoDate(field(formData, "dataNascimento"));
   const telefone = onlyDigits(field(formData, "telefone"));
 
-  const email = field(formData, "email");
-  const cpf = onlyDigits(field(formData, "cpf"));
-
   if (!nome || !dataNascimento || !telefone) {
     return { error: "Preencha todos os campos." };
   }
@@ -58,9 +55,8 @@ export async function updateProfile(
       auth: true,
       body: {
         [FIELDS.name]: nome,
+        // PUT /usuarios/me só aceita estes três campos (CPF e e-mail não mudam).
         [FIELDS.birthDate]: dataNascimento,
-        [FIELDS.cpf]: cpf,
-        [FIELDS.email]: email,
         [FIELDS.phone]: telefone,
       },
     });
@@ -78,5 +74,7 @@ export async function updateProfile(
   if (!result.ok) return { error: messageFor(result) };
 
   revalidatePath("/perfil");
+  revalidatePath("/menu");
+  revalidatePath("/home");
   redirect("/perfil");
 }

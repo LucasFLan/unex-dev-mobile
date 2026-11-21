@@ -10,14 +10,28 @@ export const SESSION_COOKIE = "token";
 export const ENDPOINTS = {
   login: "/auth/login",
   register: "/usuarios",
-  /** PUT: atualiza os dados do usuário logado (confira no Swagger se leva id no caminho). */
-  updateUser: "/usuarios",
+  /** PUT: atualiza nome, data de nascimento e telefone do usuário logado. */
+  updateUser: "/usuarios/me",
   /** GET: dados do usuário logado. */
   me: "/usuarios/me",
   /** GET (público): lista de categorias, em ordem alfabética. */
   categories: "/categorias",
-  /** POST: cria um anúncio cujo autor é o usuário do token. */
+  /**
+   * POST: cria um anúncio cujo autor é o usuário do token.
+   * GET (público): lista anúncios ativos. GET/PUT/DELETE `/anuncios/{id}`;
+   * PATCH `/anuncios/{id}/ativar` e `/anuncios/{id}/desativar` (só o autor).
+   */
   ads: "/anuncios",
+  /** GET: anúncios do usuário logado, ativos e inativos (paginado). */
+  myAds: "/usuarios/me/anuncios",
+  /** POST `/anuncios/{id}/propostas`: envia proposta para o autor do anúncio. */
+  proposals: (adId: string) => `/anuncios/${encodeURIComponent(adId)}/propostas`,
+  /** GET: notificações do usuário logado (paginado, mais recentes primeiro). */
+  notifications: "/usuarios/me/notificacoes",
+  /** GET: { naoLidas } para o contador do sino. */
+  unreadNotifications: "/usuarios/me/notificacoes/nao-lidas",
+  /** PATCH: marca todas as notificações do usuário como lidas. */
+  readAllNotifications: "/usuarios/me/notificacoes/lidas",
   /** PATCH: altera a senha do usuário logado (exige a senha atual). */
   changePassword: "/usuarios/me/senha",
 } as const;

@@ -1,28 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import {
-  Share2,
-  Clock3,
-  MapPin,
-  Zap,
-  BadgeCheck,
-  Star,
-  ChevronRight,
-  LockKeyhole,
-} from "lucide-react";
+import { Share2, Clock3, MapPin, LockKeyhole } from "lucide-react";
+import { AdOwnerActions } from "@/components/AdOwnerActions";
 import { BackButton } from "@/components/BackButton";
-import Button from "@/components/Button";
+import { ProposalSheet } from "@/components/ProposalSheet";
 import { RelativeTime } from "@/components/RelativeTime";
-import { initials, type ServiceRequestDetail } from "@/lib/marketplace";
-import { formatShortDate } from "@/lib/format";
-import {formatPrice, formatDistance, formatRating} from "@/lib/format";
+import { MyProposalStatus } from "@/components/MyProposalStatus";
+import { ReceivedProposals } from "@/components/ReceivedProposals";
+import type { AnuncioItem } from "@/lib/ads";
+import type { ProposalItem } from "@/lib/proposals";
+import { formatPrice } from "@/lib/format";
 
-export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
+type ServiceDetailsProps = {
+  ad: AnuncioItem;
+  /** O usuário logado é o autor: mostra as ações de gerenciar. */
+  isOwner: boolean;
+  /** Propostas recebidas (só preenchido para o autor). */
+  proposals: ProposalItem[];
+  /** Proposta que o usuário logado já enviou para este anúncio. */
+  myProposal: ProposalItem | null;
+};
+
+export function ServiceDetails({
+  ad,
+  isOwner,
+  proposals,
+  myProposal,
+}: ServiceDetailsProps) {
   const [showProposal, setShowProposal] = useState(false);
-
-  const { client } = request;
+  const location = `${ad.cidade}, ${ad.uf}`;
 
   async function handleShare() {
     const url = window.location.href;
@@ -31,7 +38,7 @@ export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
       if (navigator.share) {
         await navigator.share({
           title: "Pedido de serviço - ChamaAí",
-          text: request.title,
+          text: ad.titulo,
           url,
         });
       } else {
@@ -67,32 +74,34 @@ export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
         <section className="px-5">
           <div className="flex items-center gap-1.5">
             <span className="rounded-md bg-amber-100 px-2 py-1 text-[8px] font-medium text-amber-800">
-              {request.category}
+              {ad.categoria.nome}
             </span>
 
-            {request.urgent && (
-              <span className="rounded-md bg-red-100 px-2 py-1 text-[8px] font-medium text-red-600">
-                Urgente
+            <span className="rounded-md bg-blue-50 px-2 py-1 text-[8px] font-medium text-blue-700">
+              {ad.tipo === "PEDIDO" ? "Procura profissional" : "Oferece serviço"}
+            </span>
+
+            {!ad.ativo && (
+              <span className="rounded-md bg-slate-100 px-2 py-1 text-[8px] font-medium text-slate-600">
+                Pausado
               </span>
             )}
           </div>
 
           <h2 className="mt-2 text-[14px] font-bold leading-4.5 tracking-tight">
-            {request.title}
+            {ad.titulo}
           </h2>
 
           <div className="mt-1.5 flex flex-wrap items-center gap-1 text-[9px] text-slate-500">
             <Clock3 size={11} />
 
             <span>
-              Publicado <RelativeTime isoDate={request.createdAt} />
+              Publicado <RelativeTime isoDate={ad.criadoEm} />
             </span>
 
             <span>·</span>
 
-            <span>
-              {request.neighborhood}, {formatDistance(request.distanceKm)}
-            </span>
+            <span>{location}</span>
           </div>
 
           <div className="mt-3 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5">
@@ -101,26 +110,14 @@ export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
                 Orçamento do cliente
               </p>
 
-              <p className="text-[16px] font-bold">
-                {formatPrice(request.price)}
-              </p>
+              <p className="text-[16px] font-bold">{formatPrice(ad.preco)}</p>
             </div>
 
             <div className="text-right">
               <p className="text-[8px] text-blue-600">Prazo</p>
-
-              {request.urgent ? (
-                <p className="flex items-center justify-end gap-1 text-[10px] font-semibold text-red-500">
-                  <Zap size={12} />
-                  Urgente
-                </p>
-              ) : (
-                <p className="text-[10px] font-semibold text-slate-700">
-                  {request.preferredDate
-                    ? formatShortDate(request.preferredDate)
-                    : "A combinar"}
-                </p>
-              )}
+              <p className="text-[10px] font-semibold text-slate-700">
+                A combinar
+              </p>
             </div>
           </div>
 
@@ -128,84 +125,13 @@ export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
             <h3 className="text-[11px] font-bold">Descrição</h3>
 
             <p className="mt-1.5 text-[9px] leading-3.5 text-slate-600">
-              {request.description}
+              {ad.descricao}
             </p>
           </section>
 
-          {request.photos.length > 0 && (
-            <section className="mt-4">
-              <h3 className="text-[11px] font-bold">Fotos do cliente</h3>
-
-              <div className="mt-2 grid grid-cols-3 gap-1.5">
-                {request.photos.map((src, index) => (
-                  <div
-                    key={`${src}-${index}`}
-                    className="relative aspect-square overflow-hidden rounded-xl bg-slate-100"
-                  >
-                    <Image
-                      src={src}
-                      alt={`Foto ${index + 1} do pedido`}
-                      fill
-                      sizes="(max-width: 448px) 33vw, 150px"
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
+          {isOwner && (
+            <ReceivedProposals proposals={proposals} adType={ad.tipo} />
           )}
-
-          <section className="mt-3">
-            <button
-              type="button"
-              className="flex w-full items-center gap-2 rounded-xl border border-slate-200 px-2.5 py-2"
-            >
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[9px] font-semibold text-blue-600">
-                {initials(client.name)}
-              </div>
-
-              <div className="min-w-0 flex-1 text-left">
-                <div className="flex items-center gap-1">
-                  <span className="text-[9px] font-semibold">
-                    {client.name}
-                  </span>
-
-                  {client.verified && (
-                    <BadgeCheck size={11} className="text-blue-600" />
-                  )}
-                </div>
-
-                <div className="mt-0.5 flex items-center gap-1">
-                  {client.rating !== null ? (
-                    <>
-                      <Star
-                        size={10}
-                        className="fill-amber-400 text-amber-400"
-                      />
-
-                      <span className="text-[9px] font-semibold">
-                        {formatRating(client.rating)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-[9px] text-slate-500">
-                      Sem avaliações ainda
-                    </span>
-                  )}
-                </div>
-
-                <p className="text-[8px] text-slate-500">
-                  Cliente desde {client.memberSince.slice(0, 4)} ·{" "}
-                  {client.requestsCount}{" "}
-                  {client.requestsCount === 1
-                    ? "pedido publicado"
-                    : "pedidos publicados"}
-                </p>
-              </div>
-
-              <ChevronRight size={15} className="shrink-0 text-slate-400" />
-            </button>
-          </section>
 
           <section className="mt-4">
             <h3 className="text-[11px] font-bold">Localização aproximada</h3>
@@ -231,14 +157,19 @@ export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
               <LockKeyhole size={11} className="mt-0.5 shrink-0" />
 
               <p>
-                Região de {request.neighborhood}. O endereço exato é liberado
-                quando a proposta é aceita.
+                Região de {location}. O endereço exato é liberado quando a
+                proposta é aceita.
               </p>
             </div>
           </section>
         </section>
       </div>
 
+      {isOwner ? (
+        <AdOwnerActions ad={ad} />
+      ) : myProposal ? (
+        <MyProposalStatus proposal={myProposal} />
+      ) : (
       <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-2">
         <div className="mx-auto max-w-md">
           <button
@@ -250,58 +181,17 @@ export function ServiceDetails({ request }: { request: ServiceRequestDetail }) {
           </button>
         </div>
       </footer>
+      )}
 
-      {showProposal && (
-        <div className="fixed inset-0 z-30 flex items-end justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-t-2xl bg-white p-5">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-bold">Enviar proposta</h3>
-
-              <button
-                type="button"
-                onClick={() => setShowProposal(false)}
-                className="text-slate-500"
-                aria-label="Fechar"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-500">
-              Informe o valor que deseja cobrar pelo serviço.
-            </p>
-
-            <label className="mt-4 block text-xs font-medium">
-              Valor da proposta
-            </label>
-
-            <input
-              type="number"
-              placeholder="R$ 0,00"
-              min="0"
-              className="mt-2 h-11 w-full rounded-lg border border-slate-200 px-3 text-sm outline-none focus:border-blue-500"
-            />
-
-            <label className="mt-4 block text-xs font-medium">
-              Mensagem para o cliente
-            </label>
-
-            <textarea
-              placeholder="Descreva como pretende realizar o serviço..."
-              rows={3}
-              className="mt-2 w-full resize-none rounded-lg border border-slate-200 p-3 text-xs outline-none focus:border-blue-500"
-            />
-
-            <Button
-              text="Confirmar proposta"
-              type="button"
-              onClick={() => {
-                setShowProposal(false);
-                alert("Proposta enviada!");
-              }}
-            />
-          </div>
-        </div>
+      {showProposal && !isOwner && (
+        <ProposalSheet
+          adId={ad.id}
+          title="Enviar proposta"
+          description="Diga quanto cobra e como pretende fazer o serviço."
+          valueLabel="Valor da proposta"
+          messagePlaceholder="Descreva como pretende realizar o serviço, prazo e se leva o material..."
+          onClose={() => setShowProposal(false)}
+        />
       )}
     </main>
   );

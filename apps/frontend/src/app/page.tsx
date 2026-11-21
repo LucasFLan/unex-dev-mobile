@@ -18,6 +18,7 @@ import {
   Menu,
 } from "lucide-react";
 import Image from "next/image";
+import { CurrentYear } from "@/components/CurrentYear";
 import Logo from "@/../public/logo.svg"
 
 const categories = [
@@ -458,7 +459,7 @@ export default function HomePage() {
           </Link>
 
           <p className="text-center text-xs text-slate-400">
-            © {new Date().getFullYear()} ChamaAí. Todos os direitos reservados.
+            © <CurrentYear /> ChamaAí. Todos os direitos reservados.
           </p>
 
           <div className="flex gap-5 text-xs font-medium text-slate-500">

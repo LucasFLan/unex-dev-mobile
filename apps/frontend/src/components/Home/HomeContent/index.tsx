@@ -21,7 +21,8 @@ import {
   filterProfessionals,
   filterRequests,
 } from "@/lib/marketplace";
-import { AnuncioItem } from "@/lib/ads";
+import type { AnuncioItem } from "@/lib/ads";
+import type { Category } from "@/lib/categories-api";
 
 const carousel =
   "flex gap-2.5 overflow-x-auto px-5 pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden";
@@ -81,9 +82,17 @@ function EmptyState({
 type HomeContentProps = {
   userName: string;
   anuncios: AnuncioItem[];
+  categories: Category[];
+  /** Quantidade de notificações não lidas, para o selo do sino. */
+  unreadNotifications: number;
 };
 
-export function HomeContent({ userName, anuncios }: HomeContentProps) {
+export function HomeContent({
+  userName,
+  anuncios,
+  categories,
+  unreadNotifications,
+}: HomeContentProps) {
   const {
     filters,
     hasActiveFilters,
@@ -100,43 +109,40 @@ export function HomeContent({ userName, anuncios }: HomeContentProps) {
   const closeFilters = useCallback(() => setShowFilters(false), []);
   useDismissable(filtersRef, showFilters, closeFilters);
 
-const professionals = useMemo(() => {
-  const ofertas = anuncios
-    .filter((anuncio) => anuncio.tipo === "OFERTA")
-    .map((anuncio) => ({
-      id: anuncio.id,
-      category: anuncio.categoria.nome,
-      name: anuncio.titulo,
-      service: anuncio.descricao,
-      location: `${anuncio.cidade}, ${anuncio.uf}`,
-      price: anuncio.preco,
-      rating: 0,
-      reviews: 0,
-      distance: 0,
-      createdAt: anuncio.criadoEm,
-    }));
+  const professionals = useMemo(() => {
+    const ofertas = anuncios
+      .filter((anuncio) => anuncio.tipo === "OFERTA")
+      .map((anuncio) => ({
+        id: anuncio.id,
+        category: anuncio.categoria.nome,
+        categorySlug: anuncio.categoria.slug,
+        name: anuncio.titulo,
+        service: anuncio.descricao,
+        location: `${anuncio.cidade}, ${anuncio.uf}`,
+        price: anuncio.preco,
+        createdAt: anuncio.criadoEm,
+      }));
 
-  return filterProfessionals(ofertas, filters);
-}, [anuncios, filters]);
+    return filterProfessionals(ofertas, filters);
+  }, [anuncios, filters]);
 
-const requests = useMemo(() => {
-  const pedidos = anuncios
-    .filter((anuncio) => anuncio.tipo === "PEDIDO")
-    .map((anuncio) => ({
-      id: anuncio.id,
-      category: anuncio.categoria.nome,
-      urgent: false,
-      time: anuncio.criadoEm,
-      title: anuncio.titulo,
-      description: anuncio.descricao,
-      location: `${anuncio.cidade}, ${anuncio.uf}`,
-      distance: 0,
-      price: anuncio.preco,
-      createdAt: anuncio.criadoEm,
-    }));
+  const requests = useMemo(() => {
+    const pedidos = anuncios
+      .filter((anuncio) => anuncio.tipo === "PEDIDO")
+      .map((anuncio) => ({
+        id: anuncio.id,
+        category: anuncio.categoria.nome,
+        categorySlug: anuncio.categoria.slug,
+        title: anuncio.titulo,
+        description: anuncio.descricao,
+        location: `${anuncio.cidade}, ${anuncio.uf}`,
+        price: anuncio.preco,
+        createdAt: anuncio.criadoEm,
+      }));
 
-  return filterRequests(pedidos, filters);
-}, [anuncios, filters]);
+    return filterRequests(pedidos, filters);
+  }, [anuncios, filters]);
+
   const onClear = hasActiveFilters ? clearFilters : undefined;
   const priceFilterActive = filters.maxPrice !== null;
 
@@ -149,13 +155,25 @@ const requests = useMemo(() => {
               Olá, {userName}
             </h1>
 
-            <button
-              type="button"
-              aria-label="Notificações"
+            <Link
+              href="/notificacoes"
+              aria-label={
+                unreadNotifications > 0
+                  ? `Notificações (${unreadNotifications} não lidas)`
+                  : "Notificações"
+              }
               className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200"
             >
               <Bell size={18} aria-hidden="true" />
-            </button>
+              {unreadNotifications > 0 && (
+                <span
+                  className="absolute -right-1.5 -top-1.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white ring-2 ring-white"
+                  aria-hidden="true"
+                >
+                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                </span>
+              )}
+            </Link>
           </div>
 
           <div ref={filtersRef} className="relative mt-4">
@@ -233,7 +251,11 @@ const requests = useMemo(() => {
           </div>
         </header>
 
-        <CategoryList active={filters.category} onSelect={setCategory} />
+        <CategoryList
+          categories={categories}
+          active={filters.category}
+          onSelect={setCategory}
+        />
 
         <Section
           title="Profissionais disponíveis"

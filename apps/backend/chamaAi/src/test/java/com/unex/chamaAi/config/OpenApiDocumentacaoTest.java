@@ -73,7 +73,12 @@ class OpenApiDocumentacaoTest {
         for (String[] rota : new String[][]{{"/usuarios/me", "get"}, {"/usuarios/me", "put"}, {"/usuarios/me/senha", "patch"},
                 {"/anuncios", "post"}, {"/anuncios/{id}", "put"}, {"/anuncios/{id}", "delete"},
                 {"/anuncios/{id}/ativar", "patch"}, {"/anuncios/{id}/desativar", "patch"},
-                {"/usuarios/me/anuncios", "get"}}) {
+                {"/usuarios/me/anuncios", "get"}, {"/anuncios/{id}/propostas", "post"},
+                {"/usuarios/me/propostas/recebidas", "get"}, {"/usuarios/me/propostas/enviadas", "get"},
+                {"/usuarios/me/notificacoes", "get"}, {"/usuarios/me/notificacoes/nao-lidas", "get"},
+                {"/usuarios/me/notificacoes/lidas", "patch"}, {"/notificacoes/{id}/lida", "patch"},
+                {"/propostas/{id}/aceitar", "patch"}, {"/propostas/{id}/recusar", "patch"},
+                {"/propostas/{id}/cancelar", "patch"}}) {
             assertTrue(operacao(rota[0], rota[1]).path("responses").has("401"), rota[1] + " " + rota[0] + " sem 401");
         }
     }
@@ -107,7 +112,10 @@ class OpenApiDocumentacaoTest {
                 .toString().contains("senha"));
         for (String schema : List.of("CadastrarUsuarioRequest", "EditarPerfilRequest", "AlterarSenhaRequest",
                 "LoginRequest", "UsuarioCadastradoResponse", "PerfilUsuarioResponse", "TokenAcessoResponse",
-                "AnuncioRequest", "AnuncioResponse", "CategoriaResponse", "PaginaAnunciosResponse")) {
+                "AnuncioRequest", "AnuncioResponse", "CategoriaResponse", "PaginaAnunciosResponse",
+                "PropostaRequest", "PropostaResponse", "PropostaAnuncioResponse", "PropostaParticipanteResponse",
+                "PaginaPropostasResponse", "NotificacaoResponse", "PaginaNotificacoesResponse",
+                "ContagemNotificacoesResponse")) {
             JsonNode propriedades = spec.path("components").path("schemas").path(schema).path("properties");
             assertFalse(propriedades.isEmpty(), schema + " não está na especificação");
             propriedades.properties().forEach(campo -> {

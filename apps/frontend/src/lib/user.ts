@@ -4,11 +4,14 @@ import { apiFetch } from "@/lib/api";
 import { ENDPOINTS, FIELDS } from "@/lib/api-contract";
 
 export type CurrentUser = {
+  id: string;
   name: string;
   email: string;
   phone: string;
   cpf: string;
   birthDate: string;
+  verified: boolean;
+  role: "USUARIO" | "ADMIN";
 };
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
@@ -23,11 +26,14 @@ function parseUser(data: unknown): CurrentUser | null {
   if (!name || !email) return null;
 
   return {
+    id: text(body.id),
     name,
     email,
     phone: text(body[FIELDS.phone]),
     cpf: text(body[FIELDS.cpf]),
     birthDate: text(body[FIELDS.birthDate]),
+    verified: body.verificado === true,
+    role: body.papel === "ADMIN" ? "ADMIN" : "USUARIO",
   };
 }
 

@@ -2,27 +2,19 @@ import Link from "next/link";
 import { Clock3, MapPin } from "lucide-react";
 import { RelativeTime } from "@/components/RelativeTime";
 import { type ServiceRequest } from "@/lib/marketplace";
-import {formatPrice, formatDistance} from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 
 export function RequestCard({ request }: { request: ServiceRequest }) {
   return (
     <article className="relative flex w-60 flex-col rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm">
       <div className="flex items-center justify-between gap-1">
-        <div className="flex items-center gap-1">
-          <span className="rounded bg-amber-50 px-1.5 py-1 text-[10px] font-medium text-amber-800">
-            {request.category}
-          </span>
-
-          {request.urgent && (
-            <span className="rounded bg-red-50 px-1.5 py-1 text-[10px] font-medium text-red-600">
-              Urgente
-            </span>
-          )}
-        </div>
+        <span className="truncate rounded bg-amber-50 px-1.5 py-1 text-[10px] font-medium text-amber-800">
+          {request.category}
+        </span>
 
         <span className="flex shrink-0 items-center gap-1 text-[10px] text-slate-500">
           <Clock3 size={10} aria-hidden="true" />
-          {/* <RelativeTime isoDate={request.createdAt} /> */}
+          <RelativeTime isoDate={request.createdAt} />
         </span>
       </div>
 
@@ -42,9 +34,7 @@ export function RequestCard({ request }: { request: ServiceRequest }) {
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
         <span className="flex min-w-0 items-center gap-1 text-[10px] text-slate-500">
           <MapPin size={11} className="shrink-0" aria-hidden="true" />
-          <span className="truncate">
-            {request.location}
-          </span>
+          <span className="truncate">{request.location}</span>
         </span>
 
         <strong className="shrink-0 text-[11px]">
@@ -52,12 +42,9 @@ export function RequestCard({ request }: { request: ServiceRequest }) {
         </strong>
       </div>
 
-      <Link
-        href={`/servicos/${request.id}/proposta`}
-        className="relative z-10 mt-2 rounded-lg bg-blue-50 py-2 text-center text-[11px] font-semibold text-blue-600 transition hover:bg-blue-100"
-      >
-        Enviar proposta
-      </Link>
+      <span className="relative mt-2 rounded-lg bg-blue-50 py-2 text-center text-[11px] font-semibold text-blue-600 transition hover:bg-blue-100">
+        Ver pedido
+      </span>
     </article>
   );
 }

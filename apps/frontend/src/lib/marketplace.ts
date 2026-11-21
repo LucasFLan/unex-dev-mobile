@@ -1,92 +1,34 @@
-import type { CategoryName } from "@/lib/categories";
 import { normalize } from "@/lib/format";
-import { Review } from "./perfil";
 
 export type Professional = {
   id: string;
+  /** Nome da categoria, para exibição. */
   category: string;
+  /** Slug da categoria (GET /categorias), usada no filtro e no ícone. */
+  categorySlug: string;
   name: string;
   service: string;
   location: string;
-  price: number;
-  rating: number;
-  reviews: number;
-  distance: number;
+  /** `null` = "a combinar". */
+  price: number | null;
   createdAt: string;
-};
-
-export type AnuncioMarketplace = {
-  id: string; 
-  tipo: "OFERTA" | "PEDIDO";
-  titulo: string;
-  descricao: string;
-  preco: number;
-  categoria: {
-    id: string;
-    slug: string;
-    nome: string;
-  };
-  cidade: string;
-  uf: string;
-  ativo: boolean;
-  autorId: string;
-  criadoEm: string;
 };
 
 export type ServiceRequest = {
   id: string;
   category: string;
-  urgent: boolean;
-  time: string;
+  categorySlug: string;
   title: string;
   description: string;
   location: string;
-  distance: number;
-  price: number;
+  /** `null` = "a combinar". */
+  price: number | null;
   createdAt: string;
-};
-
-export type RequestClient = {
-  name: string;
-  rating: number | null;
-  reviewsCount: number;
-  verified: boolean;
-  memberSince: string;
-  requestsCount: number;
-};
-
-export type ServiceRequestDetail = ServiceRequest & {
-  client: RequestClient;
-  proposalsCount: number;
-  /** URLs das fotos enviadas pelo cliente (pode ser vazio) */
-  photos: string[];
-  /** Data ISO (AAAA-MM-DD); null = a combinar */
-  preferredDate: string | null;
-  /** Informações extras que o cliente listou. */
-  requirements: string[];
-};
-export type ProfessionalService = {
-  name: string;
-  price: number;
-  unit: string | null;
-};
-
-export type ProfessionalDetail = Professional & {
-  description: string;
-  priceUnit: string | null;
-  serviceRadiusKm: number;
-  verified: boolean;
-  memberSince: string;
-  completedServices: number;
-  availability: string;
-  services: ProfessionalService[];
-  reviews: Review[];
 };
 
 export const SORT_OPTIONS = [
   { value: "recentes", label: "Mais recentes" },
   { value: "menor-preco", label: "Menor preço" },
-  { value: "melhor-avaliados", label: "Melhor avaliados" },
 ] as const;
 
 export type SortOption = (typeof SORT_OPTIONS)[number]["value"];
@@ -98,13 +40,24 @@ export const isSortOption = (value: string | null): value is SortOption =>
 
 export type HomeFilters = {
   query: string;
-  category: CategoryName | null;
+  /** Slug da categoria selecionada. */
+  category: string | null;
   sort: SortOption;
   maxPrice: number | null;
 };
 
 const newestFirst = (a: { createdAt: string }, b: { createdAt: string }) =>
   b.createdAt.localeCompare(a.createdAt);
+
+/** Menor preço primeiro; "a combinar" (null) vai para o fim. */
+const cheapestFirst = (
+  a: { price: number | null },
+  b: { price: number | null }
+) => (a.price ?? Infinity) - (b.price ?? Infinity);
+
+/** Preço "a combinar" não é descartado pelo filtro de valor máximo. */
+const withinPrice = (price: number | null, maxPrice: number | null) =>
+  maxPrice === null || price === null || price <= maxPrice;
 
 export function filterProfessionals(
   list: Professional[],
@@ -122,24 +75,14 @@ export function filterProfessionals(
       ) {
         return false;
       }
-      if (filters.category && professional.category !== filters.category) {
+      if (filters.category && professional.categorySlug !== filters.category) {
         return false;
       }
-      if (filters.maxPrice !== null && professional.price > filters.maxPrice) {
-        return false;
-      }
-      return true;
+      return withinPrice(professional.price, filters.maxPrice);
     })
-    .sort((a, b) => {
-      switch (filters.sort) {
-        case "menor-preco":
-          return a.price - b.price;
-        // case "melhor-avaliados":
-        //   return b.rating - a.rating || b.reviewsCount - a.reviewsCount;
-        default:
-          return newestFirst(a, b);
-      }
-    });
+    .sort((a, b) =>
+      filters.sort === "menor-preco" ? cheapestFirst(a, b) : newestFirst(a, b)
+    );
 }
 
 export function filterRequests(
@@ -158,16 +101,13 @@ export function filterRequests(
       ) {
         return false;
       }
-      if (filters.category && request.category !== filters.category) {
+      if (filters.category && request.categorySlug !== filters.category) {
         return false;
       }
-      if (filters.maxPrice !== null && request.price > filters.maxPrice) {
-        return false;
-      }
-      return true;
+      return withinPrice(request.price, filters.maxPrice);
     })
     .sort((a, b) =>
-      filters.sort === "menor-preco" ? a.price - b.price : newestFirst(a, b)
+      filters.sort === "menor-preco" ? cheapestFirst(a, b) : newestFirst(a, b)
     );
 }
 
