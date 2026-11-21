@@ -3,51 +3,41 @@ import Link from "next/link";
 import {
   ArrowLeft,
   BadgeCheck,
+  Cake,
+  Clock3,
   Mail,
-  MapPin,
   Pencil,
   Phone,
-  Star,
 } from "lucide-react";
 import { Block } from "@/components/Block";
 import { InfoRow } from "@/components/InfoRow";
-import { ReviewCard } from "@/components/ReviewCard";
-import { CATEGORY_META } from "@/lib/categories";
-import { formatPhone } from "@/lib/format";
+import { getMeusAnuncios } from "@/lib/ads";
+import { getCategoryMeta } from "@/lib/categories";
+import { formatPhone, formatShortDate } from "@/lib/format";
 import { initials } from "@/lib/marketplace";
-import { formatMonth, formatRating } from "@/lib/format";
-import { mockProfile, mockReviews } from "@/lib/mocks";
 import { getCurrentUser } from "@/lib/user";
 
 async function PerfilContent() {
-  const user = await getCurrentUser();
+  const [user, anuncios] = await Promise.all([
+    getCurrentUser(),
+    getMeusAnuncios(),
+  ]);
 
-  const profile = {
-    ...mockProfile,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    cpf: user.cpf,
-    birthDate: user.birthDate,
-  };
-  const reviews = mockReviews;
+  const ativos = anuncios.filter((anuncio) => anuncio.ativo).length;
 
   const stats = [
-    {
-      label: "Avaliação",
-      value: (
-        <span className="flex items-center justify-center gap-1">
-          <Star
-            size={13}
-            className="fill-amber-400 text-amber-400"
-            aria-hidden="true"
-          />
-          {formatRating(profile.rating)}
-        </span>
-      ),
-    },
-    { label: "Avaliações", value: profile.reviewsCount },
-    { label: "Serviços concluídos", value: profile.completedServices },
+    { label: "Anúncios", value: anuncios.length },
+    { label: "Ativos", value: ativos },
+    { label: "Pausados", value: anuncios.length - ativos },
+  ];
+
+  // Categorias (sem repetição) dos anúncios em que o usuário oferece serviço.
+  const offeredCategories = [
+    ...new Map(
+      anuncios
+        .filter((anuncio) => anuncio.tipo === "OFERTA")
+        .map((anuncio) => [anuncio.categoria.slug, anuncio.categoria])
+    ).values(),
   ];
 
   return (
@@ -71,12 +61,12 @@ async function PerfilContent() {
               className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-2xl font-bold text-blue-600"
               aria-hidden="true"
             >
-              {initials(profile.name)}
+              {initials(user.name)}
             </span>
 
             <div className="mt-3 flex items-center gap-1">
-              <h2 className="text-base font-bold">{profile.name}</h2>
-              {profile.verified && (
+              <h2 className="text-base font-bold">{user.name}</h2>
+              {user.verified && (
                 <BadgeCheck
                   size={16}
                   className="text-blue-600"
@@ -85,9 +75,12 @@ async function PerfilContent() {
               )}
             </div>
 
-            <p className="mt-0.5 text-[11px] text-slate-500">
-              Membro desde {formatMonth(profile.memberSince)}
-            </p>
+            {!user.verified && (
+              <p className="mt-1 flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-medium text-amber-700">
+                <Clock3 size={11} aria-hidden="true" />
+                Conta aguardando verificação
+              </p>
+            )}
 
             <Link
               href="/perfil/editar"
@@ -107,39 +100,35 @@ async function PerfilContent() {
             ))}
           </dl>
 
-          {profile.bio && (
-            <Block title="Sobre">
-              <p className="rounded-xl border border-slate-200 bg-white p-3 text-[11px] leading-4 text-slate-600 shadow-sm">
-                {profile.bio}
-              </p>
-            </Block>
-          )}
-
           <Block title="Dados de contato">
             <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-              <InfoRow icon={Mail} label="E-mail" value={profile.email} />
+              <InfoRow icon={Mail} label="E-mail" value={user.email} />
               <InfoRow
                 icon={Phone}
                 label="Telefone"
-                value={formatPhone(profile.phone)}
+                value={user.phone ? formatPhone(user.phone) : "Não informado"}
               />
-              <InfoRow
-                icon={MapPin}
-                label="Bairro"
-                value={profile.neighborhood}
-              />
+              {user.birthDate && (
+                <InfoRow
+                  icon={Cake}
+                  label="Data de nascimento"
+                  value={formatShortDate(user.birthDate)}
+                />
+              )}
             </ul>
           </Block>
 
-          {profile.categories.length > 0 && (
+          {offeredCategories.length > 0 && (
             <Block title="Serviços que ofereço">
               <ul className="flex flex-wrap gap-2">
-                {profile.categories.map((category) => {
-                  const { icon: Icon, bg, text } = CATEGORY_META[category];
+                {offeredCategories.map((category) => {
+                  const { icon: Icon, bg, text } = getCategoryMeta(
+                    category.slug
+                  );
 
                   return (
                     <li
-                      key={category}
+                      key={category.id}
                       className="flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1 pl-1 pr-3 text-[11px] font-medium text-slate-700 shadow-sm"
                     >
                       <span
@@ -147,7 +136,7 @@ async function PerfilContent() {
                       >
                         <Icon size={13} strokeWidth={1.8} aria-hidden="true" />
                       </span>
-                      {category}
+                      {category.nome}
                     </li>
                   );
                 })}
@@ -155,21 +144,12 @@ async function PerfilContent() {
             </Block>
           )}
 
-          <Block title="Avaliações recebidas">
-            {reviews.length > 0 ? (
-              <ul className="space-y-2">
-                {reviews.map((review) => (
-                  <li key={review.id}>
-                    <ReviewCard review={review} />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center text-xs text-slate-500">
-                Você ainda não recebeu avaliações.
-              </p>
-            )}
-          </Block>
+          <Link
+            href="/historico"
+            className="flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-semibold text-blue-600 shadow-sm"
+          >
+            Ver meus anúncios
+          </Link>
         </div>
       </div>
     </main>

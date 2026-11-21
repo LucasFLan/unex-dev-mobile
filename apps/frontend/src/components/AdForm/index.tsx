@@ -15,15 +15,22 @@ import {
   Image as ImageIcon,
   X,
 } from "lucide-react";
-import { createAd, type AdFormState } from "@/app/anunciar/actions";
+import {
+  createAd,
+  updateAd,
+  type AdFormState,
+} from "@/app/anunciar/actions";
 import { BackButton } from "@/components/BackButton";
 import Button from "@/components/Button";
+import type { AnuncioItem } from "@/lib/ads";
 import type { Category } from "@/lib/categories-api";
 import { ESTADOS } from "@/lib/estados";
 
 type AdType = "procurar" | "oferecer";
 
 const MAX_PHOTOS = 6;
+const MAX_TITLE = 120;
+const MAX_DESCRIPTION = 5000;
 
 function PhotoPreview({
   file,
@@ -56,25 +63,42 @@ function PhotoPreview({
   );
 }
 
-export function AdForm({ categories }: { categories: Category[] }) {
+type AdFormProps = {
+  categories: Category[];
+  /** Quando informado, o formulário edita este anúncio (PUT /anuncios/{id}). */
+  ad?: AnuncioItem;
+};
+
+export function AdForm({ categories, ad }: AdFormProps) {
+  const isEditing = ad !== undefined;
+  const submit = useMemo(
+    () => (ad ? updateAd.bind(null, ad.id) : createAd),
+    [ad]
+  );
   const [state, formAction, pending] = useActionState<AdFormState, FormData>(
-    createAd,
+    submit,
     null
   );
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [adType, setAdType] = useState<AdType>("procurar");
-  const [category, setCategory] = useState("");
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [negotiable, setNegotiable] = useState(false);
+  const [adType, setAdType] = useState<AdType>(
+    ad?.tipo === "OFERTA" ? "oferecer" : "procurar"
+  );
+  const [category, setCategory] = useState(ad?.categoria.id ?? "");
+  const [title, setTitle] = useState(ad?.titulo ?? "");
+  const [description, setDescription] = useState(ad?.descricao ?? "");
+  const [price, setPrice] = useState(
+    ad?.preco != null ? String(ad.preco) : ""
+  );
+  const [negotiable, setNegotiable] = useState(
+    isEditing && ad.preco === null
+  );
   const [paymentType, setPaymentType] = useState("por visita");
   const [availability, setAvailability] = useState("Esta semana");
   const [radius, setRadius] = useState("10 km");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [uf, setUf] = useState("");
+  const [city, setCity] = useState(ad?.cidade ?? "");
+  const [uf, setUf] = useState(ad?.uf ?? "");
   const [photos, setPhotos] = useState<File[]>([]);
 
   const isOffering = adType === "oferecer";
@@ -112,7 +136,9 @@ export function AdForm({ categories }: { categories: Category[] }) {
         <header className="flex h-14.5 items-center justify-between px-4">
           <BackButton />
 
-          <h1 className="text-[11px] font-semibold">Criar anúncio</h1>
+          <h1 className="text-[11px] font-semibold">
+            {isEditing ? "Editar anúncio" : "Criar anúncio"}
+          </h1>
 
           <div className="w-8" />
         </header>
@@ -240,7 +266,7 @@ export function AdForm({ categories }: { categories: Category[] }) {
                 </label>
 
                 <span className="text-[8px] text-slate-400">
-                  {title.length}/60
+                  {title.length}/{MAX_TITLE}
                 </span>
               </div>
 
@@ -252,7 +278,7 @@ export function AdForm({ categories }: { categories: Category[] }) {
                   name="titulo"
                   type="text"
                   minLength={3}
-                  maxLength={60}
+                  maxLength={MAX_TITLE}
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -308,7 +334,7 @@ export function AdForm({ categories }: { categories: Category[] }) {
                 </label>
 
                 <span className="text-[8px] text-slate-400">
-                  {description.length}/1000
+                  {description.length}/{MAX_DESCRIPTION}
                 </span>
               </div>
 
@@ -317,7 +343,7 @@ export function AdForm({ categories }: { categories: Category[] }) {
                 name="descricao"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                maxLength={1000}
+                maxLength={MAX_DESCRIPTION}
                 required
                 rows={4}
                 placeholder={
@@ -579,7 +605,15 @@ export function AdForm({ categories }: { categories: Category[] }) {
       <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-2">
         <div className="mx-auto max-w-md">
           <Button
-            text={pending ? "Publicando..." : "Publicar anúncio"}
+            text={
+              pending
+                ? isEditing
+                  ? "Salvando..."
+                  : "Publicando..."
+                : isEditing
+                  ? "Salvar alterações"
+                  : "Publicar anúncio"
+            }
             type="button"
             onClick={() => {
               if (!pending) formRef.current?.requestSubmit();

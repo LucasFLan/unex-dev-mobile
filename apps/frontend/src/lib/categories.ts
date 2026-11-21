@@ -1,24 +1,46 @@
 import {
   Droplet,
   Hammer,
+  KeyRound,
+  Layers,
+  LayoutGrid,
+  Leaf,
+  type LucideIcon,
   Paintbrush,
+  PanelsTopLeft,
+  Snowflake,
   Sparkles,
   Wrench,
   Zap,
 } from "lucide-react";
 
-export const CATEGORY_META: Record<string, { icon: any; bg: string; text: string }> = {
-  Eletricista: { icon: Zap, bg: "bg-amber-100", text: "text-amber-500" },
-  Encanador: { icon: Droplet, bg: "bg-blue-100", text: "text-blue-500" },
-  Diarista: { icon: Sparkles, bg: "bg-violet-100", text: "text-violet-500" },
-  Pedreiro: { icon: Hammer, bg: "bg-orange-100", text: "text-orange-500" },
-  Montador: { icon: Wrench, bg: "bg-teal-100", text: "text-teal-500" },
-  Pintor: { icon: Paintbrush, bg: "bg-pink-100", text: "text-pink-500" },
+export type CategoryMeta = { icon: LucideIcon; bg: string; text: string };
+
+/**
+ * Visual de cada categoria, pela `slug` devolvida em GET /categorias.
+ * Categorias novas no back caem no visual padrão (FALLBACK_META).
+ */
+export const CATEGORY_META: Record<string, CategoryMeta> = {
+  eletricista: { icon: Zap, bg: "bg-amber-100", text: "text-amber-500" },
+  encanador: { icon: Droplet, bg: "bg-blue-100", text: "text-blue-500" },
+  pedreiro: { icon: Hammer, bg: "bg-orange-100", text: "text-orange-500" },
+  pintor: { icon: Paintbrush, bg: "bg-pink-100", text: "text-pink-500" },
+  marceneiro: { icon: Hammer, bg: "bg-yellow-100", text: "text-yellow-600" },
+  serralheiro: { icon: Wrench, bg: "bg-zinc-100", text: "text-zinc-500" },
+  gesseiro: { icon: Layers, bg: "bg-stone-100", text: "text-stone-500" },
+  vidraceiro: { icon: PanelsTopLeft, bg: "bg-cyan-100", text: "text-cyan-500" },
+  chaveiro: { icon: KeyRound, bg: "bg-lime-100", text: "text-lime-600" },
+  "montador-de-moveis": { icon: Wrench, bg: "bg-teal-100", text: "text-teal-500" },
+  "ar-condicionado": { icon: Snowflake, bg: "bg-sky-100", text: "text-sky-500" },
+  limpeza: { icon: Sparkles, bg: "bg-violet-100", text: "text-violet-500" },
+  jardinagem: { icon: Leaf, bg: "bg-green-100", text: "text-green-600" },
 };
 
-export type CategoryName = keyof typeof CATEGORY_META;
+const FALLBACK_META: CategoryMeta = {
+  icon: LayoutGrid,
+  bg: "bg-slate-100",
+  text: "text-slate-500",
+};
 
-export const CATEGORY_NAMES = Object.keys(CATEGORY_META) as CategoryName[];
-
-export const isCategoryName = (value: string | null): value is CategoryName =>
-  value !== null && (CATEGORY_NAMES as string[]).includes(value);
+export const getCategoryMeta = (slug: string): CategoryMeta =>
+  CATEGORY_META[slug] ?? FALLBACK_META;

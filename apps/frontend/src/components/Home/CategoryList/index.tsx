@@ -1,15 +1,15 @@
-import {
-  CATEGORY_META,
-  CATEGORY_NAMES,
-  type CategoryName,
-} from "@/lib/categories";
+import { getCategoryMeta } from "@/lib/categories";
+import type { Category } from "@/lib/categories-api";
 
 type CategoryListProps = {
-  active: CategoryName | null;
-  onSelect: (category: CategoryName | null) => void;
+  /** Categorias vindas de GET /categorias. */
+  categories: Category[];
+  /** Slug da categoria selecionada. */
+  active: string | null;
+  onSelect: (slug: string | null) => void;
 };
 
-export function CategoryList({ active, onSelect }: CategoryListProps) {
+export function CategoryList({ categories, active, onSelect }: CategoryListProps) {
   return (
     <section className="mt-4" aria-labelledby="titulo-categorias">
       <div className="mb-3 flex h-5 items-center justify-between px-5">
@@ -29,16 +29,17 @@ export function CategoryList({ active, onSelect }: CategoryListProps) {
       </div>
 
       <ul className="flex gap-3 overflow-x-auto px-5 pb-1.5 pt-1.5 scrollbar-none [&::-webkit-scrollbar]:hidden">
-        {CATEGORY_NAMES.map((name) => {
-          const { icon: Icon, bg, text } = CATEGORY_META[name];
-          const selected = active === name;
+        {categories.map(({ id, slug, nome }) => {
+          const { icon: Icon, bg, text } = getCategoryMeta(slug);
+          const selected = active === slug;
 
           return (
-            <li key={name} className="shrink-0">
+            <li key={id} className="shrink-0">
               <button
                 type="button"
-                onClick={() => onSelect(selected ? null : name)}
+                onClick={() => onSelect(selected ? null : slug)}
                 aria-pressed={selected}
+                title={nome}
                 className="flex w-14 flex-col items-center gap-1.5"
               >
                 <span
@@ -50,7 +51,7 @@ export function CategoryList({ active, onSelect }: CategoryListProps) {
                 </span>
 
                 <span className="w-full truncate text-center text-[10px] text-slate-700">
-                  {name}
+                  {nome}
                 </span>
               </button>
             </li>

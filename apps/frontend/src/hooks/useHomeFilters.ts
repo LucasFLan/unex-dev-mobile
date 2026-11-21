@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { isCategoryName, type CategoryName } from "@/lib/categories";
 import {
   DEFAULT_SORT,
   isSortOption,
@@ -21,10 +20,7 @@ export function useHomeFilters() {
 
   const query = searchParams.get("q") ?? "";
 
-  const categoryParam = searchParams.get("categoria");
-  const category: CategoryName | null = isCategoryName(categoryParam)
-    ? categoryParam
-    : null;
+  const category = searchParams.get("categoria") || null;
 
   const sortParam = searchParams.get("ordem");
   const sort: SortOption = isSortOption(sortParam) ? sortParam : DEFAULT_SORT;
@@ -67,7 +63,7 @@ export function useHomeFilters() {
   }, [searchInput, updateParams]);
 
   const setCategory = useCallback(
-    (value: CategoryName | null) => updateParams({ categoria: value }),
+    (value: string | null) => updateParams({ categoria: value }),
     [updateParams]
   );
 
