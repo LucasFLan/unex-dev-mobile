@@ -20,6 +20,8 @@ type ServiceDetailsProps = {
   proposals: ProposalItem[];
   /** Proposta que o usuário logado já enviou para este anúncio. */
   myProposal: ProposalItem | null;
+  /** Tela-pai (de onde o usuário abriu o anúncio). */
+  backHref: string;
 };
 
 export function ServiceDetails({
@@ -27,6 +29,7 @@ export function ServiceDetails({
   isOwner,
   proposals,
   myProposal,
+  backHref,
 }: ServiceDetailsProps) {
   const [showProposal, setShowProposal] = useState(false);
   const location = `${ad.cidade}, ${ad.uf}`;
@@ -55,6 +58,7 @@ export function ServiceDetails({
       <div className="mx-auto min-h-screen w-full max-w-md pb-24">
         <header className="flex h-15.5 items-center justify-between px-4">
           <BackButton
+            href={backHref}
             iconSize={17}
             className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200"
           />
@@ -166,7 +170,7 @@ export function ServiceDetails({
       </div>
 
       {isOwner ? (
-        <AdOwnerActions ad={ad} />
+        <AdOwnerActions ad={ad} backHref={backHref} />
       ) : myProposal ? (
         <MyProposalStatus proposal={myProposal} />
       ) : (

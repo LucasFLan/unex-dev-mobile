@@ -1,17 +1,32 @@
 import { Suspense } from "react";
 import { NotificacoesContent } from "@/components/NotificacoesContent";
+import { backHrefFrom, currentHref, FROM_PARAM } from "@/lib/navigation";
 import { getNotificacoes } from "@/lib/notifications";
 
-async function NotificacoesLoader() {
-  const notifications = await getNotificacoes();
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-  return <NotificacoesContent notifications={notifications} />;
+async function NotificacoesLoader({ searchParams }: { searchParams: SearchParams }) {
+  const from = (await searchParams)[FROM_PARAM];
+  const notifications = await getNotificacoes();
+  const backHref = backHrefFrom(from, "/home");
+
+  return (
+    <NotificacoesContent
+      notifications={notifications}
+      backHref={backHref}
+      selfHref={currentHref("/notificacoes", backHref === "/home" ? null : backHref)}
+    />
+  );
 }
 
-export default function NotificacoesPage() {
+export default function NotificacoesPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
   return (
     <Suspense fallback={<main className="min-h-dvh bg-fundo" />}>
-      <NotificacoesLoader />
+      <NotificacoesLoader searchParams={searchParams} />
     </Suspense>
   );
 }

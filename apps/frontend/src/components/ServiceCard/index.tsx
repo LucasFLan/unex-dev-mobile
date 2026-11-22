@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { getCategoryMeta } from "@/lib/categories";
+import { withFrom } from "@/lib/navigation";
 import type { Service, ServiceStatus, ServiceType } from "@/lib/services";
 
 const TYPE_STYLE: Record<ServiceType, string> = {
@@ -83,7 +84,7 @@ export function ServiceCard({
 
       <div className="mt-2 flex items-center gap-1.5">
         <Link
-          href={`/anunciar/${service.id}/editar`}
+          href={withFrom(`/anunciar/${service.id}/editar`, "/historico")}
           className="flex h-8 items-center rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 active:bg-slate-100"
         >
           Editar

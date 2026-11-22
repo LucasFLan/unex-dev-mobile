@@ -23,6 +23,8 @@ type ProfessionalDetailsProps = {
   proposals: ProposalItem[];
   /** Proposta que o usuário logado já enviou para este anúncio. */
   myProposal: ProposalItem | null;
+  /** Tela-pai (de onde o usuário abriu o anúncio). */
+  backHref: string;
 };
 
 export function ProfessionalDetails({
@@ -30,6 +32,7 @@ export function ProfessionalDetails({
   isOwner,
   proposals,
   myProposal,
+  backHref,
 }: ProfessionalDetailsProps) {
   const { icon: Icon, bg, text } = getCategoryMeta(ad.categoria.slug);
   const location = `${ad.cidade}, ${ad.uf}`;
@@ -60,6 +63,7 @@ export function ProfessionalDetails({
       <div className="mx-auto min-h-screen w-full max-w-md pb-24">
         <section className={`relative h-45.5 ${bg}`}>
           <BackButton
+            href={backHref}
             iconSize={17}
             className="absolute left-3 top-10 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm"
           />
@@ -190,7 +194,7 @@ export function ProfessionalDetails({
       </div>
 
       {isOwner ? (
-        <AdOwnerActions ad={ad} />
+        <AdOwnerActions ad={ad} backHref={backHref} />
       ) : myProposal ? (
         <MyProposalStatus proposal={myProposal} />
       ) : (

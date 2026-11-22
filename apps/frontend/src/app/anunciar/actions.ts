@@ -6,6 +6,7 @@ import { apiFetch, type ApiResult } from "@/lib/api";
 import { AD_FIELDS, ENDPOINTS, extractErrorMessage } from "@/lib/api-contract";
 import { parseAnuncio, type AnuncioItem } from "@/lib/ads";
 import { UFS } from "@/lib/estados";
+import { backHrefFrom } from "@/lib/navigation";
 import { clearSessionToken } from "@/lib/session";
 
 export type AdFormState = { error: string } | null;
@@ -159,7 +160,8 @@ export async function updateAd(
   if (!result.ok) return { error: messageFor(result) };
 
   revalidateAd(id);
-  redirect("/historico");
+  // Volta para onde a edição foi aberta (Histórico ou detalhe do anúncio).
+  redirect(backHrefFrom(field(formData, "voltar"), "/historico"));
 }
 
 /** PATCH /anuncios/{id}/ativar ou /desativar. */

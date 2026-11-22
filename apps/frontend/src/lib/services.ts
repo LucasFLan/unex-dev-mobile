@@ -1,5 +1,6 @@
 import type { AnuncioItem } from "@/lib/ads";
 import { formatPrice, formatShortDate } from "@/lib/format";
+import { withFrom } from "@/lib/navigation";
 
 export const SERVICE_TYPES = ["Procuro", "Ofereço"] as const;
 export const SERVICE_STATUSES = ["Ativo", "Pausado"] as const;
@@ -34,6 +35,9 @@ export function toService(ad: AnuncioItem): Service {
     description: `Publicado em ${formatShortDate(ad.criadoEm)} · ${ad.categoria.nome} · ${ad.cidade}/${ad.uf}`,
     price: formatPrice(ad.preco),
     categorySlug: ad.categoria.slug,
-    href: isOffer ? `/profissionais/${ad.id}` : `/servicos/${ad.id}`,
+    href: withFrom(
+      isOffer ? `/profissionais/${ad.id}` : `/servicos/${ad.id}`,
+      "/historico"
+    ),
   };
 }

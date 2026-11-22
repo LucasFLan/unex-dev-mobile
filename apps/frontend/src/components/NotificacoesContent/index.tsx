@@ -15,6 +15,7 @@ import { markAllNotificationsRead } from "@/app/notificacoes/actions";
 import { BackButton } from "@/components/BackButton";
 import { BottomNav } from "@/components/BottomNav";
 import { RelativeTime } from "@/components/RelativeTime";
+import { withFrom } from "@/lib/navigation";
 import type { NotificationItem } from "@/lib/notifications";
 
 const TYPE_STYLE: Record<string, { icon: LucideIcon; tone: string }> = {
@@ -28,17 +29,25 @@ const TYPE_STYLE: Record<string, { icon: LucideIcon; tone: string }> = {
  * Quem recebeu a proposta vai ao anúncio (lá aceita ou recusa). Quem enviou vai às suas propostas:
  * o pedido aceito fica pausado e não abre mais para outras pessoas.
  */
-function hrefFor(notification: NotificationItem) {
+function hrefFor(notification: NotificationItem, selfHref: string) {
   if (notification.tipo === "PROPOSTA_RECEBIDA") {
-    return notification.anuncioId ? `/anuncios/${notification.anuncioId}` : null;
+    return notification.anuncioId
+      ? withFrom(`/anuncios/${notification.anuncioId}`, selfHref)
+      : null;
   }
   return "/historico?aba=propostas";
 }
 
-function NotificationCard({ notification }: { notification: NotificationItem }) {
+function NotificationCard({
+  notification,
+  selfHref,
+}: {
+  notification: NotificationItem;
+  selfHref: string;
+}) {
   const { icon: Icon, tone } =
     TYPE_STYLE[notification.tipo] ?? TYPE_STYLE.PROPOSTA_RECEBIDA;
-  const href = hrefFor(notification);
+  const href = hrefFor(notification, selfHref);
 
   const content = (
     <>
@@ -93,8 +102,14 @@ function NotificationCard({ notification }: { notification: NotificationItem }) 
 
 export function NotificacoesContent({
   notifications,
+  backHref,
+  selfHref,
 }: {
   notifications: NotificationItem[];
+  /** Tela-pai: Início (sino) ou Menu. */
+  backHref: string;
+  /** URL desta tela, para os anúncios abertos daqui voltarem para cá. */
+  selfHref: string;
 }) {
   const hasUnread = notifications.some((notification) => !notification.lida);
   const marked = useRef(false);
@@ -111,7 +126,7 @@ export function NotificacoesContent({
     <main className="min-h-dvh bg-fundo pb-24 text-slate-800">
       <div className="mx-auto w-full max-w-lg">
         <header className="sticky top-0 z-20 flex items-center gap-1 bg-fundo px-2 pb-2 pt-3">
-          <BackButton />
+          <BackButton href={backHref} />
           <h1 className="text-[17px] font-bold tracking-tight">Notificações</h1>
         </header>
 
@@ -135,7 +150,7 @@ export function NotificacoesContent({
             <ul className="space-y-2">
               {notifications.map((notification) => (
                 <li key={notification.id}>
-                  <NotificationCard notification={notification} />
+                  <NotificationCard notification={notification} selfHref={selfHref} />
                 </li>
               ))}
             </ul>

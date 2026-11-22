@@ -67,9 +67,11 @@ type AdFormProps = {
   categories: Category[];
   /** Quando informado, o formulário edita este anúncio (PUT /anuncios/{id}). */
   ad?: AnuncioItem;
+  /** Tela-pai: Início ao criar; de onde veio a edição (Histórico ou detalhe). */
+  backHref: string;
 };
 
-export function AdForm({ categories, ad }: AdFormProps) {
+export function AdForm({ categories, ad, backHref }: AdFormProps) {
   const isEditing = ad !== undefined;
   const submit = useMemo(
     () => (ad ? updateAd.bind(null, ad.id) : createAd),
@@ -134,7 +136,7 @@ export function AdForm({ categories, ad }: AdFormProps) {
     <main className="min-h-screen bg-white text-slate-900">
       <div className="mx-auto min-h-screen w-full max-w-md pb-24">
         <header className="flex h-14.5 items-center justify-between px-4">
-          <BackButton />
+          <BackButton href={backHref} />
 
           <h1 className="text-[11px] font-semibold">
             {isEditing ? "Editar anúncio" : "Criar anúncio"}
@@ -144,6 +146,7 @@ export function AdForm({ categories, ad }: AdFormProps) {
         </header>
 
         <form ref={formRef} action={formAction} className="px-4">
+          {isEditing && <input type="hidden" name="voltar" value={backHref} />}
           <input
             type="hidden"
             name="tipo"

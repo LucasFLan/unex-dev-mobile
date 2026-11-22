@@ -2,17 +2,28 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Pause, Pencil, Play, Trash2 } from "lucide-react";
 import { deleteAd, setAdActive } from "@/app/anunciar/actions";
 import type { AnuncioItem } from "@/lib/ads";
+import { withFrom } from "@/lib/navigation";
 
 const buttonBase =
   "flex h-9.75 items-center justify-center gap-1.5 rounded-lg border text-[10px] font-semibold transition disabled:opacity-50";
 
 /** Rodapé com as ações do autor no detalhe do anúncio. */
-export function AdOwnerActions({ ad }: { ad: AnuncioItem }) {
+export function AdOwnerActions({
+  ad,
+  backHref,
+}: {
+  ad: AnuncioItem;
+  /** Origem do detalhe, para onde ir depois de excluir. */
+  backHref: string;
+}) {
   const router = useRouter();
+  const pathname = usePathname();
+  // A edição volta para este detalhe, que por sua vez lembra a própria origem.
+  const detailHref = backHref === "/home" ? pathname : withFrom(pathname, backHref);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
@@ -33,7 +44,7 @@ export function AdOwnerActions({ ad }: { ad: AnuncioItem }) {
       setError("");
       const result = await deleteAd(ad.id);
       if (!result.ok) setError(result.error);
-      else router.replace("/historico");
+      else router.replace(backHref);
     });
   };
 
@@ -57,7 +68,7 @@ export function AdOwnerActions({ ad }: { ad: AnuncioItem }) {
 
         <div className="grid grid-cols-3 gap-2">
           <Link
-            href={`/anunciar/${ad.id}/editar`}
+            href={withFrom(`/anunciar/${ad.id}/editar`, detailHref)}
             className={`${buttonBase} border-blue-600 bg-blue-600 text-white`}
           >
             <Pencil size={13} aria-hidden="true" />

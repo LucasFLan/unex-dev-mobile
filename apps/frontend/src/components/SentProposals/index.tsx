@@ -9,6 +9,7 @@ import { ProposalContact } from "@/components/ProposalContact";
 import { ProposalStatusBadge } from "@/components/ProposalStatusBadge";
 import { RelativeTime } from "@/components/RelativeTime";
 import { formatPrice } from "@/lib/format";
+import { withFrom } from "@/lib/navigation";
 import type { ProposalItem } from "@/lib/proposals";
 
 /** Propostas que o usuário enviou, com o andamento de cada uma. */
@@ -57,13 +58,14 @@ export function SentProposals({ proposals }: { proposals: ProposalItem[] }) {
       {proposals.map((proposal) => {
         const ad = proposal.anuncio;
         // Pedido respondido fica pausado e não abre mais para quem enviou.
-        const href = !ad
+        const detail = !ad
           ? null
           : ad.tipo === "OFERTA"
             ? `/profissionais/${ad.id}`
             : proposal.status === "PENDENTE"
               ? `/servicos/${ad.id}`
               : null;
+        const href = detail && withFrom(detail, "/historico?aba=propostas");
 
         return (
           <article

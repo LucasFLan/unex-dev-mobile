@@ -7,29 +7,29 @@ const defaultClassName =
   "flex h-10 w-10 items-center justify-center rounded-xl text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600";
 
 type BackButtonProps = {
-  fallbackHref?: string;
+  /** Tela-pai: para onde o botão leva (ver lib/navigation). */
+  href: string;
   label?: string;
   className?: string;
   iconSize?: number;
 };
 
+/**
+ * Volta para a tela-pai, e não para a última página visitada: usar o histórico do navegador fazia
+ * Menu → Segurança → Senha → voltar → voltar cair de novo em Senha.
+ */
 export function BackButton({
-  fallbackHref = "/home",
+  href,
   label = "Voltar",
   className = defaultClassName,
   iconSize = 19,
 }: BackButtonProps) {
   const router = useRouter();
 
-  const handleClick = () => {
-    if (window.history.length > 1) router.back();
-    else router.push(fallbackHref);
-  };
-
   return (
     <button
       type="button"
-      onClick={handleClick}
+      onClick={() => router.push(href)}
       aria-label={label}
       className={className}
     >
