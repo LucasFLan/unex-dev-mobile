@@ -119,3 +119,6 @@ venv/
 # Miscellaneous
 # =========================
 HELP.md
+
+# Imagens de validação de conta gravadas localmente pelo back
+apps/backend/chamaAi/uploads/
