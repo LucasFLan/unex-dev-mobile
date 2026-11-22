@@ -66,7 +66,7 @@ async function PerfilContent() {
 
             <div className="mt-3 flex items-center gap-1">
               <h2 className="text-base font-bold">{user.name}</h2>
-              {user.verified && (
+              {user.validation === "APROVADO" && (
                 <BadgeCheck
                   size={16}
                   className="text-blue-600"
@@ -75,11 +75,16 @@ async function PerfilContent() {
               )}
             </div>
 
-            {!user.verified && (
-              <p className="mt-1 flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-medium text-amber-700">
+            {user.validation !== "APROVADO" && (
+              <Link
+                href="/validacao?de=%2Fperfil"
+                className="mt-1 flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-medium text-amber-700"
+              >
                 <Clock3 size={11} aria-hidden="true" />
-                Conta aguardando verificação
-              </p>
+                {user.validation === "REPROVADO"
+                  ? "Documentos não aprovados · reenviar"
+                  : "Conta não validada · validar agora"}
+              </Link>
             )}
 
             <Link

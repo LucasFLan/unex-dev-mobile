@@ -3,6 +3,15 @@ import { SESSION_COOKIE } from "@/lib/api-contract";
 
 const DEFAULT_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
+/**
+ * Cookie "secure" só é enviado pelo navegador em HTTPS. Em produção vale true, exceto com
+ * COOKIE_SECURE=false (ex.: servidor acessado por http://IP:porta, ainda sem certificado).
+ */
+const SECURE_COOKIE =
+  process.env.COOKIE_SECURE !== undefined
+    ? process.env.COOKIE_SECURE === "true"
+    : process.env.NODE_ENV === "production";
+
 function maxAgeFromJwt(token: string): number {
   try {
     const payload = JSON.parse(
@@ -22,7 +31,7 @@ export async function setSessionToken(token: string) {
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true, 
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: SECURE_COOKIE,
     path: "/",
     maxAge: maxAgeFromJwt(token),
   });

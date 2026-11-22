@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { AdForm } from "@/components/AdForm";
+import { ValidationRequired } from "@/components/ValidationRequired";
 import { getAnuncio, type AnuncioItem } from "@/lib/ads";
 import { getCategories } from "@/lib/categories-api";
 import { backHrefFrom, FROM_PARAM } from "@/lib/navigation";
@@ -21,6 +22,10 @@ async function loadTemplate(id: string | string[] | undefined): Promise<AnuncioI
 
 async function AnunciarContent({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
+  const user = await getCurrentUser();
+  if (user.validation !== "APROVADO") {
+    return <ValidationRequired validation={user.validation} action="publicar anúncios" from="/anunciar" />;
+  }
   const [categories, template] = await Promise.all([
     getCategories(),
     loadTemplate(params[COPY_PARAM]),

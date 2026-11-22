@@ -23,6 +23,8 @@ import {
 } from "@/lib/marketplace";
 import type { AnuncioItem } from "@/lib/ads";
 import type { Category } from "@/lib/categories-api";
+import type { AccountValidation } from "@/lib/user";
+import { ValidationBanner } from "@/components/ValidationBanner";
 
 const carousel =
   "flex gap-2.5 overflow-x-auto px-5 pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden";
@@ -85,6 +87,8 @@ type HomeContentProps = {
   categories: Category[];
   /** Quantidade de notificações não lidas, para o selo do sino. */
   unreadNotifications: number;
+  /** Contas não aprovadas veem um aviso para validar. */
+  validation: AccountValidation;
 };
 
 export function HomeContent({
@@ -92,6 +96,7 @@ export function HomeContent({
   anuncios,
   categories,
   unreadNotifications,
+  validation,
 }: HomeContentProps) {
   const {
     filters,
@@ -175,6 +180,8 @@ export function HomeContent({
               )}
             </Link>
           </div>
+
+          <ValidationBanner validation={validation} from="/home" className="mt-4" />
 
           <div ref={filtersRef} className="relative mt-4">
             <div className="flex gap-2">

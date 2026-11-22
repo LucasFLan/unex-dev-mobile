@@ -70,3 +70,10 @@ const shortDateFormatter = new Intl.DateTimeFormat("pt-BR", {
 
 export const formatShortDate = (isoDate: string) =>
   shortDateFormatter.format(new Date(isoDate));
+
+export function formatCpf(cpf: string) {
+  const digits = cpf.replace(/\D/g, "");
+  return digits.length === 11
+    ? `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+    : cpf;
+}

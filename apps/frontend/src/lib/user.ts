@@ -12,7 +12,11 @@ export type CurrentUser = {
   birthDate: string;
   verified: boolean;
   role: "USUARIO" | "ADMIN";
+  /** Só APROVADO publica anúncios e envia propostas. */
+  validation: AccountValidation;
 };
+
+export type AccountValidation = "PENDENTE" | "APROVADO" | "REPROVADO";
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
 
@@ -34,6 +38,10 @@ function parseUser(data: unknown): CurrentUser | null {
     birthDate: text(body[FIELDS.birthDate]),
     verified: body.verificado === true,
     role: body.papel === "ADMIN" ? "ADMIN" : "USUARIO",
+    validation:
+      body.statusValidacao === "APROVADO" || body.statusValidacao === "REPROVADO"
+        ? body.statusValidacao
+        : "PENDENTE",
   };
 }
 

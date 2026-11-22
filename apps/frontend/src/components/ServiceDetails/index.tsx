@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Share2, Clock3, MapPin, LockKeyhole } from "lucide-react";
 import { AdOwnerActions } from "@/components/AdOwnerActions";
 import { BackButton } from "@/components/BackButton";
+import { ValidationBanner } from "@/components/ValidationBanner";
 import { ProposalSheet } from "@/components/ProposalSheet";
 import { RelativeTime } from "@/components/RelativeTime";
 import { MyProposalStatus } from "@/components/MyProposalStatus";
@@ -22,6 +23,8 @@ type ServiceDetailsProps = {
   myProposal: ProposalItem | null;
   /** Tela-pai (de onde o usuário abriu o anúncio). */
   backHref: string;
+  /** Conta aprovada? Senão, o botão leva para a validação. */
+  canPropose: boolean;
 };
 
 export function ServiceDetails({
@@ -30,6 +33,7 @@ export function ServiceDetails({
   proposals,
   myProposal,
   backHref,
+  canPropose,
 }: ServiceDetailsProps) {
   const [showProposal, setShowProposal] = useState(false);
   const location = `${ad.cidade}, ${ad.uf}`;
@@ -176,13 +180,17 @@ export function ServiceDetails({
       ) : (
       <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-2">
         <div className="mx-auto max-w-md">
-          <button
-            type="button"
-            onClick={() => setShowProposal(true)}
-            className="h-9.75 w-full rounded-lg bg-blue-600 text-[10px] font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99]"
-          >
-            Enviar proposta
-          </button>
+          {canPropose ? (
+            <button
+              type="button"
+              onClick={() => setShowProposal(true)}
+              className="h-9.75 w-full rounded-lg bg-blue-600 text-[10px] font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.99]"
+            >
+              Enviar proposta
+            </button>
+          ) : (
+            <ValidationBanner validation="PENDENTE" from={`/servicos/${ad.id}`} />
+          )}
         </div>
       </footer>
       )}

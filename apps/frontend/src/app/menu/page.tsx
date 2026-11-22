@@ -11,6 +11,8 @@ import {
   MapPin,
   MessageSquare,
   ShieldCheck,
+  UserCheck,
+  BadgeCheck,
   Star,
   User,
 } from "lucide-react";
@@ -19,6 +21,18 @@ import { BottomNav } from "@/components/BottomNav";
 import { MenuSection, type MenuItem } from "@/components/MenuSection";
 import { initials } from "@/lib/marketplace";
 import { getCurrentUser } from "@/lib/user";
+
+const ADMIN_SECTION: { title: string; items: MenuItem[] } = {
+  title: "Administração",
+  items: [
+    {
+      label: "Validar usuários",
+      href: "/admin/validacoes",
+      icon: UserCheck,
+      tone: "bg-indigo-100 text-indigo-600",
+    },
+  ],
+};
 
 const SECTIONS: { title: string; items: MenuItem[] }[] = [
   {
@@ -29,6 +43,12 @@ const SECTIONS: { title: string; items: MenuItem[] }[] = [
         href: "/perfil",
         icon: User,
         tone: "bg-blue-100 text-blue-500",
+      },
+      {
+        label: "Validar conta",
+        href: "/validacao?de=%2Fmenu",
+        icon: BadgeCheck,
+        tone: "bg-amber-100 text-amber-600",
       },
       {
         label: "Endereços",
@@ -140,7 +160,7 @@ async function MenuContent() {
         </Link>
 
         <div className="mt-4 space-y-4">
-          {SECTIONS.map((section) => (
+          {(user.role === "ADMIN" ? [ADMIN_SECTION, ...SECTIONS] : SECTIONS).map((section) => (
             <MenuSection
               key={section.title}
               title={section.title}

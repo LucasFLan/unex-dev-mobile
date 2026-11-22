@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Share2, MapPin, CalendarDays, UserRound } from "lucide-react";
 import { AdOwnerActions } from "@/components/AdOwnerActions";
 import { BackButton } from "@/components/BackButton";
+import { ValidationBanner } from "@/components/ValidationBanner";
 import { ProposalSheet } from "@/components/ProposalSheet";
 import Button from "@/components/Button";
 import { RelativeTime } from "@/components/RelativeTime";
@@ -25,6 +26,8 @@ type ProfessionalDetailsProps = {
   myProposal: ProposalItem | null;
   /** Tela-pai (de onde o usuário abriu o anúncio). */
   backHref: string;
+  /** Conta aprovada? Senão, o botão leva para a validação. */
+  canPropose: boolean;
 };
 
 export function ProfessionalDetails({
@@ -33,6 +36,7 @@ export function ProfessionalDetails({
   proposals,
   myProposal,
   backHref,
+  canPropose,
 }: ProfessionalDetailsProps) {
   const { icon: Icon, bg, text } = getCategoryMeta(ad.categoria.slug);
   const location = `${ad.cidade}, ${ad.uf}`;
@@ -200,11 +204,15 @@ export function ProfessionalDetails({
       ) : (
         <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-2">
           <div className="mx-auto max-w-md">
-            <Button
-              text="Solicitar orçamento"
-              type="button"
-              onClick={() => setShowRequest(true)}
-            />
+            {canPropose ? (
+              <Button
+                text="Solicitar orçamento"
+                type="button"
+                onClick={() => setShowRequest(true)}
+              />
+            ) : (
+              <ValidationBanner validation="PENDENTE" from={`/profissionais/${ad.id}`} />
+            )}
           </div>
         </footer>
       )}
