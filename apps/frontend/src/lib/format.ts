@@ -1,9 +1,12 @@
-export const formatPrice = (value: number) =>
-  value.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  });
+/** `null` = preço "a combinar" (anúncio sem valor definido). */
+export const formatPrice = (value: number | null) =>
+  value === null
+    ? "A combinar"
+    : value.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: Number.isInteger(value) ? 0 : 2,
+      });
 
 export const normalize = (text: string) =>
   text

@@ -72,7 +72,7 @@ const SECTIONS: { title: string; items: MenuItem[] }[] = [
     items: [
       {
         label: "Notificações",
-        href: "/notificacoes",
+        href: "/notificacoes?de=%2Fmenu",
         icon: Bell,
         tone: "bg-blue-100 text-blue-500",
       },

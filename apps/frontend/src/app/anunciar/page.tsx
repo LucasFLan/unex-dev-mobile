@@ -5,7 +5,7 @@ import { getCategories } from "@/lib/categories-api";
 async function AnunciarContent() {
   const categories = await getCategories();
 
-  return <AdForm categories={categories} />;
+  return <AdForm categories={categories} backHref="/home" />;
 }
 
 export default function AnunciarPage() {

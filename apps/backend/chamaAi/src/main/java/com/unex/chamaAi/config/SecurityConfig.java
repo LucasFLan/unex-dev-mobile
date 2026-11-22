@@ -25,7 +25,8 @@ public class SecurityConfig {
                 .sessionManagement(sessao -> sessao.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(rotas -> rotas
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/usuarios", "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios", "/auth/login", "/auth/recuperar-senha",
+                                "/auth/recuperar-senha/validar", "/auth/recuperar-senha/redefinir").permitAll()
                         .requestMatchers(HttpMethod.GET, "/anuncios", "/anuncios/*", "/categorias").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/usuarios/*/aprovar", "/usuarios/*/reprovar").hasRole("ADMIN")

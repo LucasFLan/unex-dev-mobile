@@ -20,7 +20,7 @@ export function ChangePasswordForm() {
     <main className="min-h-screen w-full bg-white px-6 pb-8 pt-6 text-slate-900">
       <div className="mx-auto flex w-full max-w-md flex-col">
         <BackButton
-          fallbackHref="/seguranca"
+          href="/seguranca"
           iconSize={19}
           className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-800 transition hover:bg-slate-50"
         />

@@ -1,28 +1,14 @@
-import type { CategoryName } from "@/lib/categories";
-
-export type UserProfile = {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  cpf: string;
-  birthDate: string;
-  neighborhood: string;
-  bio: string;
-  verified: boolean;
-  memberSince: string;
-  rating: number;
-  reviewsCount: number;
-  completedServices: number;
-  categories: CategoryName[];
-};
-
+/**
+ * Avaliação recebida por um usuário.
+ * Ainda não existe endpoint de avaliações no back; o tipo fica pronto para
+ * quando existir (usado por ReviewCard).
+ */
 export type Review = {
   id: number;
   authorName: string;
   rating: number;
   comment: string;
-  category: CategoryName;
+  /** Nome da categoria do serviço avaliado. */
+  category: string;
   createdAt: string;
 };
-

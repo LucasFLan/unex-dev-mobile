@@ -96,6 +96,45 @@ public final class ExemplosDeErro {
             {"title": "Not Found", "status": 404, "detail": "Anúncio não encontrado.",
              "instance": "/anuncios/7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e"}""";
 
+    public static final String MENSAGEM_PROPOSTA_OBRIGATORIA = """
+            {"title": "Bad Request", "status": 400, "detail": "A mensagem da proposta é obrigatória.",
+             "instance": "/anuncios/7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e/propostas"}""";
+
+    public static final String PROPOSTA_DUPLICADA = """
+            {"title": "Conflict", "status": 409, "detail": "Você já enviou uma proposta para este anúncio.",
+             "instance": "/anuncios/7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e/propostas"}""";
+
+    public static final String PROPOSTA_PROPRIO_ANUNCIO = """
+            {"title": "Unprocessable Content", "status": 422,
+             "detail": "Você não pode enviar proposta para o seu próprio anúncio.",
+             "instance": "/anuncios/7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e/propostas"}""";
+
+    public static final String PROPOSTA_NAO_ENCONTRADA = """
+            {"title": "Not Found", "status": 404, "detail": "Proposta não encontrada.",
+             "instance": "/propostas/c4d5e6f7-1a2b-4c3d-8e9f-0a1b2c3d4e5f/aceitar"}""";
+
+    public static final String PROPOSTA_JA_RESPONDIDA = """
+            {"title": "Unprocessable Content", "status": 422, "detail": "Esta proposta já foi respondida.",
+             "instance": "/propostas/c4d5e6f7-1a2b-4c3d-8e9f-0a1b2c3d4e5f/aceitar"}""";
+
+    public static final String ACESSO_NEGADO_RESPONDER_PROPOSTA = """
+            {"title": "Forbidden", "status": 403,
+             "detail": "Só o autor do anúncio pode responder a esta proposta.",
+             "instance": "/propostas/c4d5e6f7-1a2b-4c3d-8e9f-0a1b2c3d4e5f/aceitar"}""";
+
+    public static final String ACESSO_NEGADO_CANCELAR_PROPOSTA = """
+            {"title": "Forbidden", "status": 403, "detail": "Só quem enviou a proposta pode cancelá-la.",
+             "instance": "/propostas/c4d5e6f7-1a2b-4c3d-8e9f-0a1b2c3d4e5f/cancelar"}""";
+
+    public static final String NOTIFICACAO_NAO_ENCONTRADA = """
+            {"title": "Not Found", "status": 404, "detail": "Notificação não encontrada.",
+             "instance": "/notificacoes/5b6c7d8e-9f0a-4b1c-8d2e-3f4a5b6c7d8e/lida"}""";
+
+    public static final String CODIGO_RECUPERACAO_INVALIDO = """
+            {"title": "Bad Request", "status": 400,
+             "detail": "Código inválido ou expirado. Solicite um novo código.",
+             "instance": "/auth/recuperar-senha/validar"}""";
+
     public static final String ERRO_INTERNO = """
             {"title": "Internal Server Error", "status": 500,
              "detail": "Erro interno do servidor."}""";

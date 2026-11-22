@@ -49,6 +49,10 @@ class OpenApiDocumentacaoTest {
     void rotasPublicasNaoExigemToken() {
         assertTrue(operacao("/usuarios", "post").path("security").isEmpty());
         assertTrue(operacao("/auth/login", "post").path("security").isEmpty());
+        for (String rota : List.of("/auth/recuperar-senha", "/auth/recuperar-senha/validar",
+                "/auth/recuperar-senha/redefinir")) {
+            assertTrue(operacao(rota, "post").path("security").isEmpty(), rota + " deveria ser pública");
+        }
         assertEquals("bearerAuth", spec.path("security").get(0).propertyNames().iterator().next());
     }
 
@@ -73,7 +77,12 @@ class OpenApiDocumentacaoTest {
         for (String[] rota : new String[][]{{"/usuarios/me", "get"}, {"/usuarios/me", "put"}, {"/usuarios/me/senha", "patch"},
                 {"/anuncios", "post"}, {"/anuncios/{id}", "put"}, {"/anuncios/{id}", "delete"},
                 {"/anuncios/{id}/ativar", "patch"}, {"/anuncios/{id}/desativar", "patch"},
-                {"/usuarios/me/anuncios", "get"}}) {
+                {"/usuarios/me/anuncios", "get"}, {"/anuncios/{id}/propostas", "post"},
+                {"/usuarios/me/propostas/recebidas", "get"}, {"/usuarios/me/propostas/enviadas", "get"},
+                {"/usuarios/me/notificacoes", "get"}, {"/usuarios/me/notificacoes/nao-lidas", "get"},
+                {"/usuarios/me/notificacoes/lidas", "patch"}, {"/notificacoes/{id}/lida", "patch"},
+                {"/propostas/{id}/aceitar", "patch"}, {"/propostas/{id}/recusar", "patch"},
+                {"/propostas/{id}/cancelar", "patch"}}) {
             assertTrue(operacao(rota[0], rota[1]).path("responses").has("401"), rota[1] + " " + rota[0] + " sem 401");
         }
     }
@@ -107,7 +116,11 @@ class OpenApiDocumentacaoTest {
                 .toString().contains("senha"));
         for (String schema : List.of("CadastrarUsuarioRequest", "EditarPerfilRequest", "AlterarSenhaRequest",
                 "LoginRequest", "UsuarioCadastradoResponse", "PerfilUsuarioResponse", "TokenAcessoResponse",
-                "AnuncioRequest", "AnuncioResponse", "CategoriaResponse", "PaginaAnunciosResponse")) {
+                "AnuncioRequest", "AnuncioResponse", "CategoriaResponse", "PaginaAnunciosResponse",
+                "SolicitarRecuperacaoSenhaRequest", "ValidarCodigoRecuperacaoRequest", "RedefinirSenhaRequest",
+                "PropostaRequest", "PropostaResponse", "PropostaAnuncioResponse", "PropostaParticipanteResponse",
+                "PaginaPropostasResponse", "NotificacaoResponse", "PaginaNotificacoesResponse",
+                "ContagemNotificacoesResponse")) {
             JsonNode propriedades = spec.path("components").path("schemas").path(schema).path("properties");
             assertFalse(propriedades.isEmpty(), schema + " não está na especificação");
             propriedades.properties().forEach(campo -> {
