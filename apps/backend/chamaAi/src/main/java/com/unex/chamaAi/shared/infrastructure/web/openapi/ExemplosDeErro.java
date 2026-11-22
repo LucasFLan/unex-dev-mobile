@@ -130,6 +130,11 @@ public final class ExemplosDeErro {
             {"title": "Not Found", "status": 404, "detail": "Notificação não encontrada.",
              "instance": "/notificacoes/5b6c7d8e-9f0a-4b1c-8d2e-3f4a5b6c7d8e/lida"}""";
 
+    public static final String CODIGO_RECUPERACAO_INVALIDO = """
+            {"title": "Bad Request", "status": 400,
+             "detail": "Código inválido ou expirado. Solicite um novo código.",
+             "instance": "/auth/recuperar-senha/validar"}""";
+
     public static final String ERRO_INTERNO = """
             {"title": "Internal Server Error", "status": 500,
              "detail": "Erro interno do servidor."}""";
