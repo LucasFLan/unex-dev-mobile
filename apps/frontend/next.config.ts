@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
   },
   // Abrir o dev server pelo celular na rede local (ex.: http://192.168.0.161:3000).
   allowedDevOrigins: ["192.168.*.*"],
+  // O service worker precisa ser revalidado sempre, senão o navegador demora a pegar a versão nova.
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+        ],
+      },
+    ];
+  },
   experimental: {
     // Validação de conta: documento + selfie (até 5 MB cada) passam por uma server action.
     serverActions: {
