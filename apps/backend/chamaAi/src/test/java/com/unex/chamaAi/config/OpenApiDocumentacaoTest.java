@@ -49,6 +49,10 @@ class OpenApiDocumentacaoTest {
     void rotasPublicasNaoExigemToken() {
         assertTrue(operacao("/usuarios", "post").path("security").isEmpty());
         assertTrue(operacao("/auth/login", "post").path("security").isEmpty());
+        for (String rota : List.of("/auth/recuperar-senha", "/auth/recuperar-senha/validar",
+                "/auth/recuperar-senha/redefinir")) {
+            assertTrue(operacao(rota, "post").path("security").isEmpty(), rota + " deveria ser pública");
+        }
         assertEquals("bearerAuth", spec.path("security").get(0).propertyNames().iterator().next());
     }
 
@@ -113,6 +117,7 @@ class OpenApiDocumentacaoTest {
         for (String schema : List.of("CadastrarUsuarioRequest", "EditarPerfilRequest", "AlterarSenhaRequest",
                 "LoginRequest", "UsuarioCadastradoResponse", "PerfilUsuarioResponse", "TokenAcessoResponse",
                 "AnuncioRequest", "AnuncioResponse", "CategoriaResponse", "PaginaAnunciosResponse",
+                "SolicitarRecuperacaoSenhaRequest", "ValidarCodigoRecuperacaoRequest", "RedefinirSenhaRequest",
                 "PropostaRequest", "PropostaResponse", "PropostaAnuncioResponse", "PropostaParticipanteResponse",
                 "PaginaPropostasResponse", "NotificacaoResponse", "PaginaNotificacoesResponse",
                 "ContagemNotificacoesResponse")) {
