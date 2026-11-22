@@ -66,6 +66,26 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, corpo, headers, status, request);
     }
 
+    /** Upload sem um dos arquivos obrigatórios (ex.: documento ou selfie). */
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestPart(
+            org.springframework.web.multipart.support.MissingServletRequestPartException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        String parte = "selfie".equals(ex.getRequestPartName()) ? "a selfie com o documento" : "a foto do documento";
+        ProblemDetail corpo = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Envie " + parte + ".");
+        return handleExceptionInternal(ex, corpo, headers, HttpStatus.BAD_REQUEST, request);
+    }
+
+    /** Upload acima do limite configurado em spring.servlet.multipart. */
+    @Override
+    protected ResponseEntity<Object> handleMaxUploadSizeExceededException(
+            org.springframework.web.multipart.MaxUploadSizeExceededException ex, HttpHeaders headers,
+            HttpStatusCode status, WebRequest request) {
+        ProblemDetail corpo = ProblemDetail.forStatusAndDetail(HttpStatus.PAYLOAD_TOO_LARGE,
+                "Arquivo grande demais: cada imagem pode ter no máximo 5 MB.");
+        return handleExceptionInternal(ex, corpo, headers, HttpStatus.PAYLOAD_TOO_LARGE, request);
+    }
+
     /** Parâmetro de rota ou query com formato errado (ex.: id que não é UUID). */
     @Override
     protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers,

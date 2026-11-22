@@ -1,0 +1,9 @@
+target/
+uploads/
+.env
+.env.*
+*.iml
+.idea/
+.vscode/
+docker-compose.yml
+Dockerfile

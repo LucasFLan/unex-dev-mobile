@@ -7,6 +7,17 @@ import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.FiltroAnuncios;
 import com.unex.chamaAi.shared.domain.paginacao.Pagina;
 import com.unex.chamaAi.shared.domain.paginacao.Paginacao;
+import com.unex.chamaAi.usuario.domain.entities.Usuario;
+import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
+import com.unex.chamaAi.usuario.domain.valueobjects.Cpf;
+import com.unex.chamaAi.usuario.domain.valueobjects.Email;
+import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
+import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
+import com.unex.chamaAi.usuario.domain.valueobjects.StatusValidacao;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -84,6 +95,43 @@ final class RepositoriosEmMemoria {
         @Override
         public Optional<Categoria> buscarPorId(UUID id) {
             return Optional.ofNullable(dados.get(id));
+        }
+    }
+
+    /** Qualquer id é um usuário APROVADO, menos os marcados como pendentes. */
+    static class Usuarios implements UsuarioRepository {
+
+        final Set<UUID> pendentes = new HashSet<>();
+
+        @Override
+        public Optional<Usuario> buscarPorId(UUID id) {
+            StatusValidacao status = pendentes.contains(id) ? StatusValidacao.PENDENTE : StatusValidacao.APROVADO;
+            return Optional.of(Usuario.reconstituir(id, "Fulano", LocalDate.of(2000, 1, 1), new Cpf("52998224725"),
+                    new Email("fulano@unex.edu.br"), new SenhaHash("hash"), null, false, Papel.USUARIO, status));
+        }
+
+        @Override
+        public boolean existePorCpf(Cpf cpf) {
+            return false;
+        }
+
+        @Override
+        public boolean existePorEmail(Email email) {
+            return false;
+        }
+
+        @Override
+        public Optional<Usuario> buscarPorCpf(String cpf) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<Usuario> buscarPorEmail(Email email) {
+            return Optional.empty();
+        }
+
+        @Override
+        public void salvar(Usuario usuario) {
         }
     }
 }

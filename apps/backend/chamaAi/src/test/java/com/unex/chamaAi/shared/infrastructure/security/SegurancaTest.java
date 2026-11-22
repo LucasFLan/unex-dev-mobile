@@ -178,4 +178,13 @@ class SegurancaTest {
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Access-Control-Allow-Origin"));
     }
+
+    @Test
+    void corsRecusaOrigemForaDaLista() throws Exception {
+        mockMvc.perform(options("/usuarios/me")
+                        .header("Origin", "https://site-qualquer.com")
+                        .header("Access-Control-Request-Method", "GET"))
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist("Access-Control-Allow-Origin"));
+    }
 }

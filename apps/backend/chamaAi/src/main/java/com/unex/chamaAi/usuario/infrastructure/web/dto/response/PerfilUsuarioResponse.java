@@ -30,10 +30,16 @@ public record PerfilUsuarioResponse(
         boolean verificado,
 
         @Schema(description = "Papel de acesso.", example = "USUARIO", allowableValues = {"USUARIO", "ADMIN"})
-        String papel) {
+        String papel,
+
+        @Schema(description = "Situação da validação de documentos: `PENDENTE`, `APROVADO` ou `REPROVADO`. "
+                + "Só `APROVADO` publica anúncios e envia propostas.", example = "PENDENTE",
+                allowableValues = {"PENDENTE", "APROVADO", "REPROVADO"})
+        String statusValidacao) {
 
     public static PerfilUsuarioResponse de(PerfilUsuario perfil) {
         return new PerfilUsuarioResponse(perfil.id(), perfil.nome(), perfil.dataNascimento(), perfil.cpf(),
-                perfil.email(), perfil.telefone(), perfil.verificado(), perfil.papel());
+                perfil.email(), perfil.telefone(), perfil.verificado(), perfil.papel(),
+                perfil.statusValidacao());
     }
 }

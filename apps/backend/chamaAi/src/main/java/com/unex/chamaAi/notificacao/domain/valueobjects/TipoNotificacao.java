@@ -8,5 +8,9 @@ public enum TipoNotificacao {
     /** O autor do anúncio recusou a proposta do usuário. */
     PROPOSTA_RECUSADA,
     /** O autor do pedido aceitou a proposta de outra pessoa. */
-    PROPOSTA_NAO_SELECIONADA
+    PROPOSTA_NAO_SELECIONADA,
+    /** O admin aprovou os documentos: a conta foi validada. */
+    VALIDACAO_APROVADA,
+    /** O admin reprovou os documentos; a mensagem traz o motivo. */
+    VALIDACAO_REPROVADA
 }

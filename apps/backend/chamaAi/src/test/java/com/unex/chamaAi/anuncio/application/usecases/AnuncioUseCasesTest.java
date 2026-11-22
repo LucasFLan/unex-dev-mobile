@@ -12,6 +12,7 @@ import com.unex.chamaAi.anuncio.domain.valueobjects.Localizacao;
 import com.unex.chamaAi.anuncio.domain.valueobjects.TipoAnuncio;
 import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.shared.domain.paginacao.Pagina;
+import com.unex.chamaAi.usuario.domain.exceptions.ContaNaoValidadaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,8 @@ class AnuncioUseCasesTest {
     private final RepositoriosEmMemoria.Anuncios anuncios = new RepositoriosEmMemoria.Anuncios();
     private final RepositoriosEmMemoria.Categorias categorias = new RepositoriosEmMemoria.Categorias();
 
-    private final CriarAnuncio criar = new CriarAnuncio(anuncios, categorias);
+    private final RepositoriosEmMemoria.Usuarios usuarios = new RepositoriosEmMemoria.Usuarios();
+    private final CriarAnuncio criar = new CriarAnuncio(anuncios, categorias, usuarios);
     private final BuscarAnuncio buscar = new BuscarAnuncio(anuncios, categorias);
     private final ListarAnuncios listar = new ListarAnuncios(anuncios, categorias);
     private final ListarMeusAnuncios listarMeus = new ListarMeusAnuncios(anuncios, categorias);
@@ -71,6 +73,14 @@ class AnuncioUseCasesTest {
         assertEquals(AUTOR, criado.autorId());
         assertTrue(criado.ativo());
         assertEquals(1, anuncios.dados.size());
+    }
+
+    @Test
+    void contaSemValidacaoNaoPublica() {
+        usuarios.pendentes.add(OUTRO);
+
+        assertThrows(ContaNaoValidadaException.class, () -> criarOferta(OUTRO));
+        assertTrue(anuncios.dados.isEmpty());
     }
 
     @Test

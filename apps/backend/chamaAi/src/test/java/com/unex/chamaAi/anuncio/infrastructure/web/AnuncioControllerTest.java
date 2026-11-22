@@ -9,6 +9,7 @@ import com.unex.chamaAi.usuario.infrastructure.persistence.UsuarioSpringDataRepo
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
@@ -38,6 +39,14 @@ class AnuncioControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    /** Só conta aprovada publica e propõe; a análise de documentos é testada em ValidacaoContaControllerTest. */
+    private void aprovar(String email) {
+        jdbc.update("update usuarios set status_validacao = 'APROVADO' where email = ?", email);
+    }
 
     @Autowired
     private AnuncioSpringDataRepository anuncios;
@@ -73,6 +82,7 @@ class AnuncioControllerTest {
                          "senha": "%s", "telefone": "71999999999"}
                         """.formatted(cpf, email, SENHA)))
                 .andExpect(status().isCreated());
+        aprovar(email);
         return login(email);
     }
 

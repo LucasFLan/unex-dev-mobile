@@ -89,6 +89,9 @@ public interface AnuncioController {
                             value = ExemplosDeErro.PRECO_INVALIDO),
                     @ExampleObject(name = "ufInvalida", summary = "UF inexistente", value = ExemplosDeErro.UF_INVALIDA)}))
     @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "403", description = "Conta ainda não validada (documentos não aprovados).", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class),
+            examples = @ExampleObject(name = "contaNaoValidada", value = ExemplosDeErro.CONTA_NAO_VALIDADA)))
     @PostMapping("/anuncios")
     @ResponseStatus(HttpStatus.CREATED)
     AnuncioResponse criar(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,

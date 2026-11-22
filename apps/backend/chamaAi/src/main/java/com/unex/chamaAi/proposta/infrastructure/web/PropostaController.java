@@ -83,6 +83,9 @@ public interface PropostaController {
     @ApiResponse(responseCode = "422", description = "O anúncio é seu.", content = @Content(
             mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class),
             examples = @ExampleObject(name = "proprioAnuncio", value = ExemplosDeErro.PROPOSTA_PROPRIO_ANUNCIO)))
+    @ApiResponse(responseCode = "403", description = "Conta ainda não validada (documentos não aprovados).", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class),
+            examples = @ExampleObject(name = "contaNaoValidada", value = ExemplosDeErro.CONTA_NAO_VALIDADA)))
     @PostMapping("/anuncios/{id}/propostas")
     @ResponseStatus(HttpStatus.CREATED)
     PropostaResponse enviar(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,

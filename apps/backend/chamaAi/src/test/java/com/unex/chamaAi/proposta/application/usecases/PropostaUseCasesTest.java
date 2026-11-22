@@ -16,6 +16,7 @@ import com.unex.chamaAi.proposta.application.dto.EnviarPropostaCommand;
 import com.unex.chamaAi.proposta.application.dto.PropostaDetalhada;
 import com.unex.chamaAi.proposta.domain.entities.Proposta;
 import com.unex.chamaAi.proposta.domain.exceptions.AcessoNegadoPropostaException;
+import com.unex.chamaAi.usuario.domain.exceptions.ContaNaoValidadaException;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaDuplicadaException;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaJaRespondidaException;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaNaoEncontradaException;
@@ -102,6 +103,17 @@ class PropostaUseCasesTest {
         assertTrue(notificacao.getMensagem().endsWith("\"Trocar chuveiro\": Posso ir amanhã."));
 
         assertEquals(0, listarNotificacoes.contarNaoLidas(maria.getId()));
+    }
+
+    @Test
+    void contaSemValidacaoNaoEnviaProposta() {
+        Usuario novo = Usuario.criar("Novo", LocalDate.of(2000, 1, 1), new Cpf("123.456.789-09"),
+                new Email("novo@unex.edu.br"), new SenhaHash("hash"), null);
+        usuarios.salvar(novo);
+
+        assertThrows(ContaNaoValidadaException.class, () -> enviar.executar(pedidoDoJoao.getId(), novo.getId(),
+                new EnviarPropostaCommand(null, "Oi")));
+        assertTrue(propostas.dados.isEmpty());
     }
 
     @Test
@@ -324,6 +336,7 @@ class PropostaUseCasesTest {
         Usuario adicionar(String nome, String cpf, String email) {
             Usuario usuario = Usuario.criar(nome, LocalDate.of(2000, 1, 1), new Cpf(cpf), new Email(email),
                     new SenhaHash("hash"), "71900000000");
+            usuario.aprovar();
             salvar(usuario);
             return usuario;
         }

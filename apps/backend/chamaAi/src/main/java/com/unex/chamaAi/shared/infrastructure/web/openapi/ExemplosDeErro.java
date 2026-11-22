@@ -135,6 +135,36 @@ public final class ExemplosDeErro {
              "detail": "Código inválido ou expirado. Solicite um novo código.",
              "instance": "/auth/recuperar-senha/validar"}""";
 
+    public static final String IMAGEM_VALIDACAO_INVALIDA = """
+            {"title": "Bad Request", "status": 400, "detail": "Envie a foto do documento em JPG, PNG ou WEBP.",
+             "instance": "/usuarios/me/validacao"}""";
+
+    public static final String DOCUMENTOS_EM_ANALISE = """
+            {"title": "Conflict", "status": 409, "detail": "Seus documentos já estão em análise. Aguarde a resposta.",
+             "instance": "/usuarios/me/validacao"}""";
+
+    public static final String CONTA_JA_VALIDADA = """
+            {"title": "Unprocessable Content", "status": 422, "detail": "Sua conta já está validada.",
+             "instance": "/usuarios/me/validacao"}""";
+
+    public static final String CONTA_NAO_VALIDADA = """
+            {"title": "Forbidden", "status": 403,
+             "detail": "Valide sua conta para continuar: envie a foto do documento e uma selfie em Validar conta.",
+             "instance": "/anuncios"}""";
+
+    public static final String ENVIO_VALIDACAO_NAO_ENCONTRADO = """
+            {"title": "Not Found", "status": 404, "detail": "Envio de validação não encontrado.",
+             "instance": "/admin/validacoes/8d7c6b5a-4f3e-4d2c-9b1a-0f9e8d7c6b5a"}""";
+
+    public static final String ENVIO_VALIDACAO_JA_ANALISADO = """
+            {"title": "Unprocessable Content", "status": 422, "detail": "Este envio já foi analisado.",
+             "instance": "/admin/validacoes/8d7c6b5a-4f3e-4d2c-9b1a-0f9e8d7c6b5a/aprovar"}""";
+
+    public static final String MOTIVO_REPROVACAO_OBRIGATORIO = """
+            {"title": "Bad Request", "status": 400,
+             "detail": "Explique o motivo da reprovação (pelo menos 5 caracteres): o usuário vai ver essa mensagem.",
+             "instance": "/admin/validacoes/8d7c6b5a-4f3e-4d2c-9b1a-0f9e8d7c6b5a/reprovar"}""";
+
     public static final String ERRO_INTERNO = """
             {"title": "Internal Server Error", "status": 500,
              "detail": "Erro interno do servidor."}""";

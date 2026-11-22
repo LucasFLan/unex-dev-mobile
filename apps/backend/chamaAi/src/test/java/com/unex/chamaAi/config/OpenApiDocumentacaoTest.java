@@ -82,7 +82,10 @@ class OpenApiDocumentacaoTest {
                 {"/usuarios/me/notificacoes", "get"}, {"/usuarios/me/notificacoes/nao-lidas", "get"},
                 {"/usuarios/me/notificacoes/lidas", "patch"}, {"/notificacoes/{id}/lida", "patch"},
                 {"/propostas/{id}/aceitar", "patch"}, {"/propostas/{id}/recusar", "patch"},
-                {"/propostas/{id}/cancelar", "patch"}}) {
+                {"/propostas/{id}/cancelar", "patch"}, {"/usuarios/me/validacao", "get"},
+                {"/usuarios/me/validacao", "post"}, {"/admin/validacoes", "get"}, {"/admin/validacoes/{id}", "get"},
+                {"/admin/validacoes/{id}/arquivos/{tipo}", "get"}, {"/admin/validacoes/{id}/aprovar", "patch"},
+                {"/admin/validacoes/{id}/reprovar", "patch"}}) {
             assertTrue(operacao(rota[0], rota[1]).path("responses").has("401"), rota[1] + " " + rota[0] + " sem 401");
         }
     }
@@ -117,7 +120,8 @@ class OpenApiDocumentacaoTest {
         for (String schema : List.of("CadastrarUsuarioRequest", "EditarPerfilRequest", "AlterarSenhaRequest",
                 "LoginRequest", "UsuarioCadastradoResponse", "PerfilUsuarioResponse", "TokenAcessoResponse",
                 "AnuncioRequest", "AnuncioResponse", "CategoriaResponse", "PaginaAnunciosResponse",
-                "SolicitarRecuperacaoSenhaRequest", "ValidarCodigoRecuperacaoRequest", "RedefinirSenhaRequest",
+                "MinhaValidacaoResponse", "EnvioValidacaoResponse", "SolicitanteValidacaoResponse",
+                "PaginaEnviosValidacaoResponse", "ReprovarValidacaoRequest", "SolicitarRecuperacaoSenhaRequest", "ValidarCodigoRecuperacaoRequest", "RedefinirSenhaRequest",
                 "PropostaRequest", "PropostaResponse", "PropostaAnuncioResponse", "PropostaParticipanteResponse",
                 "PaginaPropostasResponse", "NotificacaoResponse", "PaginaNotificacoesResponse",
                 "ContagemNotificacoesResponse")) {

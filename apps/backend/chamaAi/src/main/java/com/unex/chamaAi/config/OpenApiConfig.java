@@ -27,6 +27,7 @@ public class OpenApiConfig {
     public static final String TAG_CATEGORIAS = "Categorias";
     public static final String TAG_PROPOSTAS = "Propostas";
     public static final String TAG_NOTIFICACOES = "Notificações";
+    public static final String TAG_VALIDACAO = "Validação de conta";
 
     private static final String RESPOSTA_ERRO_INTERNO = "ErroInterno";
     private static final String SCHEMA_PROBLEM_DETAIL = "#/components/schemas/ProblemDetail";
@@ -79,6 +80,8 @@ public class OpenApiConfig {
                 .addTagsItem(new Tag().name(TAG_PROPOSTAS).description(
                         "Propostas enviadas para o autor de um anúncio"))
                 .addTagsItem(new Tag().name(TAG_NOTIFICACOES).description("Avisos para o usuário logado"))
+                .addTagsItem(new Tag().name(TAG_VALIDACAO).description(
+                        "Envio de documento e selfie pelo usuário e análise pelo admin"))
                 .components(new Components()
                         .addSecuritySchemes(ESQUEMA_BEARER, new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)

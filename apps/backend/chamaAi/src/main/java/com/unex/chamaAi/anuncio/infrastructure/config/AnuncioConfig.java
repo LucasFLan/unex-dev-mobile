@@ -10,6 +10,7 @@ import com.unex.chamaAi.anuncio.application.usecases.ListarCategorias;
 import com.unex.chamaAi.anuncio.application.usecases.ListarMeusAnuncios;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
+import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,8 +18,9 @@ import org.springframework.context.annotation.Configuration;
 public class AnuncioConfig {
 
     @Bean
-    public CriarAnuncio criarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
-        return new CriarAnuncio(anuncios, categorias);
+    public CriarAnuncio criarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias,
+                                     UsuarioRepository usuarios) {
+        return new CriarAnuncio(anuncios, categorias, usuarios);
     }
 
     @Bean
