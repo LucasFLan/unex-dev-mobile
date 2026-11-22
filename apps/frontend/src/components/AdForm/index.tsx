@@ -67,12 +67,19 @@ type AdFormProps = {
   categories: Category[];
   /** Quando informado, o formulário edita este anúncio (PUT /anuncios/{id}). */
   ad?: AnuncioItem;
+  /**
+   * Anúncio usado como modelo ao duplicar: preenche o formulário, mas o envio cria um anúncio novo
+   * (POST /anuncios). Ignorado quando `ad` é informado.
+   */
+  template?: AnuncioItem;
   /** Tela-pai: Início ao criar; de onde veio a edição (Histórico ou detalhe). */
   backHref: string;
 };
 
-export function AdForm({ categories, ad, backHref }: AdFormProps) {
+export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
   const isEditing = ad !== undefined;
+  const isCopy = !isEditing && template !== undefined;
+  const initial = ad ?? template;
   const submit = useMemo(
     () => (ad ? updateAd.bind(null, ad.id) : createAd),
     [ad]
@@ -84,23 +91,23 @@ export function AdForm({ categories, ad, backHref }: AdFormProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
   const [adType, setAdType] = useState<AdType>(
-    ad?.tipo === "OFERTA" ? "oferecer" : "procurar"
+    initial?.tipo === "OFERTA" ? "oferecer" : "procurar"
   );
-  const [category, setCategory] = useState(ad?.categoria.id ?? "");
-  const [title, setTitle] = useState(ad?.titulo ?? "");
-  const [description, setDescription] = useState(ad?.descricao ?? "");
+  const [category, setCategory] = useState(initial?.categoria.id ?? "");
+  const [title, setTitle] = useState(initial?.titulo ?? "");
+  const [description, setDescription] = useState(initial?.descricao ?? "");
   const [price, setPrice] = useState(
-    ad?.preco != null ? String(ad.preco) : ""
+    initial?.preco != null ? String(initial.preco) : ""
   );
   const [negotiable, setNegotiable] = useState(
-    isEditing && ad.preco === null
+    initial !== undefined && initial.preco === null
   );
   const [paymentType, setPaymentType] = useState("por visita");
   const [availability, setAvailability] = useState("Esta semana");
   const [radius, setRadius] = useState("10 km");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState(ad?.cidade ?? "");
-  const [uf, setUf] = useState(ad?.uf ?? "");
+  const [city, setCity] = useState(initial?.cidade ?? "");
+  const [uf, setUf] = useState(initial?.uf ?? "");
   const [photos, setPhotos] = useState<File[]>([]);
 
   const isOffering = adType === "oferecer";
@@ -139,7 +146,7 @@ export function AdForm({ categories, ad, backHref }: AdFormProps) {
           <BackButton href={backHref} />
 
           <h1 className="text-[11px] font-semibold">
-            {isEditing ? "Editar anúncio" : "Criar anúncio"}
+            {isEditing ? "Editar anúncio" : isCopy ? "Duplicar anúncio" : "Criar anúncio"}
           </h1>
 
           <div className="w-8" />
@@ -159,6 +166,13 @@ export function AdForm({ categories, ad, backHref }: AdFormProps) {
           />
 
           <fieldset disabled={pending} className="min-w-0">
+            {isCopy && (
+              <p className="mb-3 rounded-lg bg-blue-50 px-3 py-2 text-[11px] leading-4 text-blue-700">
+                Copiamos os dados de <strong>“{template?.titulo}”</strong>. Revise o que
+                quiser mudar e publique: o anúncio original continua igual.
+              </p>
+            )}
+
             {state?.error && (
               <p
                 role="alert"
