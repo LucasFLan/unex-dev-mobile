@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AppSidebar } from "@/components/AppSidebar";
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({
@@ -36,6 +39,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white">
+        {/* usePathname() só existe em runtime: o Suspense evita bloquear o pré-render. */}
+        <Suspense fallback={null}>
+          <AppSidebar />
+        </Suspense>
+        <Suspense fallback={null}>
+          <AutoRefresh />
+        </Suspense>
         {children}
         <ServiceWorkerRegister />
       </body>

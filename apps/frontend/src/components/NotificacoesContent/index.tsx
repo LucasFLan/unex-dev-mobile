@@ -67,17 +67,17 @@ function NotificationCard({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <p className="truncate text-xs font-semibold">{notification.titulo}</p>
+          <p className="truncate text-xs font-semibold lg:text-sm">{notification.titulo}</p>
           {!notification.lida && (
             <span className="rounded-full bg-blue-600 px-1.5 py-0.5 text-[9px] font-semibold text-white">
               Nova
             </span>
           )}
         </div>
-        <p className="mt-0.5 text-[11px] leading-4 text-slate-600">
+        <p className="mt-0.5 text-[11px] leading-4 text-slate-600 lg:text-[13px] lg:leading-5">
           {notification.mensagem}
         </p>
-        <p className="mt-1 text-[10px] text-slate-400">
+        <p className="mt-1 text-[10px] text-slate-400 lg:text-xs">
           <RelativeTime isoDate={notification.criadoEm} />
         </p>
       </div>
@@ -130,11 +130,11 @@ export function NotificacoesContent({
   }, [hasUnread]);
 
   return (
-    <main className="min-h-dvh bg-fundo pb-24 text-slate-800">
-      <div className="mx-auto w-full max-w-lg">
-        <header className="sticky top-0 z-20 flex items-center gap-1 bg-fundo px-2 pb-2 pt-3">
+    <main className="min-h-dvh bg-fundo pb-24 text-slate-800 lg:pb-12">
+      <div className="mx-auto w-full max-w-lg lg:max-w-3xl lg:px-6">
+        <header className="sticky top-0 z-20 flex items-center gap-1 bg-fundo px-2 pb-2 pt-3 lg:pb-4 lg:pt-8">
           <BackButton href={backHref} />
-          <h1 className="text-[17px] font-bold tracking-tight">Notificações</h1>
+          <h1 className="text-[17px] font-bold tracking-tight lg:text-2xl">Notificações</h1>
         </header>
 
         <section className="space-y-2 px-3.5">

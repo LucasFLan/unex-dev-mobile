@@ -42,8 +42,8 @@ export function EditProfileForm({ initial }: { initial: EditProfileInitial }) {
     };
 
   return (
-    <main className="min-h-screen w-full bg-white px-6 pb-8 pt-6 text-slate-900">
-      <div className="mx-auto flex w-full max-w-md flex-col">
+    <main className="min-h-screen w-full bg-white px-6 pb-8 pt-6 text-slate-900 md:bg-fundo md:py-12">
+      <div className="mx-auto flex w-full max-w-md flex-col md:rounded-2xl md:border md:border-slate-200 md:bg-white md:p-8 md:shadow-sm">
         <BackButton
           href="/perfil"
           iconSize={19}

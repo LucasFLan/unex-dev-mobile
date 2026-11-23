@@ -47,6 +47,10 @@ export const ENDPOINTS = {
   /** GET: foto anexada a uma proposta (só quem enviou ou recebeu). */
   proposalPhoto: (proposalId: string, photoId: string) =>
     `/propostas/${encodeURIComponent(proposalId)}/fotos/${encodeURIComponent(photoId)}`,
+  /** POST (multipart "fotos"): adiciona fotos ao anúncio; DELETE com o id: remove. GET com o id: a imagem. */
+  adPhotos: (adId: string) => `/anuncios/${encodeURIComponent(adId)}/fotos`,
+  adPhoto: (adId: string, photoId: string) =>
+    `/anuncios/${encodeURIComponent(adId)}/fotos/${encodeURIComponent(photoId)}`,
 } as const;
 
 /** Campos do JSON de PATCH /usuarios/me/senha. */

@@ -2,10 +2,11 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { Lock, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { login, type AuthState } from "@/app/actions";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
+import { PasswordField } from "@/components/seguranca/PasswordField";
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(
@@ -41,17 +42,13 @@ export function LoginForm() {
           />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Input
-            name="senha"
-            type="password"
-            placeholder="Digite sua senha"
-            labelText="Senha"
-            icon={<Lock size={17} />}
-            autoComplete="current-password"
-            required
-          />
-        </div>
+        <PasswordField
+          name="senha"
+          placeholder="Digite sua senha"
+          labelText="Senha"
+          autoComplete="current-password"
+          className="flex flex-col gap-2"
+        />
 
         <div className="flex justify-end">
           <Link

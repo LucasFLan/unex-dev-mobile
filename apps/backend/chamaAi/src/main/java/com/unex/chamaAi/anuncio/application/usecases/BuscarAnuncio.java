@@ -5,6 +5,7 @@ import com.unex.chamaAi.anuncio.application.dto.AnuncioDetalhado;
 import com.unex.chamaAi.anuncio.domain.exceptions.AnuncioNaoEncontradoException;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
+import com.unex.chamaAi.anuncio.domain.repositories.FotoAnuncioRepository;
 
 import java.util.UUID;
 
@@ -14,8 +15,13 @@ public class BuscarAnuncio {
     private final DetalhadorAnuncio detalhador;
 
     public BuscarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, AutoresAnuncio autores) {
+        this(anuncios, categorias, autores, null);
+    }
+
+    public BuscarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, AutoresAnuncio autores,
+            FotoAnuncioRepository fotos) {
         this.anuncios = anuncios;
-        this.detalhador = new DetalhadorAnuncio(categorias, autores);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores, fotos);
     }
 
     /** solicitanteId pode ser nulo (visitante sem login). */

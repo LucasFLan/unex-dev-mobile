@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Schema(description = "Anúncio com a categoria detalhada.")
@@ -59,7 +60,11 @@ public record AnuncioResponse(
         Instant criadoEm,
 
         @Schema(description = "Data da última edição (ISO-8601, UTC).", example = "2026-11-16T21:30:00.123456Z")
-        Instant atualizadoEm) {
+        Instant atualizadoEm,
+
+        @Schema(description = "Ids das fotos do anúncio, na ordem do envio (até 6). A imagem fica em "
+                + "`GET /anuncios/{id}/fotos/{fotoId}`.", example = "[\"5c8e2a1d-3b4f-4e6a-8d7c-9b0a1e2f3d4c\"]")
+        List<UUID> fotos) {
 
     public record Regiao(@Schema(example = "-13.01") double latitude, @Schema(example = "-38.53") double longitude) {
     }
@@ -107,6 +112,6 @@ public record AnuncioResponse(
                 anuncio.ativo(), anuncio.autorId(),
                 dono == null ? null : new Autor(dono.id(), dono.nome(), dono.fotoAtualizadaEm(), dono.mediaAvaliacoes(),
                         dono.totalAvaliacoes()),
-                anuncio.criadoEm(), anuncio.atualizadoEm());
+                anuncio.criadoEm(), anuncio.atualizadoEm(), anuncio.fotos());
     }
 }

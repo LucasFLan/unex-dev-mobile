@@ -11,13 +11,14 @@ const TABS = [
   { label: "Menu", href: "/menu", icon: Menu },
 ] as const;
 
+/** Navegação do app no mobile/tablet. No desktop (lg+) é substituída pela AppSidebar. */
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
     <nav
       aria-label="Navegação principal"
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white pb-[max(8px,env(safe-area-inset-bottom))]"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white pb-[max(8px,env(safe-area-inset-bottom))] lg:hidden"
     >
       <ul className="mx-auto grid h-15 w-full max-w-lg grid-cols-4">
         {TABS.map(({ label, href, icon: Icon, ...rest }) => {

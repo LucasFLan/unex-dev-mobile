@@ -40,11 +40,13 @@ services:
     # Imagens enviadas pelos usuários, um volume por tipo (sobrevivem a recriar o container e ao re-pull):
     # - uploads: documentos e selfies da validação de conta (/app/uploads/validacao);
     # - uploads_perfil: fotos de perfil;
-    # - uploads_propostas: fotos anexadas às propostas.
+    # - uploads_propostas: fotos anexadas às propostas;
+    # - uploads_anuncios: fotos dos anúncios (até 6 por anúncio).
     volumes:
       - uploads:/app/uploads
       - uploads_perfil:/app/uploads/perfil
       - uploads_propostas:/app/uploads/propostas
+      - uploads_anuncios:/app/uploads/anuncios
     # API e Swagger: http://192.168.254.210:28080/swagger-ui.html
     ports:
       - "${BACK_PORT:-28080}:8080"
@@ -66,3 +68,4 @@ volumes:
   uploads:
   uploads_perfil:
   uploads_propostas:
+  uploads_anuncios:

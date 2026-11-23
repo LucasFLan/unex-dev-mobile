@@ -83,7 +83,7 @@ public interface PropostaController {
                     @ExampleObject(name = "valorInvalido", value = ExemplosDeErro.PRECO_INVALIDO)}))
     @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
     @ApiResponse(responseCode = "404", ref = "#/components/responses/AnuncioNaoEncontrado")
-    @ApiResponse(responseCode = "409", description = "Você já enviou uma proposta para este anúncio.", content = @Content(
+    @ApiResponse(responseCode = "409", description = "Você já tem uma proposta em andamento (pendente ou aceita) para este anúncio.", content = @Content(
             mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class),
             examples = @ExampleObject(name = "duplicada", value = ExemplosDeErro.PROPOSTA_DUPLICADA)))
     @ApiResponse(responseCode = "422", description = "O anúncio é seu.", content = @Content(
@@ -136,7 +136,7 @@ public interface PropostaController {
     @ApiResponse(responseCode = "403", description = "Conta ainda não validada.", content = @Content(
             mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "404", ref = "#/components/responses/AnuncioNaoEncontrado")
-    @ApiResponse(responseCode = "409", description = "Você já enviou uma proposta para este anúncio.", content = @Content(
+    @ApiResponse(responseCode = "409", description = "Você já tem uma proposta em andamento (pendente ou aceita) para este anúncio.", content = @Content(
             mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
     @ApiResponse(responseCode = "422", description = "O anúncio é seu.", content = @Content(
             mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))

@@ -33,6 +33,8 @@ export type AnuncioItem = {
   autor: AdAuthor | null;
   criadoEm: string;
   atualizadoEm: string;
+  /** Ids das fotos do anúncio, na ordem do envio (ver lib/ad-photos). */
+  fotos: string[];
 };
 
 export type GeoPoint = { latitude: number; longitude: number };
@@ -145,6 +147,7 @@ export function parseAnuncio(item: unknown): AnuncioItem | null {
     autor: author(b.autor),
     criadoEm: text(b.criadoEm),
     atualizadoEm: text(b.atualizadoEm),
+    fotos: Array.isArray(b.fotos) ? b.fotos.filter((foto): foto is string => typeof foto === "string") : [],
   };
 }
 

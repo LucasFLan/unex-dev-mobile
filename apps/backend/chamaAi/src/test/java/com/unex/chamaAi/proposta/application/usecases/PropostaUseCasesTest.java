@@ -192,6 +192,27 @@ class PropostaUseCasesTest {
     }
 
     @Test
+    void contrataDeNovoDepoisDeConcluirOuSerRecusado() {
+        Anuncio oferta = anuncios.adicionar(joao.getId(), "Encanador", true, TipoAnuncio.OFERTA);
+        PropostaDetalhada primeira = propor(oferta, maria);
+
+        // Enquanto a primeira está em aberto (pendente ou aceita), não dá para pedir de novo.
+        assertThrows(PropostaDuplicadaException.class, () -> propor(oferta, maria));
+        responder.aceitar(primeira.id(), joao.getId());
+        assertThrows(PropostaDuplicadaException.class, () -> propor(oferta, maria));
+
+        // Serviço feito: a Maria contrata o João de novo, e cada serviço tem a própria avaliação.
+        responder.concluir(primeira.id(), maria.getId());
+        PropostaDetalhada segunda = propor(oferta, maria);
+        assertEquals("PENDENTE", segunda.status());
+        avaliar.executar(primeira.id(), maria.getId(), 5, "Ótimo");
+
+        // Recusada também encerra: pode tentar de novo.
+        responder.recusar(segunda.id(), joao.getId());
+        assertEquals("PENDENTE", propor(oferta, maria).status());
+    }
+
+    @Test
     void naoPermitePropostaDuplicada() {
         mariaPropoe("100", "Primeira");
         assertThrows(PropostaDuplicadaException.class, () -> mariaPropoe("90", "Segunda"));
@@ -567,9 +588,9 @@ class PropostaUseCasesTest {
         }
 
         @Override
-        public boolean existePorAnuncioERemetente(UUID anuncioId, UUID remetenteId) {
+        public boolean existeEmAbertoPorAnuncioERemetente(UUID anuncioId, UUID remetenteId) {
             return dados.values().stream().anyMatch(p -> p.getAnuncioId().equals(anuncioId)
-                    && p.getRemetenteId().equals(remetenteId));
+                    && p.getRemetenteId().equals(remetenteId) && p.getStatus().emAberto());
         }
 
         @Override

@@ -41,8 +41,8 @@ const Register = () => {
     };
 
   return (
-    <main className="min-h-screen w-full bg-white px-6 pb-8 pt-6 text-slate-900">
-      <div className="mx-auto flex w-full max-w-md flex-col">
+    <main className="min-h-screen w-full bg-white px-6 pb-8 pt-6 text-slate-900 md:bg-fundo md:py-12">
+      <div className="mx-auto flex w-full max-w-md flex-col md:rounded-2xl md:border md:border-slate-200 md:bg-white md:p-8 md:shadow-sm">
         <BackButton
           href="/login"
           iconSize={19}
@@ -171,14 +171,14 @@ const Register = () => {
               <span className="text-xs leading-4.5 text-slate-500">
                 Li e concordo com os{" "}
                 <Link
-                  href="/termos"
+                  href="/termos?de=%2Fregister"
                   className="font-medium text-blue-600 hover:underline"
                 >
                   Termos de Uso
                 </Link>{" "}
                 e a{" "}
                 <Link
-                  href="/privacidade"
+                  href="/privacidade?de=%2Fregister"
                   className="font-medium text-blue-600 hover:underline"
                 >
                   Política de Privacidade

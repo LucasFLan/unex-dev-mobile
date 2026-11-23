@@ -20,23 +20,23 @@ export function AdLocation({ ad, isOwner }: { ad: AnuncioItem; isOwner: boolean 
 
   return (
     <section className="mt-4">
-      <h2 className="text-[11px] font-bold">{offering ? "Região de atendimento" : "Localização aproximada"}</h2>
+      <h2 className="text-[11px] font-bold lg:text-base">{offering ? "Região de atendimento" : "Localização aproximada"}</h2>
 
       {ad.regiao ? (
         <LocationMap
           center={ad.regiao}
           radiusKm={radius}
           label={`Mapa da região: ${region}`}
-          className="mt-2 h-36"
+          className="mt-2 h-36 lg:h-72"
         />
       ) : (
-        <div className="mt-2 flex h-14 items-center justify-center gap-1.5 rounded-xl bg-slate-50 text-[10px] text-slate-500">
+        <div className="mt-2 flex h-14 items-center justify-center gap-1.5 rounded-xl bg-slate-50 text-[10px] text-slate-500 lg:h-20 lg:text-sm">
           <MapPin size={13} aria-hidden="true" />
           {region}
         </div>
       )}
 
-      <div className="mt-2 flex items-start gap-1 text-[9px] leading-3 text-slate-500">
+      <div className="mt-2 flex items-start gap-1 text-[9px] leading-3 text-slate-500 lg:text-sm lg:leading-5">
         {offering ? (
           <MapPin size={11} className="mt-0.5 shrink-0" aria-hidden="true" />
         ) : (
@@ -61,26 +61,26 @@ export function AdAuthor({ ad, isOwner, from }: { ad: AnuncioItem; isOwner: bool
 
   const content = (
     <>
-      <Avatar userId={ad.autorId} name={name} version={author ? author.fotoAtualizadaEm : undefined} className="h-7 w-7 text-[9px]" />
+      <Avatar userId={ad.autorId} name={name} version={author ? author.fotoAtualizadaEm : undefined} className="h-7 w-7 text-[9px] lg:h-11 lg:w-11 lg:text-sm" />
       <span className="min-w-0">
-        <span className="block text-[8px] text-slate-500">Anunciado por</span>
+        <span className="block text-[8px] text-slate-500 lg:text-xs">Anunciado por</span>
         <span className="flex items-center gap-1.5">
-          <strong className="truncate text-[11px] text-slate-800">{isOwner ? "você" : name}</strong>
-          {author && <RatingBadge media={author.media} total={author.total} className="text-[9px]" />}
+          <strong className="truncate text-[11px] text-slate-800 lg:text-base">{isOwner ? "você" : name}</strong>
+          {author && <RatingBadge media={author.media} total={author.total} className="text-[9px] lg:text-xs" />}
         </span>
       </span>
     </>
   );
 
   return isOwner ? (
-    <div className="mt-2 flex items-center gap-2">{content}</div>
+    <div className="mt-2 flex items-center gap-2 lg:mt-4 lg:gap-3">{content}</div>
   ) : (
     <Link
       href={withFrom(`/usuarios/${ad.autorId}`, from)}
-      className="mt-2 flex items-center gap-2 rounded-lg focus-visible:outline-2 focus-visible:outline-blue-600"
+      className="mt-2 flex items-center gap-2 rounded-lg lg:mt-4 lg:gap-3 focus-visible:outline-2 focus-visible:outline-blue-600"
     >
       {content}
-      <span className="ml-auto text-[9px] font-medium text-blue-600">Ver avaliações</span>
+      <span className="ml-auto text-[9px] font-medium text-blue-600 lg:text-xs">Ver avaliações</span>
     </Link>
   );
 }

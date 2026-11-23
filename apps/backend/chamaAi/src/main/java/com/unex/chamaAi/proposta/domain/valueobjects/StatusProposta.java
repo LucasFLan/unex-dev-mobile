@@ -12,5 +12,10 @@ public enum StatusProposta {
     /** Quem enviou retirou a proposta. */
     CANCELADA,
     /** Depois de aceita, quem contratou confirmou que o serviço foi feito: libera a avaliação. */
-    CONCLUIDA
+    CONCLUIDA;
+
+    /** Proposta ainda em andamento: enquanto houver uma, a mesma pessoa não envia outra ao mesmo anúncio. */
+    public boolean emAberto() {
+        return this == PENDENTE || this == ACEITA;
+    }
 }

@@ -3,9 +3,11 @@ import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 export type InputProps = {
   labelText: string;
   icon?: ReactNode;
+  /** Conteúdo à direita, dentro do campo (ex.: botão de mostrar a senha). */
+  trailing?: ReactNode;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-const Input = ({ labelText, icon, id, ...props }: InputProps) => {
+const Input = ({ labelText, icon, trailing, id, ...props }: InputProps) => {
   const generatedId = useId();
   const inputId = id ?? generatedId;
 
@@ -28,6 +30,8 @@ const Input = ({ labelText, icon, id, ...props }: InputProps) => {
           id={inputId}
           className="h-full min-w-0 flex-1 bg-transparent text-xs text-slate-800 outline-none placeholder:text-slate-400"
         />
+
+        {trailing}
       </div>
     </>
   );

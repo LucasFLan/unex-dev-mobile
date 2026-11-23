@@ -203,17 +203,17 @@ export function HistoricoContent({
   const count = filteredServices.length;
 
   return (
-    <main className="min-h-dvh bg-fundo pb-24 text-slate-800">
-      <div className="mx-auto w-full max-w-120">
-        <header className="sticky top-0 z-20 bg-fundo px-3.5 pb-2 pt-4">
+    <main className="min-h-dvh bg-fundo pb-24 text-slate-800 lg:pb-12">
+      <div className="mx-auto w-full max-w-120 lg:max-w-5xl lg:px-6">
+        <header className="sticky top-0 z-20 bg-fundo px-3.5 pb-2 pt-4 lg:pb-4 lg:pt-8">
           <div className="mb-2 flex items-center justify-between">
-            <h1 className="text-[17px] font-bold tracking-tight">
+            <h1 className="text-[17px] font-bold tracking-tight lg:text-2xl">
               Histórico
             </h1>
 
             <Link
               href="/anunciar"
-              className="flex h-8 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-[11px] font-semibold text-white"
+              className="flex h-8 items-center gap-1 rounded-lg bg-blue-600 px-2.5 text-[11px] font-semibold text-white transition hover:bg-blue-700 lg:h-10 lg:px-4 lg:text-sm"
             >
               <Plus size={13} aria-hidden="true" />
               Novo
@@ -223,7 +223,7 @@ export function HistoricoContent({
           <div
             role="tablist"
             aria-label="O que mostrar"
-            className="mb-2 grid grid-cols-2 rounded-lg bg-slate-100 p-0.5 text-[11px] font-medium"
+            className="mb-2 grid grid-cols-2 rounded-lg bg-slate-100 p-0.5 text-[11px] font-medium lg:mb-3 lg:max-w-xl lg:text-sm"
           >
             {(
               [
@@ -251,7 +251,7 @@ export function HistoricoContent({
           {tab === "anuncios" && (
           <>
 
-          <div className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5">
+          <div className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 focus-within:border-blue-500 lg:h-11 lg:max-w-xl lg:px-3.5">
             <Search size={14} className="text-slate-400" aria-hidden="true" />
             <input
               type="search"
@@ -259,7 +259,7 @@ export function HistoricoContent({
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar nos meus anúncios"
               aria-label="Buscar nos meus anúncios"
-              className="h-full w-full bg-transparent text-[11px] outline-none placeholder:text-slate-500 [&::-webkit-search-cancel-button]:hidden"
+              className="h-full w-full bg-transparent text-[11px] outline-none lg:text-sm placeholder:text-slate-500 [&::-webkit-search-cancel-button]:hidden"
             />
             {search && (
               <button
@@ -273,7 +273,7 @@ export function HistoricoContent({
             )}
           </div>
 
-          <div ref={filtersRef} className="relative mt-2">
+          <div ref={filtersRef} className="relative mt-2 lg:mt-3 lg:max-w-xl">
             <div className="flex gap-1.5">
               <button
                 type="button"
@@ -411,7 +411,7 @@ export function HistoricoContent({
           )}
         </header>
 
-        <section className="space-y-3 px-3 pb-4">
+        <section className="space-y-3 px-3 pb-4 lg:space-y-6 lg:px-3.5">
           {tab === "propostas" ? (
             <SentProposals proposals={sentProposals} />
           ) : services.length === 0 ? (
@@ -432,11 +432,11 @@ export function HistoricoContent({
           ) : groups.length > 0 ? (
             groups.map(([monthKey, items]) => (
               <div key={monthKey}>
-                <h2 className="mb-2 mt-1 text-[10px] font-medium uppercase tracking-wide text-slate-500">
+                <h2 className="mb-2 mt-1 text-[10px] font-medium uppercase tracking-wide text-slate-500 lg:mb-3 lg:text-xs">
                   {formatMonth(items[0].date)}
                 </h2>
 
-                <div className="space-y-2">
+                <div className="space-y-2 lg:grid lg:grid-cols-2 lg:items-start lg:gap-3 lg:space-y-0">
                   {items.map((service) => (
                     <ServiceCard
                       key={service.id}
@@ -477,7 +477,7 @@ export function HistoricoContent({
       {toast && (
         <div
           role="status"
-          className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-slate-800 px-4 py-2.5 text-xs text-white shadow-lg"
+          className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 lg:bottom-8 lg:left-[calc(50%+7.5rem)] rounded-lg bg-slate-800 px-4 py-2.5 text-xs text-white shadow-lg"
         >
           {toast}
         </div>

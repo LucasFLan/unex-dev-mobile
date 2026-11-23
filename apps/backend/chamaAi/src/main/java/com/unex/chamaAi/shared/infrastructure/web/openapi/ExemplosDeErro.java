@@ -101,7 +101,7 @@ public final class ExemplosDeErro {
              "instance": "/anuncios/7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e/propostas"}""";
 
     public static final String PROPOSTA_DUPLICADA = """
-            {"title": "Conflict", "status": 409, "detail": "Você já enviou uma proposta para este anúncio.",
+            {"title": "Conflict", "status": 409, "detail": "Você já tem uma proposta em andamento para este anúncio.",
              "instance": "/anuncios/7a1c9e2b-4d3f-4b8a-9e6d-2c5f8a1b3d4e/propostas"}""";
 
     public static final String PROPOSTA_PROPRIO_ANUNCIO = """

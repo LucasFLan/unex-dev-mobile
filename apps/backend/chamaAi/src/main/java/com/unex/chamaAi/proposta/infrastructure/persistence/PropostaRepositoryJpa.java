@@ -49,8 +49,9 @@ public class PropostaRepositoryJpa implements PropostaRepository {
     }
 
     @Override
-    public boolean existePorAnuncioERemetente(UUID anuncioId, UUID remetenteId) {
-        return springData.existsByAnuncioIdAndRemetenteId(anuncioId, remetenteId);
+    public boolean existeEmAbertoPorAnuncioERemetente(UUID anuncioId, UUID remetenteId) {
+        return springData.existsByAnuncioIdAndRemetenteIdAndStatusIn(anuncioId, remetenteId,
+                List.of(StatusProposta.PENDENTE.name(), StatusProposta.ACEITA.name()));
     }
 
     @Override

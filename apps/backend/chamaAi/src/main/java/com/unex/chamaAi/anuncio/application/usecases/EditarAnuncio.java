@@ -9,6 +9,7 @@ import com.unex.chamaAi.anuncio.domain.exceptions.AcessoNegadoAnuncioException;
 import com.unex.chamaAi.anuncio.domain.exceptions.AnuncioNaoEncontradoException;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
+import com.unex.chamaAi.anuncio.domain.repositories.FotoAnuncioRepository;
 
 import java.util.UUID;
 
@@ -20,9 +21,15 @@ public class EditarAnuncio {
 
     public EditarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, ConsultaCep consultaCep,
                          AutoresAnuncio autores) {
+        this(anuncios, categorias, consultaCep, autores, null);
+    }
+
+    public EditarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, ConsultaCep consultaCep,
+                         AutoresAnuncio autores,
+            FotoAnuncioRepository fotos) {
         this.anuncios = anuncios;
         this.validador = new ValidadorDadosAnuncio(categorias, consultaCep);
-        this.detalhador = new DetalhadorAnuncio(categorias, autores);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores, fotos);
     }
 
     /** Só o autor edita. Para quem não vê o anúncio (inativo de outro autor), ele "não existe". */

@@ -1,4 +1,5 @@
 import { normalize } from "@/lib/format";
+import { adPhotoUrl } from "@/lib/ad-photos";
 import type { AnuncioItem, GeoPoint } from "@/lib/ads";
 import { distanceKm } from "@/lib/geo";
 
@@ -26,12 +27,17 @@ export type Professional = {
   /** Slug da categoria (GET /categorias), usada no filtro e no ícone. */
   categorySlug: string;
   name: string;
+  /** Título do anúncio (o que aparece no card). */
+  title: string;
+  /** Descrição do anúncio (entra na busca). */
   service: string;
   location: string;
   /** `null` = "a combinar". */
   price: number | null;
   createdAt: string;
   rating: Rating;
+  /** Primeira foto do anúncio (capa do card), já com o endereço; `null` sem fotos. */
+  cover: string | null;
 } & Located;
 
 export type ServiceRequest = {
@@ -107,7 +113,7 @@ export function filterProfessionals(
       if (
         query &&
         !normalize(
-          `${professional.name} ${professional.category} ${professional.service}`
+          `${professional.title} ${professional.name} ${professional.category} ${professional.service}`
         ).includes(query)
       ) {
         return false;
@@ -165,11 +171,13 @@ export const toProfessional = (anuncio: AnuncioItem): Professional => ({
   category: anuncio.categoria.nome,
   categorySlug: anuncio.categoria.slug,
   name: anuncio.autor?.nome || anuncio.titulo,
+  title: anuncio.titulo,
   service: anuncio.descricao,
   location: anuncio.bairro ? `${anuncio.bairro}, ${anuncio.cidade}` : `${anuncio.cidade}, ${anuncio.uf}`,
   price: anuncio.preco,
   createdAt: anuncio.criadoEm,
   rating: { media: anuncio.autor?.media ?? null, total: anuncio.autor?.total ?? 0 },
+  cover: anuncio.fotos[0] ? adPhotoUrl(anuncio.id, anuncio.fotos[0]) : null,
   point: anuncio.regiao,
   radiusKm: anuncio.raioAtendimentoKm,
   distanceKm: null,

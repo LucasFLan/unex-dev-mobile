@@ -7,6 +7,7 @@ import com.unex.chamaAi.anuncio.domain.exceptions.AcessoNegadoAnuncioException;
 import com.unex.chamaAi.anuncio.domain.exceptions.AnuncioNaoEncontradoException;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
+import com.unex.chamaAi.anuncio.domain.repositories.FotoAnuncioRepository;
 
 import java.util.UUID;
 
@@ -16,8 +17,13 @@ public class AlterarAtivacaoAnuncio {
     private final DetalhadorAnuncio detalhador;
 
     public AlterarAtivacaoAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, AutoresAnuncio autores) {
+        this(anuncios, categorias, autores, null);
+    }
+
+    public AlterarAtivacaoAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, AutoresAnuncio autores,
+            FotoAnuncioRepository fotos) {
         this.anuncios = anuncios;
-        this.detalhador = new DetalhadorAnuncio(categorias, autores);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores, fotos);
     }
 
     /**

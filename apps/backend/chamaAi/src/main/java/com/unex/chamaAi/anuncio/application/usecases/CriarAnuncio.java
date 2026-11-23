@@ -10,6 +10,7 @@ import com.unex.chamaAi.anuncio.application.dto.DadosAnuncioCommand;
 import com.unex.chamaAi.anuncio.domain.entities.Anuncio;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
+import com.unex.chamaAi.anuncio.domain.repositories.FotoAnuncioRepository;
 
 import java.util.UUID;
 
@@ -22,10 +23,16 @@ public class CriarAnuncio {
 
     public CriarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, UsuarioRepository usuarios,
                         ConsultaCep consultaCep, AutoresAnuncio autores) {
+        this(anuncios, categorias, usuarios, consultaCep, autores, null);
+    }
+
+    public CriarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, UsuarioRepository usuarios,
+                        ConsultaCep consultaCep, AutoresAnuncio autores,
+            FotoAnuncioRepository fotos) {
         this.anuncios = anuncios;
         this.usuarios = usuarios;
         this.validador = new ValidadorDadosAnuncio(categorias, consultaCep);
-        this.detalhador = new DetalhadorAnuncio(categorias, autores);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores, fotos);
     }
 
     /** Só conta com documentos aprovados publica anúncio. */
