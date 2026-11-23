@@ -3,10 +3,22 @@ import { Clock3, MapPin } from "lucide-react";
 import { RelativeTime } from "@/components/RelativeTime";
 import { type ServiceRequest } from "@/lib/marketplace";
 import { formatPrice } from "@/lib/format";
+import { withFrom } from "@/lib/navigation";
 
-export function RequestCard({ request }: { request: ServiceRequest }) {
+export function RequestCard({
+  request,
+  from,
+  className = "w-60",
+}: {
+  request: ServiceRequest;
+  /** Tela de onde o detalhe foi aberto, para o voltar (padrão: Home). */
+  from?: string;
+  className?: string;
+}) {
+  const href = `/servicos/${request.id}`;
+
   return (
-    <article className="relative flex w-60 flex-col rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm">
+    <article className={`relative flex ${className} flex-col rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm`}>
       <div className="flex items-center justify-between gap-1">
         <span className="truncate rounded bg-amber-50 px-1.5 py-1 text-[10px] font-medium text-amber-800">
           {request.category}
@@ -20,7 +32,7 @@ export function RequestCard({ request }: { request: ServiceRequest }) {
 
       <h3 className="mt-2 text-[11px] font-semibold leading-4">
         <Link
-          href={`/servicos/${request.id}`}
+          href={from ? withFrom(href, from) : href}
           className="after:absolute after:inset-0 focus-visible:outline-2 focus-visible:outline-blue-600"
         >
           {request.title}

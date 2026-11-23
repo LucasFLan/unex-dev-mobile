@@ -1,4 +1,5 @@
 import { normalize } from "@/lib/format";
+import type { AnuncioItem } from "@/lib/ads";
 
 export type Professional = {
   id: string;
@@ -110,6 +111,30 @@ export function filterRequests(
       filters.sort === "menor-preco" ? cheapestFirst(a, b) : newestFirst(a, b)
     );
 }
+
+/** Anúncio do tipo OFERTA no formato do card de profissional. */
+export const toProfessional = (anuncio: AnuncioItem): Professional => ({
+  id: anuncio.id,
+  category: anuncio.categoria.nome,
+  categorySlug: anuncio.categoria.slug,
+  name: anuncio.titulo,
+  service: anuncio.descricao,
+  location: `${anuncio.cidade}, ${anuncio.uf}`,
+  price: anuncio.preco,
+  createdAt: anuncio.criadoEm,
+});
+
+/** Anúncio do tipo PEDIDO no formato do card de pedido. */
+export const toRequest = (anuncio: AnuncioItem): ServiceRequest => ({
+  id: anuncio.id,
+  category: anuncio.categoria.nome,
+  categorySlug: anuncio.categoria.slug,
+  title: anuncio.titulo,
+  description: anuncio.descricao,
+  location: `${anuncio.cidade}, ${anuncio.uf}`,
+  price: anuncio.preco,
+  createdAt: anuncio.criadoEm,
+});
 
 export const initials = (name: string) =>
   name

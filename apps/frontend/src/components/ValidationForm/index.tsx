@@ -2,11 +2,12 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, IdCard, Loader2, X } from "lucide-react";
+import { Camera, IdCard, ImageUp, Loader2, X } from "lucide-react";
 import {
   sendValidationDocuments,
   type ValidationFormState,
 } from "@/app/validacao/actions";
+import { CameraCapture, cameraSupported } from "@/components/CameraCapture";
 import { resizeImageForUpload } from "@/lib/image-resize";
 
 type Slot = {
@@ -46,12 +47,23 @@ function ImagePicker({
   onPick: (file: File | null) => void;
 }) {
   const [inputKey, setInputKey] = useState(0);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraMessage, setCameraMessage] = useState<string | null>(null);
   const Icon = slot.icon;
   const { preview } = picked;
   const clear = () => {
     onPick(null);
     setInputKey((key) => key + 1);
   };
+
+  function openCamera() {
+    setCameraMessage(null);
+    if (!cameraSupported()) {
+      setCameraMessage("Este navegador não abre a câmera por aqui. Use \"Galeria\" e tire a foto pelo app de câmera.");
+      return;
+    }
+    setCameraOpen(true);
+  }
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
@@ -72,7 +84,7 @@ function ImagePicker({
             ) : (
               <>
                 <Icon size={22} aria-hidden="true" />
-                Tirar foto ou escolher da galeria
+                Toque em Abrir câmera ou escolha da galeria
               </>
             )}
           </span>
@@ -83,11 +95,57 @@ function ImagePicker({
           type="file"
           name={slot.name}
           accept="image/*"
-          required
+          required={!picked.file}
           className="absolute inset-0 cursor-pointer opacity-0"
           onChange={(event) => onPick(event.target.files?.[0] ?? null)}
         />
       </label>
+
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={openCamera}
+          className="flex h-10 items-center justify-center gap-1.5 rounded-lg bg-blue-600 text-[11px] font-semibold text-white"
+        >
+          <Camera size={15} aria-hidden="true" />
+          {picked.file ? "Tirar outra" : "Abrir câmera"}
+        </button>
+        <label className="flex h-10 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white text-[11px] font-semibold text-slate-700">
+          <ImageUp size={15} aria-hidden="true" />
+          Galeria
+          <input
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            onChange={(event) => {
+              const file = event.target.files?.[0] ?? null;
+              event.target.value = "";
+              if (file) onPick(file);
+            }}
+          />
+        </label>
+      </div>
+
+      {cameraMessage && (
+        <p role="alert" className="mt-2 text-[11px] text-amber-700">
+          {cameraMessage}
+        </p>
+      )}
+
+      {cameraOpen && (
+        <CameraCapture
+          kind={slot.name}
+          title={slot.title}
+          onCapture={(file) => {
+            setCameraOpen(false);
+            onPick(file);
+          }}
+          onClose={(error) => {
+            setCameraOpen(false);
+            if (error) setCameraMessage(error);
+          }}
+        />
+      )}
 
       {picked.error && (
         <p role="alert" className="mt-2 text-[11px] text-red-600">

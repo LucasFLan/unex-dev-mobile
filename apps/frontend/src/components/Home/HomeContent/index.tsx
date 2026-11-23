@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Bell, Search, SlidersHorizontal, X } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { CategoryList } from "@/components/Home/CategoryList";
@@ -20,6 +21,8 @@ import {
   SORT_OPTIONS,
   filterProfessionals,
   filterRequests,
+  toProfessional,
+  toRequest,
 } from "@/lib/marketplace";
 import type { AnuncioItem } from "@/lib/ads";
 import type { Category } from "@/lib/categories-api";
@@ -114,39 +117,27 @@ export function HomeContent({
   const closeFilters = useCallback(() => setShowFilters(false), []);
   useDismissable(filtersRef, showFilters, closeFilters);
 
-  const professionals = useMemo(() => {
-    const ofertas = anuncios
-      .filter((anuncio) => anuncio.tipo === "OFERTA")
-      .map((anuncio) => ({
-        id: anuncio.id,
-        category: anuncio.categoria.nome,
-        categorySlug: anuncio.categoria.slug,
-        name: anuncio.titulo,
-        service: anuncio.descricao,
-        location: `${anuncio.cidade}, ${anuncio.uf}`,
-        price: anuncio.preco,
-        createdAt: anuncio.criadoEm,
-      }));
+  const professionals = useMemo(
+    () =>
+      filterProfessionals(
+        anuncios.filter((anuncio) => anuncio.tipo === "OFERTA").map(toProfessional),
+        filters
+      ),
+    [anuncios, filters]
+  );
 
-    return filterProfessionals(ofertas, filters);
-  }, [anuncios, filters]);
+  const requests = useMemo(
+    () =>
+      filterRequests(
+        anuncios.filter((anuncio) => anuncio.tipo === "PEDIDO").map(toRequest),
+        filters
+      ),
+    [anuncios, filters]
+  );
 
-  const requests = useMemo(() => {
-    const pedidos = anuncios
-      .filter((anuncio) => anuncio.tipo === "PEDIDO")
-      .map((anuncio) => ({
-        id: anuncio.id,
-        category: anuncio.categoria.nome,
-        categorySlug: anuncio.categoria.slug,
-        title: anuncio.titulo,
-        description: anuncio.descricao,
-        location: `${anuncio.cidade}, ${anuncio.uf}`,
-        price: anuncio.preco,
-        createdAt: anuncio.criadoEm,
-      }));
-
-    return filterRequests(pedidos, filters);
-  }, [anuncios, filters]);
+  // "Ver todos" abre a lista completa com a mesma busca, categoria, ordem e preço da Home.
+  const queryString = useSearchParams().toString();
+  const withQuery = (path: string) => (queryString ? `${path}?${queryString}` : path);
 
   const onClear = hasActiveFilters ? clearFilters : undefined;
   const priceFilterActive = filters.maxPrice !== null;
@@ -267,7 +258,7 @@ export function HomeContent({
         <Section
           title="Profissionais disponíveis"
           subtitle="Quem oferece serviços perto de você"
-          href="/profissionais"
+          href={withQuery("/profissionais")}
         >
           {professionals.length === 0 ? (
             <EmptyState
@@ -288,7 +279,7 @@ export function HomeContent({
         <Section
           title="Pedidos de serviço"
           subtitle="Clientes procurando profissionais agora"
-          href="/servicos"
+          href={withQuery("/servicos")}
         >
           {requests.length === 0 ? (
             <EmptyState
