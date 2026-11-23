@@ -48,8 +48,8 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
   const pendingCount = proposals.filter((p) => p.status === "PENDENTE").length;
 
   return (
-    <section className="mt-4">
-      <h3 className="text-[11px] font-bold">
+    <section className="mt-4 lg:mt-8">
+      <h3 className="text-[11px] font-bold lg:text-base">
         Propostas recebidas ({proposals.length})
         {pendingCount > 0 && (
           <span className="ml-1 font-normal text-amber-700">
@@ -61,18 +61,18 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
       {error && (
         <p
           role="alert"
-          className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-[10px] text-red-600"
+          className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-[10px] text-red-600 lg:text-sm"
         >
           {error}
         </p>
       )}
 
       {proposals.length === 0 ? (
-        <p className="mt-2 rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-[10px] text-slate-500">
+        <p className="mt-2 rounded-xl border border-dashed border-slate-200 px-3 py-4 text-center text-[10px] text-slate-500 lg:py-8 lg:text-sm">
           Ninguém enviou proposta ainda.
         </p>
       ) : (
-        <ul className="mt-2 space-y-2">
+        <ul className="mt-2 space-y-2 lg:mt-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
           {proposals.map((proposal) => {
             const busy = pending && busyId === proposal.id;
 
@@ -91,27 +91,27 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                   <Avatar
                     userId={proposal.remetente.id}
                     name={proposal.remetente.nome}
-                    className="h-8 w-8 text-[10px]"
+                    className="h-8 w-8 text-[10px] lg:h-10 lg:w-10 lg:text-xs"
                   />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
-                      <p className="truncate text-[10px] font-semibold">
+                      <p className="truncate text-[10px] font-semibold lg:text-sm">
                         {proposal.remetente.nome}
                       </p>
                       <ProposalStatusBadge status={proposal.status} />
                     </div>
-                    <p className="text-[9px] text-slate-500">
+                    <p className="text-[9px] text-slate-500 lg:text-xs">
                       <RelativeTime isoDate={proposal.criadoEm} />
                     </p>
                   </div>
 
-                  <strong className="shrink-0 text-[11px]">
+                  <strong className="shrink-0 text-[11px] lg:text-sm">
                     {formatPrice(proposal.valor)}
                   </strong>
                 </div>
 
-                <p className="mt-2 whitespace-pre-line text-[10px] leading-3.5 text-slate-600">
+                <p className="mt-2 whitespace-pre-line text-[10px] leading-3.5 text-slate-600 lg:text-sm lg:leading-5">
                   {proposal.mensagem}
                 </p>
 
@@ -123,7 +123,7 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                       type="button"
                       onClick={() => respond(proposal, "recusar")}
                       disabled={pending}
-                      className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 text-[10px] font-medium text-slate-700 disabled:opacity-50"
+                      className="flex h-8 items-center justify-center gap-1 rounded-md border border-slate-200 text-[10px] font-medium text-slate-700 disabled:opacity-50 lg:h-9 lg:text-sm"
                     >
                       <X size={12} aria-hidden="true" />
                       Recusar
@@ -132,7 +132,7 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                       type="button"
                       onClick={() => respond(proposal, "aceitar")}
                       disabled={pending}
-                      className="flex h-8 items-center justify-center gap-1 rounded-md bg-blue-600 text-[10px] font-semibold text-white disabled:opacity-50"
+                      className="flex h-8 items-center justify-center gap-1 rounded-md bg-blue-600 text-[10px] font-semibold text-white disabled:opacity-50 lg:h-9 lg:text-sm"
                     >
                       <Check size={12} aria-hidden="true" />
                       {busy ? "Enviando..." : "Aceitar"}

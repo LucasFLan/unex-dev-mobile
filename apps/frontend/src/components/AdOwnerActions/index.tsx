@@ -10,16 +10,25 @@ import type { AnuncioItem } from "@/lib/ads";
 import { withFrom } from "@/lib/navigation";
 
 const buttonBase =
-  "flex h-9.75 items-center justify-center gap-1.5 rounded-lg border text-[10px] font-semibold transition disabled:opacity-50";
+  "flex h-9.75 items-center justify-center gap-1.5 rounded-lg border text-[10px] font-semibold transition disabled:opacity-50 lg:h-11 lg:text-sm";
 
-/** Rodapé com as ações do autor no detalhe do anúncio. */
+/** Celular e tablet: rodapé fixo. Desktop (lg+): bloco dentro do painel lateral do detalhe. */
+const WRAPPER = {
+  footer:
+    "fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 md:sticky md:mx-auto md:max-w-md md:rounded-b-2xl md:border md:border-slate-200 md:shadow-sm lg:hidden",
+  panel: "hidden lg:block",
+} as const;
+
+/** Ações do autor no detalhe do anúncio (rodapé no celular, painel lateral no desktop). */
 export function AdOwnerActions({
   ad,
   backHref,
+  variant = "footer",
 }: {
   ad: AnuncioItem;
   /** Origem do detalhe, para onde ir depois de excluir. */
   backHref: string;
+  variant?: keyof typeof WRAPPER;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -50,10 +59,10 @@ export function AdOwnerActions({
   };
 
   return (
-    <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 md:sticky md:mx-auto md:max-w-md md:rounded-b-2xl md:border md:border-slate-200 md:shadow-sm">
-      <div className="mx-auto max-w-md">
+    <footer className={WRAPPER[variant]}>
+      <div className="mx-auto max-w-md lg:max-w-none">
         {!ad.ativo && (
-          <p className="mb-2 rounded-lg bg-slate-100 px-3 py-2 text-[10px] text-slate-600">
+          <p className="mb-2 rounded-lg bg-slate-100 px-3 py-2 text-[10px] text-slate-600 lg:mb-3 lg:text-sm">
             Este anúncio está pausado e não aparece para outras pessoas.
           </p>
         )}
@@ -61,13 +70,13 @@ export function AdOwnerActions({
         {error && (
           <p
             role="alert"
-            className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-[10px] text-red-600"
+            className="mb-2 rounded-lg bg-red-50 px-3 py-2 text-[10px] text-red-600 lg:text-sm"
           >
             {error}
           </p>
         )}
 
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-2 lg:grid-cols-2">
           <Link
             href={withFrom(`/anunciar/${ad.id}/editar`, detailHref)}
             className={`${buttonBase} border-blue-600 bg-blue-600 text-white`}

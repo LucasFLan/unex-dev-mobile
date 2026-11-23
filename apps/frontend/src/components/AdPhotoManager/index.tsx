@@ -54,9 +54,9 @@ export function AdPhotoManager({ ad }: { ad: AnuncioItem }) {
   }
 
   return (
-    <section className="mt-4" aria-labelledby="titulo-fotos-anuncio">
+    <section className="mt-4 lg:mt-8" aria-labelledby="titulo-fotos-anuncio">
       <div className="flex items-center justify-between">
-        <h2 id="titulo-fotos-anuncio" className="text-[11px] font-bold md:text-sm">
+        <h2 id="titulo-fotos-anuncio" className="text-[11px] font-bold md:text-sm lg:text-base">
           Fotos do anúncio
         </h2>
         <span className="text-[9px] text-slate-400 md:text-xs">
@@ -64,7 +64,7 @@ export function AdPhotoManager({ ad }: { ad: AnuncioItem }) {
         </span>
       </div>
 
-      <div className="mt-2 grid grid-cols-4 gap-1.5 md:gap-2">
+      <div className="mt-2 grid grid-cols-4 gap-1.5 md:gap-2 lg:mt-3 lg:grid-cols-6">
         {ad.fotos.map((photoId, index) => (
           <div
             key={photoId}
