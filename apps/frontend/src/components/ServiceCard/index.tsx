@@ -34,7 +34,7 @@ export function ServiceCard({
   const isPaused = service.status === "Pausado";
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm">
+    <article className="rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm lg:p-4">
       <div className="flex gap-2.5">
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${bg} ${text}`}
@@ -61,15 +61,15 @@ export function ServiceCard({
             </span>
           </div>
 
-          <h3 className="text-xs font-semibold leading-snug text-slate-800">
+          <h3 className="text-xs font-semibold leading-snug text-slate-800 lg:text-sm">
             {service.title}
           </h3>
 
-          <p className="mt-1 text-[10px] text-slate-500">
+          <p className="mt-1 text-[10px] text-slate-500 lg:text-xs">
             {service.description}
           </p>
 
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-800">
+          <p className="mt-0.5 text-[11px] font-semibold text-slate-800 lg:mt-1 lg:text-sm">
             {service.price}
           </p>
         </div>
@@ -86,7 +86,7 @@ export function ServiceCard({
       <div className="mt-2 flex items-center gap-1.5">
         <Link
           href={withFrom(`/anunciar/${service.id}/editar`, "/historico")}
-          className="flex h-8 items-center rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 active:bg-slate-100"
+          className="flex h-8 items-center rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 hover:bg-slate-50 active:bg-slate-100 lg:text-xs"
         >
           Editar
         </Link>
@@ -95,14 +95,14 @@ export function ServiceCard({
           type="button"
           onClick={() => onTogglePause(service.id)}
           disabled={busy}
-          className="h-8 rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 active:bg-slate-100 disabled:opacity-50"
+          className="h-8 rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 hover:bg-slate-50 active:bg-slate-100 lg:text-xs disabled:opacity-50"
         >
           {isPaused ? "Retomar" : "Pausar"}
         </button>
 
         <Link
           href={duplicateAdHref(service.id, "/historico")}
-          className="flex h-8 items-center rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 active:bg-slate-100"
+          className="flex h-8 items-center rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 hover:bg-slate-50 active:bg-slate-100 lg:text-xs"
         >
           Duplicar
         </Link>
@@ -111,7 +111,7 @@ export function ServiceCard({
           type="button"
           onClick={() => onDelete(service.id)}
           disabled={busy}
-          className="ml-auto h-8 rounded-md px-3 text-[10px] font-medium text-red-500 active:bg-red-50 disabled:opacity-50"
+          className="ml-auto h-8 rounded-md px-3 text-[10px] font-medium text-red-500 hover:bg-red-50 active:bg-red-50 lg:text-xs disabled:opacity-50"
         >
           Excluir
         </button>

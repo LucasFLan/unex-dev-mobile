@@ -127,13 +127,13 @@ async function MenuContent() {
   const user = await getCurrentUser();
 
   return (
-    <main className="min-h-dvh bg-fundo pb-28 text-slate-800">
-      <div className="mx-auto w-full max-w-lg px-3.5 pt-4">
-        <h1 className="mb-3 text-[17px] font-bold tracking-tight">Menu</h1>
+    <main className="min-h-dvh bg-fundo pb-28 text-slate-800 lg:pb-12">
+      <div className="mx-auto w-full max-w-lg px-3.5 pt-4 lg:max-w-4xl lg:px-6 lg:pt-8">
+        <h1 className="mb-3 text-[17px] font-bold tracking-tight lg:mb-5 lg:text-2xl">Menu</h1>
 
         <Link
           href="/perfil"
-          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm focus-visible:outline-2 focus-visible:outline-blue-600"
+          className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:border-blue-200 lg:p-5 focus-visible:outline-2 focus-visible:outline-blue-600"
         >
           <span
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600"
@@ -159,7 +159,7 @@ async function MenuContent() {
           />
         </Link>
 
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 space-y-4 lg:mt-6 lg:columns-2 lg:gap-6 lg:space-y-0 lg:*:mb-6 lg:*:break-inside-avoid">
           {(user.role === "ADMIN" ? [ADMIN_SECTION, ...SECTIONS] : SECTIONS).map((section) => (
             <MenuSection
               key={section.title}
@@ -168,7 +168,7 @@ async function MenuContent() {
             />
           ))}
 
-          <form action={logout}>
+          <form action={logout} className="lg:mx-auto lg:w-full lg:max-w-sm lg:[column-span:all]">
             <button
               type="submit"
               className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-red-500 shadow-sm active:bg-red-50"

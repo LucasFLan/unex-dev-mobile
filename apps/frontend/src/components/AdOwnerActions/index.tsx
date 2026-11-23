@@ -50,7 +50,7 @@ export function AdOwnerActions({
   };
 
   return (
-    <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-2">
+    <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-4 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 md:sticky md:mx-auto md:max-w-md md:rounded-b-2xl md:border md:border-slate-200 md:shadow-sm">
       <div className="mx-auto max-w-md">
         {!ad.ativo && (
           <p className="mb-2 rounded-lg bg-slate-100 px-3 py-2 text-[10px] text-slate-600">

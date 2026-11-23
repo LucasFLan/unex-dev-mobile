@@ -17,8 +17,8 @@ export function ValidationRequired({
   from: string;
 }) {
   return (
-    <main className="min-h-dvh bg-fundo pb-24 text-slate-800">
-      <div className="mx-auto w-full max-w-md">
+    <main className="min-h-dvh bg-fundo pb-24 text-slate-800 lg:pb-12">
+      <div className="mx-auto w-full max-w-md lg:pt-10">
         <header className="flex items-center gap-1 px-2 pb-2 pt-3">
           <BackButton href="/home" />
         </header>

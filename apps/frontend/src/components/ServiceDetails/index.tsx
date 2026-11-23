@@ -58,8 +58,8 @@ export function ServiceDetails({
   }
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      <div className="mx-auto min-h-screen w-full max-w-md pb-24">
+    <main className="min-h-screen bg-white text-slate-900 md:bg-fundo md:px-6 md:py-10">
+      <div className="mx-auto min-h-screen w-full max-w-md bg-white pb-24 md:min-h-0 md:overflow-hidden md:rounded-t-2xl md:border md:border-b-0 md:border-slate-200 md:pb-6">
         <header className="flex h-15.5 items-center justify-between px-4">
           <BackButton
             href={backHref}
@@ -178,7 +178,7 @@ export function ServiceDetails({
       ) : myProposal ? (
         <MyProposalStatus proposal={myProposal} />
       ) : (
-      <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-2">
+      <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 md:sticky md:mx-auto md:max-w-md md:rounded-b-2xl md:border md:border-slate-200 md:shadow-sm">
         <div className="mx-auto max-w-md">
           {canPropose ? (
             <button

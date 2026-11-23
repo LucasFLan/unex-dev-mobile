@@ -22,3 +22,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Desktop: abre espaço para a barra lateral do app (AppSidebar, w-60) nas telas que a exibem. */
+@media (min-width: 64rem) {
+  body:has([data-app-sidebar]) {
+    padding-left: 15rem;
+  }
+}

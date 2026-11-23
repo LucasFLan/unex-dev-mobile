@@ -42,7 +42,7 @@ async function PerfilContent() {
 
   return (
     <main className="min-h-dvh bg-fundo pb-10 text-slate-800">
-      <div className="mx-auto w-full max-w-lg">
+      <div className="mx-auto w-full max-w-lg lg:pt-6">
         <header className="sticky top-0 z-20 flex items-center gap-1 bg-fundo px-2 pb-2 pt-3">
           <Link
             href="/menu"
