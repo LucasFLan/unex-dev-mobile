@@ -29,3 +29,9 @@ body {
     padding-left: 15rem;
   }
 }
+
+/* O app tem o próprio botão de mostrar a senha; o olho nativo do Edge some ao perder o foco e confundia. */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}

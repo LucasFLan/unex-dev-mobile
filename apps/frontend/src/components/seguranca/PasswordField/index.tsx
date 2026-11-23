@@ -9,19 +9,25 @@ type PasswordFieldProps = {
   name: string;
   placeholder?: string;
   autoComplete?: string;
+  /** Classes do bloco (rótulo + campo). */
+  className?: string;
 };
 
+/**
+ * Campo de senha com o botão de mostrar/ocultar dentro do campo. O olho nativo do navegador (Edge) fica
+ * escondido no globals.css: ele some quando o campo perde o foco.
+ */
 export function PasswordField({
   labelText,
   name,
   placeholder,
   autoComplete,
+  className = "flex flex-col",
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
 
   return (
-    // flex-col mantém o rótulo (20px) acima do campo, para o olho alinhar com ele
-    <div className="relative flex flex-col">
+    <div className={className}>
       <Input
         labelText={labelText}
         name={name}
@@ -29,16 +35,18 @@ export function PasswordField({
         placeholder={placeholder}
         autoComplete={autoComplete}
         icon={<LockKeyhole size={17} />}
+        trailing={
+          <button
+            type="button"
+            onClick={() => setVisible((current) => !current)}
+            aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
+            aria-pressed={visible}
+            className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 hover:text-slate-600 focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        }
       />
-
-      <button
-        type="button"
-        onClick={() => setVisible((current) => !current)}
-        aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
-        className="absolute right-3 top-7.5 text-slate-400 hover:text-slate-600"
-      >
-        {visible ? <EyeOff size={18} /> : <Eye size={18} />}
-      </button>
     </div>
   );
 }

@@ -75,7 +75,7 @@ const SECTIONS: { title: string; items: MenuItem[] }[] = [
       {
         label: "Propostas enviadas",
         description: "Acompanhe as propostas que você mandou",
-        href: "/propostas",
+        href: "/historico?aba=propostas",
         icon: MessageSquare,
         tone: "bg-orange-100 text-orange-500",
       },
