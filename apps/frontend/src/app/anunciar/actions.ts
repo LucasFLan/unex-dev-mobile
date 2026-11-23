@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { apiFetch, type ApiResult } from "@/lib/api";
+import { apiFetch, apiUpload, type ApiResult } from "@/lib/api";
+import {
+  ACCEPTED_AD_PHOTO_TYPES,
+  MAX_AD_PHOTOS,
+  MAX_AD_PHOTO_BYTES,
+  PHOTO_NOTICE_PARAM,
+} from "@/lib/ad-photos";
 import { AD_FIELDS, ENDPOINTS, extractErrorMessage } from "@/lib/api-contract";
 import { parseAnuncio, type AnuncioItem } from "@/lib/ads";
 import { UFS } from "@/lib/estados";
@@ -154,6 +160,44 @@ export async function lookupCep(cep: string): Promise<CepResult> {
   };
 }
 
+/** Fotos novas do formulário (já reduzidas no navegador). */
+function readPhotos(formData: FormData): { photos: File[] } | { error: string } {
+  const photos = formData
+    .getAll("fotos")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+
+  if (photos.length > MAX_AD_PHOTOS) {
+    return { error: `O anúncio pode ter até ${MAX_AD_PHOTOS} fotos.` };
+  }
+  for (const photo of photos) {
+    if (photo.size > MAX_AD_PHOTO_BYTES) return { error: "Cada foto pode ter no máximo 5 MB." };
+    if (photo.type && !ACCEPTED_AD_PHOTO_TYPES.includes(photo.type)) {
+      return { error: "Envie as fotos em JPG, PNG ou WEBP." };
+    }
+  }
+  return { photos };
+}
+
+/** POST /anuncios/{id}/fotos (multipart, campo "fotos" repetido). Devolve a mensagem de erro, se houver. */
+async function uploadPhotos(id: string, photos: File[]): Promise<string | null> {
+  if (photos.length === 0) return null;
+
+  const form = new FormData();
+  photos.forEach((photo, index) => form.append("fotos", photo, photo.name || `foto-${index + 1}.jpg`));
+
+  let result: ApiResult;
+  try {
+    result = await apiUpload(ENDPOINTS.adPhotos(id), form);
+  } catch {
+    return CONNECTION_ERROR;
+  }
+  await handleUnauthorized(result);
+  if (result.ok) return null;
+  return result.status === 413
+    ? "As fotos são grandes demais (máximo 5 MB cada)."
+    : messageFor(result);
+}
+
 async function call(
   path: string,
   method: "POST" | "PUT" | "PATCH" | "DELETE",
@@ -190,6 +234,8 @@ export async function createAd(
 ): Promise<AdFormState> {
   const parsed = readAdForm(formData);
   if ("error" in parsed) return parsed;
+  const photos = readPhotos(formData);
+  if ("error" in photos) return photos;
 
   const result = await call(ENDPOINTS.ads, "POST", parsed.body);
   if (!result) return { error: CONNECTION_ERROR };
@@ -197,7 +243,13 @@ export async function createAd(
   await handleUnauthorized(result);
   if (!result.ok) return { error: messageFor(result) };
 
-  revalidateAd();
+  const created = parseAnuncio(result.data);
+  revalidateAd(created?.id);
+
+  // O anúncio já existe: se as fotos falharem, abre a edição para tentar de novo em vez de perder o anúncio.
+  if (created && (await uploadPhotos(created.id, photos.photos))) {
+    redirect(`/anunciar/${encodeURIComponent(created.id)}/editar?${PHOTO_NOTICE_PARAM}=1`);
+  }
   redirect("/historico");
 }
 
@@ -209,6 +261,8 @@ export async function updateAd(
 ): Promise<AdFormState> {
   const parsed = readAdForm(formData);
   if ("error" in parsed) return parsed;
+  const photos = readPhotos(formData);
+  if ("error" in photos) return photos;
 
   const result = await call(adPath(id), "PUT", parsed.body);
   if (!result) return { error: CONNECTION_ERROR };
@@ -217,6 +271,21 @@ export async function updateAd(
   if (!result.ok) return { error: messageFor(result) };
 
   revalidateAd(id);
+
+  // Remove antes de enviar, para as novas caberem no limite de fotos. Foto já removida (404) não é erro.
+  for (const photoId of formData.getAll("removerFoto").map(String)) {
+    const removed = await call(ENDPOINTS.adPhoto(id, photoId), "DELETE");
+    if (!removed) return { error: `Os dados foram salvos, mas ${CONNECTION_ERROR.toLowerCase()}` };
+    await handleUnauthorized(removed);
+    if (!removed.ok && removed.status !== 404) {
+      return { error: `Os dados foram salvos, mas uma foto não foi removida: ${messageFor(removed)}` };
+    }
+  }
+
+  const photoError = await uploadPhotos(id, photos.photos);
+  if (photoError) {
+    return { error: `Os dados foram salvos, mas as fotos novas não foram enviadas: ${photoError}` };
+  }
   // Volta para onde a edição foi aberta (Histórico ou detalhe do anúncio).
   redirect(backHrefFrom(field(formData, "voltar"), "/historico"));
 }

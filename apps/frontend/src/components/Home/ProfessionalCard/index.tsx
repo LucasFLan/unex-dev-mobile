@@ -30,16 +30,27 @@ export function ProfessionalCard({
       <div
         className={`relative flex h-21.5 items-center lg:h-28 justify-center ${bg}`}
       >
-        <span className="absolute left-2 top-2 max-w-[85%] truncate rounded-md bg-white/90 px-2 py-1 text-[10px] font-medium text-amber-800">
+        <span className="absolute left-2 top-2 z-10 max-w-[85%] truncate rounded-md bg-white/90 px-2 py-1 text-[10px] font-medium text-amber-800">
           {professional.category}
         </span>
 
-        <Icon
-          size={29}
-          strokeWidth={1.7}
-          className={text}
-          aria-hidden="true"
-        />
+        {professional.cover ? (
+          // eslint-disable-next-line @next/next/no-img-element -- imagem servida pela rota /api do app
+          <img
+            src={professional.cover}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <Icon
+            size={29}
+            strokeWidth={1.7}
+            className={text}
+            aria-hidden="true"
+          />
+        )}
       </div>
 
       <div className="p-2 lg:p-3">

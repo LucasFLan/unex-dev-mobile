@@ -1,4 +1,5 @@
 import { normalize } from "@/lib/format";
+import { adPhotoUrl } from "@/lib/ad-photos";
 import type { AnuncioItem, GeoPoint } from "@/lib/ads";
 import { distanceKm } from "@/lib/geo";
 
@@ -32,6 +33,8 @@ export type Professional = {
   price: number | null;
   createdAt: string;
   rating: Rating;
+  /** Primeira foto do anúncio (capa do card), já com o endereço; `null` sem fotos. */
+  cover: string | null;
 } & Located;
 
 export type ServiceRequest = {
@@ -170,6 +173,7 @@ export const toProfessional = (anuncio: AnuncioItem): Professional => ({
   price: anuncio.preco,
   createdAt: anuncio.criadoEm,
   rating: { media: anuncio.autor?.media ?? null, total: anuncio.autor?.total ?? 0 },
+  cover: anuncio.fotos[0] ? adPhotoUrl(anuncio.id, anuncio.fotos[0]) : null,
   point: anuncio.regiao,
   radiusKm: anuncio.raioAtendimentoKm,
   distanceKm: null,

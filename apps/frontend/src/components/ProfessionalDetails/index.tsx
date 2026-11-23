@@ -6,6 +6,7 @@ import { AdOwnerActions } from "@/components/AdOwnerActions";
 import { BackButton } from "@/components/BackButton";
 import { ValidationBanner } from "@/components/ValidationBanner";
 import { ProposalSheet } from "@/components/ProposalSheet";
+import { AdPhotoGallery } from "@/components/AdPhotoGallery";
 import Button from "@/components/Button";
 import { RelativeTime } from "@/components/RelativeTime";
 import { MyProposalStatus } from "@/components/MyProposalStatus";
@@ -65,7 +66,7 @@ export function ProfessionalDetails({
   return (
     <main className="min-h-screen bg-white text-slate-900 md:bg-fundo md:px-6 md:py-10">
       <div className="mx-auto min-h-screen w-full max-w-md bg-white pb-24 md:min-h-0 md:overflow-hidden md:rounded-t-2xl md:border md:border-b-0 md:border-slate-200 md:pb-6">
-        <section className={`relative h-45.5 ${bg}`}>
+        <section className={`relative h-45.5 ${bg} ${ad.fotos.length > 0 ? "md:h-64" : ""}`}>
           <BackButton
             href={backHref}
             iconSize={17}
@@ -83,14 +84,18 @@ export function ProfessionalDetails({
             </button>
           </div>
 
-          <div className="flex h-full items-center justify-center pt-5">
-            <Icon
-              size={43}
-              strokeWidth={1.3}
-              className={text}
-              aria-hidden="true"
-            />
-          </div>
+          {ad.fotos.length > 0 ? (
+            <AdPhotoGallery adId={ad.id} photos={ad.fotos} title={ad.titulo} />
+          ) : (
+            <div className="flex h-full items-center justify-center pt-5">
+              <Icon
+                size={43}
+                strokeWidth={1.3}
+                className={text}
+                aria-hidden="true"
+              />
+            </div>
+          )}
         </section>
 
         <section className="relative -mt-3 rounded-t-2xl bg-white px-4 pt-3">

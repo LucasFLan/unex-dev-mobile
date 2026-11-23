@@ -6,6 +6,7 @@ import { AdOwnerActions } from "@/components/AdOwnerActions";
 import { BackButton } from "@/components/BackButton";
 import { ValidationBanner } from "@/components/ValidationBanner";
 import { ProposalSheet } from "@/components/ProposalSheet";
+import { AdPhotoGallery } from "@/components/AdPhotoGallery";
 import { RelativeTime } from "@/components/RelativeTime";
 import { MyProposalStatus } from "@/components/MyProposalStatus";
 import { ReceivedProposals } from "@/components/ReceivedProposals";
@@ -131,6 +132,12 @@ export function ServiceDetails({
           </div>
 
           <AdAuthor ad={ad} isOwner={isOwner} from={`/servicos/${ad.id}`} />
+
+          {ad.fotos.length > 0 && (
+            <section className="relative mt-4 h-48 overflow-hidden rounded-xl bg-slate-100 md:h-56" aria-label="Fotos">
+              <AdPhotoGallery adId={ad.id} photos={ad.fotos} title={ad.titulo} />
+            </section>
+          )}
 
           <section className="mt-4">
             <h3 className="text-[11px] font-bold">Descrição</h3>
