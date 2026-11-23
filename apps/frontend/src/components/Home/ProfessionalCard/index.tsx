@@ -3,18 +3,26 @@ import { MapPin } from "lucide-react";
 import { getCategoryMeta } from "@/lib/categories";
 import { initials, type Professional } from "@/lib/marketplace";
 import { formatPrice } from "@/lib/format";
+import { withFrom } from "@/lib/navigation";
 
 export function ProfessionalCard({
   professional,
+  from,
+  className = "w-47.5",
 }: {
   professional: Professional;
+  /** Tela de onde o detalhe foi aberto, para o voltar (padrão: Home). */
+  from?: string;
+  className?: string;
 }) {
+  const href = `/profissionais/${professional.id}`;
+
   const { icon: Icon, bg, text } = getCategoryMeta(professional.categorySlug);
 
   return (
     <Link
-      href={`/profissionais/${professional.id}`}
-      className="block w-47.5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm focus-visible:outline-2 focus-visible:outline-blue-600"
+      href={from ? withFrom(href, from) : href}
+      className={`block ${className} overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm focus-visible:outline-2 focus-visible:outline-blue-600`}
     >
       <div
         className={`relative flex h-21.5 items-center justify-center ${bg}`}
