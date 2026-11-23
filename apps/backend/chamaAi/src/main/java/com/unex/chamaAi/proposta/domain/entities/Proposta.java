@@ -1,7 +1,9 @@
 package com.unex.chamaAi.proposta.domain.entities;
 
 import com.unex.chamaAi.anuncio.domain.valueobjects.Preco;
+import com.unex.chamaAi.anuncio.domain.valueobjects.TipoAnuncio;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaJaRespondidaException;
+import com.unex.chamaAi.proposta.domain.exceptions.ServicoNaoConcluivelException;
 import com.unex.chamaAi.proposta.domain.valueobjects.StatusProposta;
 import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 
@@ -13,7 +15,8 @@ import java.util.UUID;
 
 /**
  * Proposta que um usuário envia para o autor de um anúncio: um profissional respondendo a um pedido, ou um
- * cliente pedindo orçamento para uma oferta. Nasce PENDENTE e só sai desse estado uma vez.
+ * cliente pedindo orçamento para uma oferta. Nasce PENDENTE e só sai desse estado uma vez; depois de ACEITA,
+ * quem contratou pode marcá-la como CONCLUIDA (o serviço foi feito), o que libera a avaliação.
  */
 public class Proposta {
 
@@ -28,9 +31,10 @@ public class Proposta {
     private StatusProposta status;
     private final Instant criadoEm;
     private Instant respondidoEm;
+    private Instant concluidoEm;
 
     private Proposta(UUID id, UUID anuncioId, UUID remetenteId, UUID destinatarioId, Preco valor, String mensagem,
-                     StatusProposta status, Instant criadoEm, Instant respondidoEm) {
+                     StatusProposta status, Instant criadoEm, Instant respondidoEm, Instant concluidoEm) {
         this.id = Objects.requireNonNull(id, "O id é obrigatório.");
         this.anuncioId = Objects.requireNonNull(anuncioId, "O anúncio é obrigatório.");
         this.remetenteId = Objects.requireNonNull(remetenteId, "O remetente é obrigatório.");
@@ -40,20 +44,54 @@ public class Proposta {
         this.status = Objects.requireNonNull(status, "O status é obrigatório.");
         this.criadoEm = Objects.requireNonNull(criadoEm, "A data de criação é obrigatória.");
         this.respondidoEm = respondidoEm;
+        this.concluidoEm = concluidoEm;
     }
 
     /** valor nulo = "a combinar". */
     public static Proposta criar(UUID anuncioId, UUID remetenteId, UUID destinatarioId, Preco valor,
                                  String mensagem) {
         return new Proposta(UUID.randomUUID(), anuncioId, remetenteId, destinatarioId, valor, mensagem,
-                StatusProposta.PENDENTE, agora(), null);
+                StatusProposta.PENDENTE, agora(), null, null);
     }
 
     public static Proposta reconstituir(UUID id, UUID anuncioId, UUID remetenteId, UUID destinatarioId, Preco valor,
                                         String mensagem, StatusProposta status, Instant criadoEm,
                                         Instant respondidoEm) {
+        return reconstituir(id, anuncioId, remetenteId, destinatarioId, valor, mensagem, status, criadoEm,
+                respondidoEm, null);
+    }
+
+    public static Proposta reconstituir(UUID id, UUID anuncioId, UUID remetenteId, UUID destinatarioId, Preco valor,
+                                        String mensagem, StatusProposta status, Instant criadoEm,
+                                        Instant respondidoEm, Instant concluidoEm) {
         return new Proposta(id, anuncioId, remetenteId, destinatarioId, valor, mensagem, status, criadoEm,
-                respondidoEm);
+                respondidoEm, concluidoEm);
+    }
+
+    /** Quem contratou confirma que o serviço foi feito. Só vale para proposta aceita, e uma vez. */
+    public void concluir() {
+        if (status != StatusProposta.ACEITA) {
+            throw new ServicoNaoConcluivelException();
+        }
+        status = StatusProposta.CONCLUIDA;
+        concluidoEm = agora();
+    }
+
+    public boolean isConcluida() {
+        return status == StatusProposta.CONCLUIDA;
+    }
+
+    /**
+     * Quem contrata o serviço: num PEDIDO, o autor do anúncio (recebeu a proposta do profissional); numa OFERTA,
+     * quem enviou o pedido de orçamento.
+     */
+    public UUID clienteId(TipoAnuncio tipoAnuncio) {
+        return tipoAnuncio == TipoAnuncio.PEDIDO ? destinatarioId : remetenteId;
+    }
+
+    /** Quem presta o serviço (o outro lado de {@link #clienteId}). */
+    public UUID profissionalId(TipoAnuncio tipoAnuncio) {
+        return tipoAnuncio == TipoAnuncio.PEDIDO ? remetenteId : destinatarioId;
     }
 
     /** Decisão do autor do anúncio. */
@@ -90,7 +128,7 @@ public class Proposta {
 
     /** Só depois do aceite os dois lados veem o contato um do outro. */
     public boolean contatoLiberado() {
-        return status == StatusProposta.ACEITA;
+        return status == StatusProposta.ACEITA || status == StatusProposta.CONCLUIDA;
     }
 
     public boolean foiEnviadaPor(UUID usuarioId) {
@@ -154,6 +192,11 @@ public class Proposta {
     /** Vazio enquanto a proposta está pendente. */
     public Optional<Instant> getRespondidoEm() {
         return Optional.ofNullable(respondidoEm);
+    }
+
+    /** Vazio enquanto o serviço não foi marcado como concluído. */
+    public Optional<Instant> getConcluidoEm() {
+        return Optional.ofNullable(concluidoEm);
     }
 
     @Override

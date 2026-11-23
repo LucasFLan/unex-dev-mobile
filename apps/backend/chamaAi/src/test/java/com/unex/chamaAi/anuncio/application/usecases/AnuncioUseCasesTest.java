@@ -31,13 +31,15 @@ class AnuncioUseCasesTest {
     private final RepositoriosEmMemoria.Categorias categorias = new RepositoriosEmMemoria.Categorias();
 
     private final RepositoriosEmMemoria.Usuarios usuarios = new RepositoriosEmMemoria.Usuarios();
-    private final CriarAnuncio criar = new CriarAnuncio(anuncios, categorias, usuarios);
-    private final BuscarAnuncio buscar = new BuscarAnuncio(anuncios, categorias);
-    private final ListarAnuncios listar = new ListarAnuncios(anuncios, categorias);
-    private final ListarMeusAnuncios listarMeus = new ListarMeusAnuncios(anuncios, categorias);
-    private final EditarAnuncio editar = new EditarAnuncio(anuncios, categorias);
+    private final CriarAnuncio criar = new CriarAnuncio(anuncios, categorias, usuarios, cep -> java.util.Optional.empty(),
+            com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio.NENHUM);
+    private final BuscarAnuncio buscar = new BuscarAnuncio(anuncios, categorias, com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio.NENHUM);
+    private final ListarAnuncios listar = new ListarAnuncios(anuncios, categorias, com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio.NENHUM);
+    private final ListarMeusAnuncios listarMeus = new ListarMeusAnuncios(anuncios, categorias, com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio.NENHUM);
+    private final EditarAnuncio editar = new EditarAnuncio(anuncios, categorias, cep -> java.util.Optional.empty(),
+            com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio.NENHUM);
     private final ExcluirAnuncio excluir = new ExcluirAnuncio(anuncios);
-    private final AlterarAtivacaoAnuncio alterarAtivacao = new AlterarAtivacaoAnuncio(anuncios, categorias);
+    private final AlterarAtivacaoAnuncio alterarAtivacao = new AlterarAtivacaoAnuncio(anuncios, categorias, com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio.NENHUM);
     private final ListarCategorias listarCategorias = new ListarCategorias(categorias);
 
     private Categoria eletricista;

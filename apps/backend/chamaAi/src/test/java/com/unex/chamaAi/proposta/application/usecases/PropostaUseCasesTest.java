@@ -56,13 +56,30 @@ class PropostaUseCasesTest {
     private final Notificacoes notificacoes = new Notificacoes();
 
     private final FotosEmMemoria fotos = new FotosEmMemoria();
+    private final AvaliacoesEmMemoria avaliacoes = new AvaliacoesEmMemoria();
 
     private final EnviarProposta enviar = new EnviarProposta(propostas, anuncios, usuarios, fotos,
             new NotificarEventosDeProposta(notificacoes));
-    private final ListarPropostas listar = new ListarPropostas(propostas, anuncios, usuarios, fotos);
-    private final ResponderProposta responder = new ResponderProposta(propostas, anuncios, usuarios, fotos,
+    private final ListarPropostas listar = new ListarPropostas(propostas, anuncios, usuarios, fotos, avaliacoes);
+    private final ResponderProposta responder = new ResponderProposta(propostas, anuncios, usuarios, fotos, avaliacoes,
             new NotificarEventosDeProposta(notificacoes));
     private final ListarNotificacoes listarNotificacoes = new ListarNotificacoes(notificacoes);
+    private final com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository categorias =
+            new com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository() {
+                @Override
+                public List<com.unex.chamaAi.anuncio.domain.entities.Categoria> listarTodas() {
+                    return List.of();
+                }
+
+                @Override
+                public Optional<com.unex.chamaAi.anuncio.domain.entities.Categoria> buscarPorId(UUID id) {
+                    return Optional.of(new com.unex.chamaAi.anuncio.domain.entities.Categoria(id, "eletricista",
+                            "Eletricista"));
+                }
+            };
+    private final AvaliarServico avaliar = new AvaliarServico(propostas, anuncios, categorias, usuarios, avaliacoes,
+            new NotificarEventosDeProposta(notificacoes));
+    private final ListarAvaliacoes listarAvaliacoes = new ListarAvaliacoes(avaliacoes, usuarios);
     private final MarcarNotificacoesComoLidas marcarComoLidas = new MarcarNotificacoesComoLidas(notificacoes);
 
     private Usuario joao;
@@ -287,6 +304,118 @@ class PropostaUseCasesTest {
         assertTrue(anuncios.dados.get(oferta.getId()).isAtivo());
         assertEquals(StatusProposta.PENDENTE, propostas.dados.get(doPedro.id()).getStatus());
         assertTrue(notificacoesDe(pedro).isEmpty());
+    }
+
+    // ---- Conclusão e avaliação ----
+
+    /** Pedido do João, proposta da Maria (profissional) aceita: o João é quem contratou. */
+    private PropostaDetalhada servicoAceitoNoPedido() {
+        PropostaDetalhada proposta = mariaPropoe("150", "Troco hoje");
+        responder.aceitar(proposta.id(), joao.getId());
+        return proposta;
+    }
+
+    @Test
+    void clienteDoPedidoConcluiEProfissionalEhAvisado() {
+        PropostaDetalhada proposta = servicoAceitoNoPedido();
+
+        PropostaDetalhada concluida = responder.concluir(proposta.id(), joao.getId());
+
+        assertEquals("CONCLUIDA", concluida.status());
+        assertNotNull(concluida.concluidoEm());
+        assertTrue(notificacoesDe(maria).stream().anyMatch(n -> n.getTipo() == TipoNotificacao.SERVICO_CONCLUIDO));
+        // O contato continua liberado depois de concluído.
+        assertNotNull(concluida.endereco());
+    }
+
+    @Test
+    void soQuemContratouConclui() {
+        PropostaDetalhada proposta = servicoAceitoNoPedido();
+
+        assertThrows(AcessoNegadoPropostaException.class, () -> responder.concluir(proposta.id(), maria.getId()));
+        assertThrows(PropostaNaoEncontradaException.class, () -> responder.concluir(proposta.id(), pedro.getId()));
+    }
+
+    @Test
+    void soPropostaAceitaPodeSerConcluidaEUmaVezSo() {
+        PropostaDetalhada pendente = mariaPropoe(null, "Oi");
+        assertThrows(com.unex.chamaAi.proposta.domain.exceptions.ServicoNaoConcluivelException.class,
+                () -> responder.concluir(pendente.id(), joao.getId()));
+
+        responder.aceitar(pendente.id(), joao.getId());
+        responder.concluir(pendente.id(), joao.getId());
+        assertThrows(com.unex.chamaAi.proposta.domain.exceptions.ServicoNaoConcluivelException.class,
+                () -> responder.concluir(pendente.id(), joao.getId()));
+    }
+
+    @Test
+    void naOfertaQuemContrataEhQuemPediuOrcamento() {
+        Anuncio oferta = anuncios.adicionar(joao.getId(), "Pintor", true, TipoAnuncio.OFERTA);
+        PropostaDetalhada orcamento = propor(oferta, maria);
+        responder.aceitar(orcamento.id(), joao.getId());
+
+        // O João é o profissional: não conclui o próprio serviço.
+        assertThrows(AcessoNegadoPropostaException.class, () -> responder.concluir(orcamento.id(), joao.getId()));
+        responder.concluir(orcamento.id(), maria.getId());
+
+        var avaliacao = avaliar.executar(orcamento.id(), maria.getId(), 4, "Bom trabalho");
+        assertEquals(4, avaliacao.nota());
+        assertEquals(joao.getId(), avaliacoes.dados.values().iterator().next().getAvaliadoId());
+    }
+
+    @Test
+    void avaliaDepoisDeConcluirEAMediaEntraNoPerfil() {
+        PropostaDetalhada proposta = servicoAceitoNoPedido();
+        responder.concluir(proposta.id(), joao.getId());
+
+        var avaliacao = avaliar.executar(proposta.id(), joao.getId(), 5, "  Pontual e caprichosa.  ");
+
+        assertEquals(5, avaliacao.nota());
+        assertEquals("Pontual e caprichosa.", avaliacao.comentario());
+        assertEquals("Trocar chuveiro", avaliacao.servicoTitulo());
+        assertEquals("Eletricista", avaliacao.servicoCategoria());
+        assertEquals("João", avaliacao.autor().nome());
+        assertTrue(notificacoesDe(maria).stream().anyMatch(n -> n.getTipo() == TipoNotificacao.AVALIACAO_RECEBIDA
+                && n.getMensagem().contains("5 estrelas")));
+
+        var perfil = listarAvaliacoes.doUsuario(maria.getId(), null, null);
+        assertEquals(5.0, perfil.resumo().media());
+        assertEquals(1, perfil.resumo().total());
+        assertEquals(1, perfil.avaliacoes().itens().size());
+        // A proposta passa a mostrar a avaliação.
+        assertEquals(5, listar.enviadas(maria.getId(), null, null).itens().getFirst().avaliacao().nota());
+    }
+
+    @Test
+    void regrasDaAvaliacao() {
+        PropostaDetalhada proposta = servicoAceitoNoPedido();
+
+        // Antes de concluir.
+        assertThrows(com.unex.chamaAi.proposta.domain.exceptions.AvaliacaoIndisponivelException.class,
+                () -> avaliar.executar(proposta.id(), joao.getId(), 5, null));
+        responder.concluir(proposta.id(), joao.getId());
+
+        // O profissional não se avalia; quem está fora não vê a proposta.
+        assertThrows(AcessoNegadoPropostaException.class, () -> avaliar.executar(proposta.id(), maria.getId(), 5, null));
+        assertThrows(PropostaNaoEncontradaException.class, () -> avaliar.executar(proposta.id(), pedro.getId(), 5, null));
+        // Nota fora de 1 a 5, sem nota, comentário longo demais.
+        assertThrows(DadoInvalidoException.class, () -> avaliar.executar(proposta.id(), joao.getId(), 0, null));
+        assertThrows(DadoInvalidoException.class, () -> avaliar.executar(proposta.id(), joao.getId(), 6, null));
+        assertThrows(DadoInvalidoException.class, () -> avaliar.executar(proposta.id(), joao.getId(), null, null));
+        assertThrows(DadoInvalidoException.class,
+                () -> avaliar.executar(proposta.id(), joao.getId(), 3, "x".repeat(501)));
+
+        avaliar.executar(proposta.id(), joao.getId(), 3, null);
+        assertThrows(com.unex.chamaAi.proposta.domain.exceptions.AvaliacaoDuplicadaException.class,
+                () -> avaliar.executar(proposta.id(), joao.getId(), 5, null));
+    }
+
+    @Test
+    void enderecoSoAparecePraQuemEstaNaPropostaDepoisDoAceite() {
+        PropostaDetalhada pendente = mariaPropoe(null, "Oi");
+        assertNull(pendente.endereco());
+
+        assertNotNull(responder.aceitar(pendente.id(), joao.getId()).endereco());
     }
 
     @Test

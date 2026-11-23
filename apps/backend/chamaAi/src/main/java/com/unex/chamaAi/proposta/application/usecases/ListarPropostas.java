@@ -4,6 +4,7 @@ import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.proposta.application.dto.PropostaDetalhada;
 import com.unex.chamaAi.proposta.domain.exceptions.FotoPropostaNaoEncontradaException;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaNaoEncontradaException;
+import com.unex.chamaAi.proposta.domain.repositories.AvaliacaoRepository;
 import com.unex.chamaAi.proposta.domain.repositories.FotoPropostaRepository;
 import com.unex.chamaAi.proposta.domain.repositories.PropostaRepository;
 import com.unex.chamaAi.proposta.domain.valueobjects.FotoProposta;
@@ -21,10 +22,10 @@ public class ListarPropostas {
     private final DetalhadorProposta detalhador;
 
     public ListarPropostas(PropostaRepository propostas, AnuncioRepository anuncios, UsuarioRepository usuarios,
-                           FotoPropostaRepository fotos) {
+                           FotoPropostaRepository fotos, AvaliacaoRepository avaliacoes) {
         this.propostas = propostas;
         this.fotos = fotos;
-        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos);
+        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos, avaliacoes);
     }
 
     public Pagina<PropostaDetalhada> recebidas(UUID usuarioId, Integer pagina, Integer tamanho) {

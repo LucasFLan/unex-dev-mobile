@@ -1,5 +1,7 @@
 package com.unex.chamaAi.anuncio.application.usecases;
 
+import com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio;
+import com.unex.chamaAi.anuncio.application.ports.ConsultaCep;
 import com.unex.chamaAi.anuncio.application.dto.AnuncioDetalhado;
 import com.unex.chamaAi.anuncio.application.dto.DadosAnuncioCommand;
 import com.unex.chamaAi.anuncio.domain.entities.Anuncio;
@@ -16,10 +18,11 @@ public class EditarAnuncio {
     private final ValidadorDadosAnuncio validador;
     private final DetalhadorAnuncio detalhador;
 
-    public EditarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
+    public EditarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, ConsultaCep consultaCep,
+                         AutoresAnuncio autores) {
         this.anuncios = anuncios;
-        this.validador = new ValidadorDadosAnuncio(categorias);
-        this.detalhador = new DetalhadorAnuncio(categorias);
+        this.validador = new ValidadorDadosAnuncio(categorias, consultaCep);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores);
     }
 
     /** Só o autor edita. Para quem não vê o anúncio (inativo de outro autor), ele "não existe". */
@@ -33,7 +36,7 @@ public class EditarAnuncio {
 
         var dados = validador.validar(comando);
         anuncio.editar(dados.categoriaId(), dados.tipo(), dados.titulo(), dados.descricao(), dados.preco(),
-                dados.localizacao());
+                dados.localizacao(), dados.endereco(), dados.raioAtendimentoKm());
         anuncios.salvar(anuncio);
         return detalhador.detalhar(anuncio);
     }

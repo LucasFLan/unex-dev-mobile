@@ -38,7 +38,8 @@ public class EnviarProposta {
         this.usuarios = usuarios;
         this.fotos = fotos;
         this.notificador = notificador;
-        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos);
+        // Proposta recém-enviada não tem avaliação.
+        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos, null);
     }
 
     /**

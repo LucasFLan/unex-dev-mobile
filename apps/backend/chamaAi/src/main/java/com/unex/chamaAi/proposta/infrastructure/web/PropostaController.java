@@ -99,6 +99,24 @@ public interface PropostaController {
                             @PathVariable UUID id,
                             @RequestBody PropostaRequest request);
 
+    @Operation(summary = "Marcar serviço como concluído",
+            description = """
+                    Quem contratou confirma que o serviço foi feito: num **pedido**, o autor do anúncio; numa **oferta**,
+                    quem pediu o orçamento. Só vale para proposta `ACEITA`; ela vira `CONCLUIDA`, o profissional é
+                    notificado e a avaliação fica liberada (`POST /propostas/{id}/avaliacao`).""")
+    @ApiResponse(responseCode = "200", description = "Serviço concluído.", content = @Content(
+            schema = @Schema(implementation = PropostaResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "403", description = "Só quem contratou pode concluir.", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "404", description = "Proposta inexistente ou de outras pessoas.", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "422", description = "A proposta não está aceita (ou já foi concluída).",
+            content = @Content(mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @PatchMapping("/propostas/{id}/concluir")
+    PropostaResponse concluir(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
+                              @Parameter(description = "Id da proposta.") @PathVariable UUID id);
+
     @Operation(summary = "Enviar proposta com fotos",
             description = """
                     Mesma rota e mesmas regras do envio em JSON, em `multipart/form-data`, para anexar fotos (o serviço já

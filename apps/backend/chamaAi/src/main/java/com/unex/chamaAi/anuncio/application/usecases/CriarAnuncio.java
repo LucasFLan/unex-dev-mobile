@@ -1,5 +1,7 @@
 package com.unex.chamaAi.anuncio.application.usecases;
 
+import com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio;
+import com.unex.chamaAi.anuncio.application.ports.ConsultaCep;
 import com.unex.chamaAi.usuario.domain.entities.Usuario;
 import com.unex.chamaAi.usuario.domain.exceptions.ContaNaoValidadaException;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
@@ -18,11 +20,12 @@ public class CriarAnuncio {
     private final ValidadorDadosAnuncio validador;
     private final DetalhadorAnuncio detalhador;
 
-    public CriarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, UsuarioRepository usuarios) {
+    public CriarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, UsuarioRepository usuarios,
+                        ConsultaCep consultaCep, AutoresAnuncio autores) {
         this.anuncios = anuncios;
         this.usuarios = usuarios;
-        this.validador = new ValidadorDadosAnuncio(categorias);
-        this.detalhador = new DetalhadorAnuncio(categorias);
+        this.validador = new ValidadorDadosAnuncio(categorias, consultaCep);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores);
     }
 
     /** Só conta com documentos aprovados publica anúncio. */
@@ -33,7 +36,7 @@ public class CriarAnuncio {
         }
         var dados = validador.validar(comando);
         Anuncio anuncio = Anuncio.criar(autorId, dados.categoriaId(), dados.tipo(), dados.titulo(),
-                dados.descricao(), dados.preco(), dados.localizacao());
+                dados.descricao(), dados.preco(), dados.localizacao(), dados.endereco(), dados.raioAtendimentoKm());
         anuncios.salvar(anuncio);
         return detalhador.detalhar(anuncio);
     }

@@ -8,6 +8,7 @@ import com.unex.chamaAi.proposta.application.ports.NotificadorProposta;
 import com.unex.chamaAi.proposta.domain.entities.Proposta;
 import com.unex.chamaAi.proposta.domain.exceptions.AcessoNegadoPropostaException;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaNaoEncontradaException;
+import com.unex.chamaAi.proposta.domain.repositories.AvaliacaoRepository;
 import com.unex.chamaAi.proposta.domain.repositories.FotoPropostaRepository;
 import com.unex.chamaAi.proposta.domain.repositories.PropostaRepository;
 import com.unex.chamaAi.usuario.domain.entities.Usuario;
@@ -15,7 +16,10 @@ import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
 
 import java.util.UUID;
 
-/** Ações sobre uma proposta já enviada: o autor do anúncio aceita ou recusa; quem enviou pode cancelar. */
+/**
+ * Ações sobre uma proposta já enviada: o autor do anúncio aceita ou recusa; quem enviou pode cancelar; depois do
+ * aceite, quem contratou marca o serviço como concluído.
+ */
 public class ResponderProposta {
 
     private final PropostaRepository propostas;
@@ -25,12 +29,13 @@ public class ResponderProposta {
     private final DetalhadorProposta detalhador;
 
     public ResponderProposta(PropostaRepository propostas, AnuncioRepository anuncios, UsuarioRepository usuarios,
-                             FotoPropostaRepository fotos, NotificadorProposta notificador) {
+                             FotoPropostaRepository fotos, AvaliacaoRepository avaliacoes,
+                             NotificadorProposta notificador) {
         this.propostas = propostas;
         this.anuncios = anuncios;
         this.usuarios = usuarios;
         this.notificador = notificador;
-        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos);
+        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos, avaliacoes);
     }
 
     /**
@@ -77,6 +82,24 @@ public class ResponderProposta {
         }
         proposta.cancelar();
         propostas.salvar(proposta);
+        return detalhador.detalhar(proposta);
+    }
+
+    /**
+     * Quem contratou confirma que o serviço foi feito (libera a avaliação). Num PEDIDO é o autor do anúncio; numa
+     * OFERTA, quem pediu o orçamento. O profissional é avisado.
+     */
+    public PropostaDetalhada concluir(UUID propostaId, UUID usuarioId) {
+        Proposta proposta = visivel(propostaId, usuarioId);
+        Anuncio anuncio = anuncios.buscarPorId(proposta.getAnuncioId()).orElseThrow(PropostaNaoEncontradaException::new);
+        if (!proposta.clienteId(anuncio.getTipo()).equals(usuarioId)) {
+            throw new AcessoNegadoPropostaException("Só quem contratou pode marcar o serviço como concluído.");
+        }
+
+        proposta.concluir();
+        propostas.salvar(proposta);
+        notificador.servicoConcluido(proposta, proposta.profissionalId(anuncio.getTipo()), anuncio.getTitulo(),
+                nome(usuarioId));
         return detalhador.detalhar(proposta);
     }
 

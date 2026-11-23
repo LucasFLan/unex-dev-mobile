@@ -39,9 +39,35 @@ public record AnuncioRequest(
 
         @Schema(description = "Sigla da UF (aceita minúsculas).", example = "BA", minLength = 2, maxLength = 2,
                 requiredMode = REQUIRED)
-        String uf) {
+        String uf,
+
+        @Schema(description = "CEP (com ou sem hífen). Com ele o anúncio ganha bairro, mapa da região e distância; "
+                + "sem ele, fica só com cidade e UF. Consulte antes em `GET /cep/{cep}` para preencher o resto.",
+                example = "40140-110", requiredMode = NOT_REQUIRED, nullable = true)
+        String cep,
+
+        @Schema(description = "Rua. Vazio = o do CEP. Só o autor (e, após o aceite, a outra pessoa) vê.",
+                example = "Avenida Sete de Setembro", maxLength = 150, requiredMode = NOT_REQUIRED, nullable = true)
+        String logradouro,
+
+        @Schema(description = "Número. Só o autor (e, após o aceite, a outra pessoa) vê.", example = "123",
+                maxLength = 20, requiredMode = NOT_REQUIRED, nullable = true)
+        String numero,
+
+        @Schema(description = "Complemento. Só o autor (e, após o aceite, a outra pessoa) vê.", example = "Apto 201",
+                maxLength = 100, requiredMode = NOT_REQUIRED, nullable = true)
+        String complemento,
+
+        @Schema(description = "Bairro (público). Vazio = o do CEP.", example = "Barra", maxLength = 100,
+                requiredMode = NOT_REQUIRED, nullable = true)
+        String bairro,
+
+        @Schema(description = "Até quantos km o profissional atende (só `OFERTA`; ignorado em `PEDIDO`).",
+                example = "10", minimum = "1", maximum = "200", requiredMode = NOT_REQUIRED, nullable = true)
+        Integer raioAtendimentoKm) {
 
     public DadosAnuncioCommand paraComando() {
-        return new DadosAnuncioCommand(tipo, categoriaId, titulo, descricao, preco, cidade, uf);
+        return new DadosAnuncioCommand(tipo, categoriaId, titulo, descricao, preco, cidade, uf, cep, logradouro,
+                numero, complemento, bairro, raioAtendimentoKm);
     }
 }

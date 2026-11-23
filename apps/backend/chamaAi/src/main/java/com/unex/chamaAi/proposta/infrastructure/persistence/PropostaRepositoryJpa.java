@@ -33,7 +33,8 @@ public class PropostaRepositoryJpa implements PropostaRepository {
         springData.saveAndFlush(new PropostaJpaEntity(proposta.getId(), proposta.getAnuncioId(),
                 proposta.getRemetenteId(), proposta.getDestinatarioId(),
                 proposta.getValor().map(Preco::valor).orElse(null), proposta.getMensagem(),
-                proposta.getStatus().name(), proposta.getCriadoEm(), proposta.getRespondidoEm().orElse(null)));
+                proposta.getStatus().name(), proposta.getCriadoEm(), proposta.getRespondidoEm().orElse(null),
+                proposta.getConcluidoEm().orElse(null)));
     }
 
     @Override
@@ -74,6 +75,7 @@ public class PropostaRepositoryJpa implements PropostaRepository {
     private static Proposta paraDominio(PropostaJpaEntity entidade) {
         return Proposta.reconstituir(entidade.getId(), entidade.getAnuncioId(), entidade.getRemetenteId(),
                 entidade.getDestinatarioId(), Preco.deOuNulo(entidade.getValor()), entidade.getMensagem(),
-                StatusProposta.valueOf(entidade.getStatus()), entidade.getCriadoEm(), entidade.getRespondidoEm());
+                StatusProposta.valueOf(entidade.getStatus()), entidade.getCriadoEm(), entidade.getRespondidoEm(),
+                entidade.getConcluidoEm());
     }
 }

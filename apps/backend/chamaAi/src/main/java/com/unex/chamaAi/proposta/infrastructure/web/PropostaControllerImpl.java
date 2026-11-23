@@ -58,6 +58,12 @@ public class PropostaControllerImpl implements PropostaController {
         return PropostaResponse.de(enviarProposta.executar(id, usuarioLogado(jwt), comando));
     }
 
+    @Override
+    @Transactional
+    public PropostaResponse concluir(Jwt jwt, UUID id) {
+        return PropostaResponse.de(responderProposta.concluir(id, usuarioLogado(jwt)));
+    }
+
     /** As fotos não mudam depois de enviadas: o navegador pode guardar por um bom tempo. */
     @Override
     public ResponseEntity<byte[]> foto(Jwt jwt, UUID id, UUID fotoId) {

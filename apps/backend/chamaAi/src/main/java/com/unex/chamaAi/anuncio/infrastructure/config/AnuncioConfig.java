@@ -11,6 +11,8 @@ import com.unex.chamaAi.anuncio.application.usecases.ListarMeusAnuncios;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
+import com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio;
+import com.unex.chamaAi.anuncio.application.ports.ConsultaCep;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,28 +21,32 @@ public class AnuncioConfig {
 
     @Bean
     public CriarAnuncio criarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias,
-                                     UsuarioRepository usuarios) {
-        return new CriarAnuncio(anuncios, categorias, usuarios);
+                                     UsuarioRepository usuarios, ConsultaCep consultaCep, AutoresAnuncio autores) {
+        return new CriarAnuncio(anuncios, categorias, usuarios, consultaCep, autores);
     }
 
     @Bean
-    public BuscarAnuncio buscarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
-        return new BuscarAnuncio(anuncios, categorias);
+    public BuscarAnuncio buscarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias,
+                                       AutoresAnuncio autores) {
+        return new BuscarAnuncio(anuncios, categorias, autores);
     }
 
     @Bean
-    public ListarAnuncios listarAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias) {
-        return new ListarAnuncios(anuncios, categorias);
+    public ListarAnuncios listarAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias,
+                                         AutoresAnuncio autores) {
+        return new ListarAnuncios(anuncios, categorias, autores);
     }
 
     @Bean
-    public ListarMeusAnuncios listarMeusAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias) {
-        return new ListarMeusAnuncios(anuncios, categorias);
+    public ListarMeusAnuncios listarMeusAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias,
+                                                 AutoresAnuncio autores) {
+        return new ListarMeusAnuncios(anuncios, categorias, autores);
     }
 
     @Bean
-    public EditarAnuncio editarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
-        return new EditarAnuncio(anuncios, categorias);
+    public EditarAnuncio editarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias,
+                                       ConsultaCep consultaCep, AutoresAnuncio autores) {
+        return new EditarAnuncio(anuncios, categorias, consultaCep, autores);
     }
 
     @Bean
@@ -49,8 +55,9 @@ public class AnuncioConfig {
     }
 
     @Bean
-    public AlterarAtivacaoAnuncio alterarAtivacaoAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
-        return new AlterarAtivacaoAnuncio(anuncios, categorias);
+    public AlterarAtivacaoAnuncio alterarAtivacaoAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias,
+                                                         AutoresAnuncio autores) {
+        return new AlterarAtivacaoAnuncio(anuncios, categorias, autores);
     }
 
     @Bean

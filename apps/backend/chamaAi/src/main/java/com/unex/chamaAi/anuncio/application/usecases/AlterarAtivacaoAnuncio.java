@@ -1,5 +1,6 @@
 package com.unex.chamaAi.anuncio.application.usecases;
 
+import com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio;
 import com.unex.chamaAi.anuncio.application.dto.AnuncioDetalhado;
 import com.unex.chamaAi.anuncio.domain.entities.Anuncio;
 import com.unex.chamaAi.anuncio.domain.exceptions.AcessoNegadoAnuncioException;
@@ -14,9 +15,9 @@ public class AlterarAtivacaoAnuncio {
     private final AnuncioRepository anuncios;
     private final DetalhadorAnuncio detalhador;
 
-    public AlterarAtivacaoAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
+    public AlterarAtivacaoAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, AutoresAnuncio autores) {
         this.anuncios = anuncios;
-        this.detalhador = new DetalhadorAnuncio(categorias);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores);
     }
 
     /**

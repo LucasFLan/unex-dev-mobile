@@ -6,6 +6,7 @@ import com.unex.chamaAi.shared.domain.exceptions.DadoInvalidoException;
 import com.unex.chamaAi.shared.domain.exceptions.DominioException;
 import com.unex.chamaAi.shared.domain.exceptions.NaoAutenticadoException;
 import com.unex.chamaAi.shared.domain.exceptions.RecursoNaoEncontradoException;
+import com.unex.chamaAi.shared.domain.exceptions.ServicoExternoIndisponivelException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -46,6 +47,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConflitoException.class)
     public ProblemDetail conflito(ConflitoException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(ServicoExternoIndisponivelException.class)
+    public ProblemDetail servicoExternoIndisponivel(ServicoExternoIndisponivelException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
     @ExceptionHandler(DominioException.class)
