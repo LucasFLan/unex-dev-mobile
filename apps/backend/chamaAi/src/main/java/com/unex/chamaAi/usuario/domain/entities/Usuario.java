@@ -9,6 +9,7 @@ import com.unex.chamaAi.usuario.domain.valueobjects.Papel;
 import com.unex.chamaAi.usuario.domain.valueobjects.SenhaHash;
 import com.unex.chamaAi.usuario.domain.valueobjects.StatusValidacao;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
@@ -28,10 +29,12 @@ public class Usuario {
     private boolean verificado;
     private Papel papel;
     private StatusValidacao statusValidacao;
+    /** Quando a foto de perfil foi trocada pela última vez; {@code null} = sem foto. */
+    private Instant fotoAtualizadaEm;
 
     private Usuario(UUID id, String nome, LocalDate dataNascimento, Cpf cpf, Email email,
                     SenhaHash senha, String telefone, boolean verificado, Papel papel,
-                    StatusValidacao statusValidacao) {
+                    StatusValidacao statusValidacao, Instant fotoAtualizadaEm) {
         this.id = Objects.requireNonNull(id, "O id é obrigatório.");
         this.cpf = Objects.requireNonNull(cpf, "O CPF é obrigatório.");
         this.email = Objects.requireNonNull(email, "O email é obrigatório.");
@@ -42,19 +45,40 @@ public class Usuario {
         this.verificado = verificado;
         this.papel = Objects.requireNonNull(papel, "O papel é obrigatório.");
         this.statusValidacao = Objects.requireNonNull(statusValidacao, "O status de validação é obrigatório.");
+        this.fotoAtualizadaEm = fotoAtualizadaEm;
     }
 
     public static Usuario criar(String nome, LocalDate dataNascimento, Cpf cpf, Email email,
                                 SenhaHash senha, String telefone) {
         return new Usuario(UUID.randomUUID(), nome, dataNascimento, cpf, email, senha,
-                telefone, false, Papel.USUARIO, StatusValidacao.PENDENTE);
+                telefone, false, Papel.USUARIO, StatusValidacao.PENDENTE, null);
     }
 
     public static Usuario reconstituir(UUID id, String nome, LocalDate dataNascimento, Cpf cpf, Email email,
                                        SenhaHash senha, String telefone, boolean verificado, Papel papel,
                                        StatusValidacao statusValidacao) {
+        return reconstituir(id, nome, dataNascimento, cpf, email, senha, telefone, verificado, papel,
+                statusValidacao, null);
+    }
+
+    public static Usuario reconstituir(UUID id, String nome, LocalDate dataNascimento, Cpf cpf, Email email,
+                                       SenhaHash senha, String telefone, boolean verificado, Papel papel,
+                                       StatusValidacao statusValidacao, Instant fotoAtualizadaEm) {
         return new Usuario(id, nome, dataNascimento, cpf, email, senha,
-                telefone, verificado, papel, statusValidacao);
+                telefone, verificado, papel, statusValidacao, fotoAtualizadaEm);
+    }
+
+    /** Registra que a foto de perfil foi trocada agora (o arquivo em si fica no FotoPerfilRepository). */
+    public void registrarFoto(Instant quando) {
+        this.fotoAtualizadaEm = Objects.requireNonNull(quando, "A data da foto é obrigatória.");
+    }
+
+    public void removerFoto() {
+        this.fotoAtualizadaEm = null;
+    }
+
+    public boolean temFoto() {
+        return fotoAtualizadaEm != null;
     }
 
     public void alterarNome(String novoNome) {
@@ -195,6 +219,10 @@ public class Usuario {
 
     public StatusValidacao getStatusValidacao() {
         return statusValidacao;
+    }
+
+    public Instant getFotoAtualizadaEm() {
+        return fotoAtualizadaEm;
     }
 
     @Override

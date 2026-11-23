@@ -72,13 +72,13 @@ public class UsuarioRepositoryJpa implements UsuarioRepository {
         return new UsuarioJpaEntity(usuario.getId(), usuario.getNome(), usuario.getDataNascimento(),
                 usuario.getCpf().valor(), usuario.getEmail().valor(), usuario.getSenha().valor(),
                 usuario.getTelefone(), usuario.isVerificado(), usuario.getPapel().name(),
-                usuario.getStatusValidacao().name());
+                usuario.getStatusValidacao().name(), usuario.getFotoAtualizadaEm());
     }
 
     private static Usuario paraDominio(UsuarioJpaEntity entidade) {
         return Usuario.reconstituir(entidade.getId(), entidade.getNome(), entidade.getDataNascimento(),
                 new Cpf(entidade.getCpf()), new Email(entidade.getEmail()), new SenhaHash(entidade.getSenhaHash()),
                 entidade.getTelefone(), entidade.isVerificado(), Papel.valueOf(entidade.getPapel()),
-                StatusValidacao.valueOf(entidade.getStatusValidacao()));
+                StatusValidacao.valueOf(entidade.getStatusValidacao()), entidade.getFotoAtualizadaEm());
     }
 }

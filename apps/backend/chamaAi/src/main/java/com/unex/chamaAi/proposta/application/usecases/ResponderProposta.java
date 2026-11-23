@@ -8,6 +8,7 @@ import com.unex.chamaAi.proposta.application.ports.NotificadorProposta;
 import com.unex.chamaAi.proposta.domain.entities.Proposta;
 import com.unex.chamaAi.proposta.domain.exceptions.AcessoNegadoPropostaException;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaNaoEncontradaException;
+import com.unex.chamaAi.proposta.domain.repositories.FotoPropostaRepository;
 import com.unex.chamaAi.proposta.domain.repositories.PropostaRepository;
 import com.unex.chamaAi.usuario.domain.entities.Usuario;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
@@ -24,12 +25,12 @@ public class ResponderProposta {
     private final DetalhadorProposta detalhador;
 
     public ResponderProposta(PropostaRepository propostas, AnuncioRepository anuncios, UsuarioRepository usuarios,
-                             NotificadorProposta notificador) {
+                             FotoPropostaRepository fotos, NotificadorProposta notificador) {
         this.propostas = propostas;
         this.anuncios = anuncios;
         this.usuarios = usuarios;
         this.notificador = notificador;
-        this.detalhador = new DetalhadorProposta(anuncios, usuarios);
+        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos);
     }
 
     /**

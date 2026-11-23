@@ -5,6 +5,7 @@ import com.unex.chamaAi.proposta.application.ports.NotificadorProposta;
 import com.unex.chamaAi.proposta.application.usecases.EnviarProposta;
 import com.unex.chamaAi.proposta.application.usecases.ListarPropostas;
 import com.unex.chamaAi.proposta.application.usecases.ResponderProposta;
+import com.unex.chamaAi.proposta.domain.repositories.FotoPropostaRepository;
 import com.unex.chamaAi.proposta.domain.repositories.PropostaRepository;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
 import org.springframework.context.annotation.Bean;
@@ -15,19 +16,21 @@ public class PropostaConfig {
 
     @Bean
     public EnviarProposta enviarProposta(PropostaRepository propostas, AnuncioRepository anuncios,
-                                         UsuarioRepository usuarios, NotificadorProposta notificador) {
-        return new EnviarProposta(propostas, anuncios, usuarios, notificador);
+                                         UsuarioRepository usuarios, FotoPropostaRepository fotos,
+                                         NotificadorProposta notificador) {
+        return new EnviarProposta(propostas, anuncios, usuarios, fotos, notificador);
     }
 
     @Bean
     public ResponderProposta responderProposta(PropostaRepository propostas, AnuncioRepository anuncios,
-                                               UsuarioRepository usuarios, NotificadorProposta notificador) {
-        return new ResponderProposta(propostas, anuncios, usuarios, notificador);
+                                               UsuarioRepository usuarios, FotoPropostaRepository fotos,
+                                               NotificadorProposta notificador) {
+        return new ResponderProposta(propostas, anuncios, usuarios, fotos, notificador);
     }
 
     @Bean
     public ListarPropostas listarPropostas(PropostaRepository propostas, AnuncioRepository anuncios,
-                                           UsuarioRepository usuarios) {
-        return new ListarPropostas(propostas, anuncios, usuarios);
+                                           UsuarioRepository usuarios, FotoPropostaRepository fotos) {
+        return new ListarPropostas(propostas, anuncios, usuarios, fotos);
     }
 }

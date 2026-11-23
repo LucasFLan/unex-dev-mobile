@@ -16,9 +16,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +29,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -135,6 +140,43 @@ public interface UsuarioController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void alterarSenha(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
                       @RequestBody AlterarSenhaRequest request);
+
+    @Operation(summary = "Enviar ou trocar minha foto de perfil",
+            description = """
+                    Recebe a foto em `multipart/form-data` no campo `foto` (JPG, PNG ou WEBP, até 5 MB; o formato é
+                    conferido pelos bytes). Substitui a foto anterior e devolve o perfil com `fotoAtualizadaEm`
+                    atualizado. Não exige conta validada.""")
+    @ApiResponse(responseCode = "200", description = "Foto gravada; perfil atualizado.", content = @Content(
+            schema = @Schema(implementation = PerfilUsuarioResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Foto ausente, vazia, maior que 5 MB ou fora dos formatos aceitos.",
+            content = @Content(mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/UsuarioNaoEncontrado")
+    @PutMapping(value = "/me/foto", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    PerfilUsuarioResponse alterarFoto(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt,
+                                      @Parameter(description = "Foto de perfil (JPG, PNG ou WEBP, até 5 MB).")
+                                      @RequestPart("foto") MultipartFile foto);
+
+    @Operation(summary = "Remover minha foto de perfil",
+            description = "Apaga a foto e devolve o perfil com `fotoAtualizadaEm = null`. Sem foto, não faz nada.")
+    @ApiResponse(responseCode = "200", description = "Foto removida; perfil atualizado.", content = @Content(
+            schema = @Schema(implementation = PerfilUsuarioResponse.class)))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "404", ref = "#/components/responses/UsuarioNaoEncontrado")
+    @DeleteMapping("/me/foto")
+    PerfilUsuarioResponse removerFoto(@Parameter(hidden = true) @AuthenticationPrincipal Jwt jwt);
+
+    @Operation(summary = "Ver a foto de perfil de um usuário",
+            description = """
+                    Devolve a imagem (`image/jpeg`, `image/png` ou `image/webp`) de qualquer usuário, para mostrar nos
+                    anúncios e nas propostas. Exige login. Fica em cache por 5 minutos no navegador; para ver uma
+                    troca na hora, acrescente `?v=<fotoAtualizadaEm>` à URL.""")
+    @ApiResponse(responseCode = "200", description = "A imagem.", content = @Content(mediaType = "image/*"))
+    @ApiResponse(responseCode = "401", ref = "#/components/responses/NaoAutenticado")
+    @ApiResponse(responseCode = "404", description = "Usuário não existe ou não tem foto.", content = @Content(
+            mediaType = ExemplosDeErro.PROBLEM_JSON, schema = @Schema(implementation = ProblemDetail.class)))
+    @GetMapping("/{id}/foto")
+    ResponseEntity<byte[]> foto(@PathVariable UUID id);
 
     @Operation(summary = "Aprovar usuário",
             description = "Altera o status de validação do usuário para `APROVADO`. Restrito a `ADMIN`.")

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Schema(description = "Proposta enviada para o autor de um anúncio.")
@@ -39,12 +40,16 @@ public record PropostaResponse(
 
         @Schema(description = "Data em que saiu de PENDENTE (ISO-8601, UTC). `null` enquanto pendente.",
                 example = "2026-11-21T09:15:00.654321Z", nullable = true)
-        Instant respondidoEm) {
+        Instant respondidoEm,
+
+        @Schema(description = "Ids das fotos anexadas, na ordem do envio (vazio = sem fotos). Cada imagem fica em "
+                + "`GET /propostas/{id}/fotos/{fotoId}`.", example = "[\"0b1c2d3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e\"]")
+        List<UUID> fotos) {
 
     public static PropostaResponse de(PropostaDetalhada proposta) {
         return new PropostaResponse(proposta.id(), PropostaAnuncioResponse.de(proposta.anuncio()),
                 PropostaParticipanteResponse.de(proposta.remetente()),
                 PropostaParticipanteResponse.de(proposta.destinatario()), proposta.valor(), proposta.mensagem(),
-                proposta.status(), proposta.criadoEm(), proposta.respondidoEm());
+                proposta.status(), proposta.criadoEm(), proposta.respondidoEm(), proposta.fotos());
     }
 }

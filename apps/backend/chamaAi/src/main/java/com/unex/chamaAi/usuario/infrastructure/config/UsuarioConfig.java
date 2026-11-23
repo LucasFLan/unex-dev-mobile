@@ -7,12 +7,16 @@ import com.unex.chamaAi.usuario.application.usecases.AutenticarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.BuscarPerfilUsuario;
 import com.unex.chamaAi.usuario.application.usecases.CadastrarUsuario;
 import com.unex.chamaAi.usuario.application.usecases.EditarPerfilUsuario;
+import com.unex.chamaAi.usuario.application.usecases.GerenciarFotoPerfil;
 import com.unex.chamaAi.usuario.application.usecases.PromoverUsuarioParaAdmin;
 import com.unex.chamaAi.usuario.application.usecases.ReprovarUsuario;
+import com.unex.chamaAi.usuario.domain.repositories.FotoPerfilRepository;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
 import com.unex.chamaAi.usuario.domain.services.CriptografadorSenha;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Clock;
 
 @Configuration
 public class UsuarioConfig {
@@ -30,6 +34,12 @@ public class UsuarioConfig {
     @Bean
     public EditarPerfilUsuario editarPerfilUsuario(UsuarioRepository usuarios) {
         return new EditarPerfilUsuario(usuarios);
+    }
+
+    @Bean
+    public GerenciarFotoPerfil gerenciarFotoPerfil(UsuarioRepository usuarios, FotoPerfilRepository fotos,
+                                                   Clock relogio) {
+        return new GerenciarFotoPerfil(usuarios, fotos, relogio);
     }
 
     @Bean

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -47,4 +48,7 @@ public class UsuarioJpaEntity {
 
     @Column(name = "status_validacao", nullable = false, length = 20)
     private String statusValidacao;
+
+    @Column(name = "foto_atualizada_em")
+    private Instant fotoAtualizadaEm;
 }

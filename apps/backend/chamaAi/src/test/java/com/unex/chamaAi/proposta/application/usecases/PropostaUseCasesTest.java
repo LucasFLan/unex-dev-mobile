@@ -55,10 +55,12 @@ class PropostaUseCasesTest {
     private final Propostas propostas = new Propostas();
     private final Notificacoes notificacoes = new Notificacoes();
 
-    private final EnviarProposta enviar = new EnviarProposta(propostas, anuncios, usuarios,
+    private final FotosEmMemoria fotos = new FotosEmMemoria();
+
+    private final EnviarProposta enviar = new EnviarProposta(propostas, anuncios, usuarios, fotos,
             new NotificarEventosDeProposta(notificacoes));
-    private final ListarPropostas listar = new ListarPropostas(propostas, anuncios, usuarios);
-    private final ResponderProposta responder = new ResponderProposta(propostas, anuncios, usuarios,
+    private final ListarPropostas listar = new ListarPropostas(propostas, anuncios, usuarios, fotos);
+    private final ResponderProposta responder = new ResponderProposta(propostas, anuncios, usuarios, fotos,
             new NotificarEventosDeProposta(notificacoes));
     private final ListarNotificacoes listarNotificacoes = new ListarNotificacoes(notificacoes);
     private final MarcarNotificacoesComoLidas marcarComoLidas = new MarcarNotificacoesComoLidas(notificacoes);
@@ -120,6 +122,49 @@ class PropostaUseCasesTest {
     void valorNuloEhACombinar() {
         assertNull(mariaPropoe(null, "Vamos combinar o valor?").valor());
         assertTrue(notificacoes.dados.values().iterator().next().getMensagem().contains("(valor a combinar)"));
+    }
+
+    private static final byte[] JPEG = {(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 0x10};
+    private static final byte[] PNG = {(byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 0, 0};
+
+    private PropostaDetalhada mariaPropoeComFotos(List<byte[]> fotosAnexadas) {
+        return enviar.executar(pedidoDoJoao.getId(), maria.getId(),
+                new EnviarPropostaCommand(null, "Segue foto do serviço", fotosAnexadas));
+    }
+
+    @Test
+    void anexaFotosNaPropostaNaOrdemDoEnvio() {
+        PropostaDetalhada proposta = mariaPropoeComFotos(List.of(JPEG, PNG));
+
+        assertEquals(2, proposta.fotos().size());
+        assertEquals("image/jpeg", listar.foto(proposta.id(), proposta.fotos().get(0), joao.getId()).contentType());
+        assertEquals("image/png", listar.foto(proposta.id(), proposta.fotos().get(1), maria.getId()).contentType());
+        // A listagem também traz as fotos.
+        assertEquals(proposta.fotos(), listar.recebidas(joao.getId(), null, null).itens().getFirst().fotos());
+    }
+
+    @Test
+    void propostaSemFotoTemListaVazia() {
+        assertTrue(mariaPropoe(null, "Sem foto").fotos().isEmpty());
+    }
+
+    @Test
+    void recusaMaisDeCincoFotosEArquivoQueNaoEhImagem() {
+        assertThrows(DadoInvalidoException.class,
+                () -> mariaPropoeComFotos(List.of(JPEG, JPEG, JPEG, JPEG, JPEG, JPEG)));
+        assertThrows(DadoInvalidoException.class,
+                () -> mariaPropoeComFotos(List.of("não sou imagem".getBytes())));
+        assertTrue(propostas.dados.isEmpty(), "Nada é gravado quando uma foto é recusada");
+    }
+
+    @Test
+    void fotoDaPropostaSoEhVistaPelosEnvolvidos() {
+        PropostaDetalhada proposta = mariaPropoeComFotos(List.of(JPEG));
+        UUID fotoId = proposta.fotos().getFirst();
+
+        assertThrows(PropostaNaoEncontradaException.class, () -> listar.foto(proposta.id(), fotoId, pedro.getId()));
+        assertThrows(com.unex.chamaAi.proposta.domain.exceptions.FotoPropostaNaoEncontradaException.class,
+                () -> listar.foto(proposta.id(), UUID.randomUUID(), joao.getId()));
     }
 
     @Test
