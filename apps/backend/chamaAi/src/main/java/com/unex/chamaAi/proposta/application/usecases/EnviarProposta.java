@@ -12,6 +12,7 @@ import com.unex.chamaAi.proposta.domain.exceptions.PropostaDuplicadaException;
 import com.unex.chamaAi.proposta.domain.exceptions.PropostaParaProprioAnuncioException;
 import com.unex.chamaAi.proposta.domain.repositories.PropostaRepository;
 import com.unex.chamaAi.usuario.domain.entities.Usuario;
+import com.unex.chamaAi.usuario.domain.exceptions.ContaNaoValidadaException;
 import com.unex.chamaAi.usuario.domain.exceptions.UsuarioNaoEncontradoException;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
 
@@ -46,6 +47,9 @@ public class EnviarProposta {
             throw new PropostaParaProprioAnuncioException();
         }
         Usuario remetente = usuarios.buscarPorId(remetenteId).orElseThrow(UsuarioNaoEncontradoException::new);
+        if (!remetente.isAprovado()) {
+            throw new ContaNaoValidadaException();
+        }
 
         Proposta proposta = Proposta.criar(anuncio.getId(), remetenteId, anuncio.getAutorId(),
                 Preco.deOuNulo(comando.valor()), comando.mensagem());

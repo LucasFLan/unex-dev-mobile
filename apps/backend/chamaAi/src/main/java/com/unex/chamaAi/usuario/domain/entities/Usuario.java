@@ -117,6 +117,14 @@ public class Usuario {
         this.statusValidacao = StatusValidacao.REPROVADO;
     }
 
+    /** Reenviou os documentos depois de ser reprovado: volta para a fila de análise. */
+    public void voltarParaAnalise() {
+        if (this.statusValidacao == StatusValidacao.APROVADO) {
+            throw new StatusValidacaoInvalidoException("O usuário já está aprovado.");
+        }
+        this.statusValidacao = StatusValidacao.PENDENTE;
+    }
+
     public boolean isAprovado() {
         return this.statusValidacao == StatusValidacao.APROVADO;
     }

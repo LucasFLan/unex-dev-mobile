@@ -30,6 +30,7 @@ async function ProfissionalDetalheContent({
       proposals={received}
       myProposal={mine}
       backHref={backHref}
+      canPropose={user.validation === "APROVADO"}
     />
   );
 }

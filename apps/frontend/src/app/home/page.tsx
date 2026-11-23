@@ -19,6 +19,7 @@ async function HomeLoader() {
       anuncios={anuncios}
       categories={categories}
       unreadNotifications={unreadNotifications}
+      validation={user.validation}
     />
   );
 }

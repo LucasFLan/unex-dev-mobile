@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Pause, Pencil, Play, Trash2 } from "lucide-react";
+import { Copy, Pause, Pencil, Play, Trash2 } from "lucide-react";
 import { deleteAd, setAdActive } from "@/app/anunciar/actions";
+import { duplicateAdHref } from "@/lib/ad-links";
 import type { AnuncioItem } from "@/lib/ads";
 import { withFrom } from "@/lib/navigation";
 
@@ -66,7 +67,7 @@ export function AdOwnerActions({
           </p>
         )}
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-4 gap-2">
           <Link
             href={withFrom(`/anunciar/${ad.id}/editar`, detailHref)}
             className={`${buttonBase} border-blue-600 bg-blue-600 text-white`}
@@ -88,6 +89,14 @@ export function AdOwnerActions({
             )}
             {ad.ativo ? "Pausar" : "Retomar"}
           </button>
+
+          <Link
+            href={duplicateAdHref(ad.id, detailHref)}
+            className={`${buttonBase} border-slate-200 text-slate-700`}
+          >
+            <Copy size={13} aria-hidden="true" />
+            Duplicar
+          </Link>
 
           <button
             type="button"

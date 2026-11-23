@@ -8,6 +8,8 @@ import {
   ChevronRight,
   HandCoins,
   MinusCircle,
+  ShieldAlert,
+  ShieldCheck,
   XCircle,
   type LucideIcon,
 } from "lucide-react";
@@ -23,6 +25,8 @@ const TYPE_STYLE: Record<string, { icon: LucideIcon; tone: string }> = {
   PROPOSTA_ACEITA: { icon: CheckCircle2, tone: "bg-emerald-100 text-emerald-600" },
   PROPOSTA_RECUSADA: { icon: XCircle, tone: "bg-red-100 text-red-500" },
   PROPOSTA_NAO_SELECIONADA: { icon: MinusCircle, tone: "bg-slate-100 text-slate-500" },
+  VALIDACAO_APROVADA: { icon: ShieldCheck, tone: "bg-emerald-100 text-emerald-600" },
+  VALIDACAO_REPROVADA: { icon: ShieldAlert, tone: "bg-amber-100 text-amber-600" },
 };
 
 /**
@@ -30,6 +34,9 @@ const TYPE_STYLE: Record<string, { icon: LucideIcon; tone: string }> = {
  * o pedido aceito fica pausado e não abre mais para outras pessoas.
  */
 function hrefFor(notification: NotificationItem, selfHref: string) {
+  if (notification.tipo.startsWith("VALIDACAO_")) {
+    return withFrom("/validacao", selfHref);
+  }
   if (notification.tipo === "PROPOSTA_RECEBIDA") {
     return notification.anuncioId
       ? withFrom(`/anuncios/${notification.anuncioId}`, selfHref)

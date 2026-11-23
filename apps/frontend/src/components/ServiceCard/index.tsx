@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { getCategoryMeta } from "@/lib/categories";
+import { duplicateAdHref } from "@/lib/ad-links";
 import { withFrom } from "@/lib/navigation";
 import type { Service, ServiceStatus, ServiceType } from "@/lib/services";
 
@@ -98,6 +99,13 @@ export function ServiceCard({
         >
           {isPaused ? "Retomar" : "Pausar"}
         </button>
+
+        <Link
+          href={duplicateAdHref(service.id, "/historico")}
+          className="flex h-8 items-center rounded-md border border-slate-200 px-3 text-[10px] font-medium text-slate-700 active:bg-slate-100"
+        >
+          Duplicar
+        </Link>
 
         <button
           type="button"

@@ -13,7 +13,7 @@ public record NotificacaoResponse(
 
         @Schema(description = "Tipo da notificação.", example = "PROPOSTA_RECEBIDA",
                 allowableValues = {"PROPOSTA_RECEBIDA", "PROPOSTA_ACEITA", "PROPOSTA_RECUSADA",
-                        "PROPOSTA_NAO_SELECIONADA"})
+                        "PROPOSTA_NAO_SELECIONADA", "VALIDACAO_APROVADA", "VALIDACAO_REPROVADA"})
         String tipo,
 
         @Schema(description = "Título curto.", example = "Nova proposta recebida")

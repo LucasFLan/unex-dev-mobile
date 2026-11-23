@@ -30,6 +30,7 @@ async function ServicoDetalheContent({
       proposals={received}
       myProposal={mine}
       backHref={backHref}
+      canPropose={user.validation === "APROVADO"}
     />
   );
 }

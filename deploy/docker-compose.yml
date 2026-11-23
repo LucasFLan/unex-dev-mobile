@@ -1,0 +1,60 @@
+# Stack do ChamaAí para o Portainer (Stacks → Add stack → Web editor: cole este arquivo).
+# Preencha as variáveis em "Environment variables" da stack (modelo em deploy/stack.env.example).
+name: chamaai
+
+services:
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-servsoft}
+      POSTGRES_USER: ${DB_USERNAME:-chamaai}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    image: cesinha012642/chamaai-backend:${TAG:-1.0.0}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-servsoft}
+      DB_USERNAME: ${DB_USERNAME:-chamaai}
+      DB_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET (32+ caracteres)}
+      JWT_VALIDADE: ${JWT_VALIDADE:-PT1H}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      # Quem pode chamar a API pelo navegador (CORS). O front usa a rede interna e não depende disso.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://192.168.254.210:23000,http://192.168.254.210:28080,https://chamai.grupopapa.com,http://chamai.grupopapa.com}
+    volumes:
+      - uploads:/app/uploads
+    # API e Swagger: http://192.168.254.210:28080/swagger-ui.html
+    ports:
+      - "${BACK_PORT:-28080}:8080"
+
+  frontend:
+    image: cesinha012642/chamaai-frontend:${TAG:-1.0.0}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://backend:8080
+      # "false" enquanto o acesso for por http://IP:porta; "true" quando houver HTTPS (domínio + certificado).
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    ports:
+      - "${FRONT_PORT:-23000}:3000"
+
+volumes:
+  db_data:
+  uploads:
