@@ -319,3 +319,28 @@ export async function deleteAd(id: string): Promise<AdActionResult> {
   revalidateAd(id);
   return { ok: true, ad: null };
 }
+
+/** POST /anuncios/{id}/fotos direto do detalhe do anúncio (fotos já reduzidas no navegador). */
+export async function addAdPhotos(id: string, formData: FormData): Promise<AdActionResult> {
+  const photos = readPhotos(formData);
+  if ("error" in photos) return { ok: false, error: photos.error };
+  if (photos.photos.length === 0) return { ok: false, error: "Escolha ao menos uma foto." };
+
+  const error = await uploadPhotos(id, photos.photos);
+  if (error) return { ok: false, error };
+
+  revalidateAd(id);
+  return { ok: true, ad: null };
+}
+
+/** DELETE /anuncios/{id}/fotos/{fotoId}. */
+export async function removeAdPhoto(id: string, photoId: string): Promise<AdActionResult> {
+  const result = await call(ENDPOINTS.adPhoto(id, photoId), "DELETE");
+  if (!result) return { ok: false, error: CONNECTION_ERROR };
+
+  await handleUnauthorized(result);
+  if (!result.ok && result.status !== 404) return { ok: false, error: messageFor(result) };
+
+  revalidateAd(id);
+  return { ok: true, ad: parseAnuncio(result.data) };
+}

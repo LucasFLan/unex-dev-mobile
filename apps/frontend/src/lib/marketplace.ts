@@ -27,6 +27,9 @@ export type Professional = {
   /** Slug da categoria (GET /categorias), usada no filtro e no ícone. */
   categorySlug: string;
   name: string;
+  /** Título do anúncio (o que aparece no card). */
+  title: string;
+  /** Descrição do anúncio (entra na busca). */
   service: string;
   location: string;
   /** `null` = "a combinar". */
@@ -110,7 +113,7 @@ export function filterProfessionals(
       if (
         query &&
         !normalize(
-          `${professional.name} ${professional.category} ${professional.service}`
+          `${professional.title} ${professional.name} ${professional.category} ${professional.service}`
         ).includes(query)
       ) {
         return false;
@@ -168,6 +171,7 @@ export const toProfessional = (anuncio: AnuncioItem): Professional => ({
   category: anuncio.categoria.nome,
   categorySlug: anuncio.categoria.slug,
   name: anuncio.autor?.nome || anuncio.titulo,
+  title: anuncio.titulo,
   service: anuncio.descricao,
   location: anuncio.bairro ? `${anuncio.bairro}, ${anuncio.cidade}` : `${anuncio.cidade}, ${anuncio.uf}`,
   price: anuncio.preco,

@@ -7,6 +7,7 @@ import { BackButton } from "@/components/BackButton";
 import { ValidationBanner } from "@/components/ValidationBanner";
 import { ProposalSheet } from "@/components/ProposalSheet";
 import { AdPhotoGallery } from "@/components/AdPhotoGallery";
+import { AdPhotoManager } from "@/components/AdPhotoManager";
 import { RelativeTime } from "@/components/RelativeTime";
 import { MyProposalStatus } from "@/components/MyProposalStatus";
 import { ReceivedProposals } from "@/components/ReceivedProposals";
@@ -146,6 +147,8 @@ export function ServiceDetails({
               {ad.descricao}
             </p>
           </section>
+
+          {isOwner && <AdPhotoManager ad={ad} />}
 
           {isOwner && (
             <ReceivedProposals proposals={proposals} adType={ad.tipo} />

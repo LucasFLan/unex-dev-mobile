@@ -55,7 +55,7 @@ export function ProfessionalCard({
 
       <div className="p-2 lg:p-3">
         <h3 className="line-clamp-2 min-h-8 text-[11px] font-semibold leading-3.5 lg:min-h-10 lg:text-sm lg:leading-5">
-          {professional.service}
+          {professional.title}
         </h3>
 
         <div className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-600 lg:text-xs">
