@@ -12,5 +12,9 @@ public enum TipoNotificacao {
     /** O admin aprovou os documentos: a conta foi validada. */
     VALIDACAO_APROVADA,
     /** O admin reprovou os documentos; a mensagem traz o motivo. */
-    VALIDACAO_REPROVADA
+    VALIDACAO_REPROVADA,
+    /** Quem contratou marcou o serviço do usuário (profissional) como concluído. */
+    SERVICO_CONCLUIDO,
+    /** Quem contratou avaliou o serviço do usuário (profissional). */
+    AVALIACAO_RECEBIDA
 }

@@ -24,6 +24,12 @@ public record PaginaAnunciosResponse(
         @Schema(description = "Total de páginas.", example = "3")
         int totalPaginas) {
 
+    /** Anúncios do próprio usuário: com o endereço completo. */
+    public static PaginaAnunciosResponse doAutor(Pagina<AnuncioDetalhado> pagina, java.util.UUID autorId) {
+        return new PaginaAnunciosResponse(pagina.itens().stream().map(a -> AnuncioResponse.de(a, autorId)).toList(),
+                pagina.pagina(), pagina.tamanho(), pagina.totalItens(), pagina.totalPaginas());
+    }
+
     public static PaginaAnunciosResponse de(Pagina<AnuncioDetalhado> pagina) {
         return new PaginaAnunciosResponse(pagina.itens().stream().map(AnuncioResponse::de).toList(),
                 pagina.pagina(), pagina.tamanho(), pagina.totalItens(), pagina.totalPaginas());

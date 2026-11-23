@@ -51,6 +51,21 @@ public class NotificarEventosDeProposta implements NotificadorProposta {
         }
     }
 
+    @Override
+    public void servicoConcluido(Proposta proposta, UUID profissionalId, String tituloAnuncio, String nomeCliente) {
+        salvar(proposta, profissionalId, TipoNotificacao.SERVICO_CONCLUIDO, "Serviço concluído",
+                "%s marcou o serviço \"%s\" como concluído. Agora é só aguardar a avaliação."
+                        .formatted(nomeCliente, tituloAnuncio));
+    }
+
+    @Override
+    public void avaliacaoRecebida(Proposta proposta, UUID profissionalId, String tituloAnuncio, String nomeCliente,
+                                  int nota) {
+        salvar(proposta, profissionalId, TipoNotificacao.AVALIACAO_RECEBIDA, "Nova avaliação",
+                "%s avaliou seu serviço \"%s\" com %d %s.".formatted(nomeCliente, tituloAnuncio, nota,
+                        nota == 1 ? "estrela" : "estrelas"));
+    }
+
     private void salvar(Proposta proposta, UUID usuarioId, TipoNotificacao tipo, String titulo,
                         String mensagem) {
         notificacoes.salvar(Notificacao.criar(usuarioId, tipo, titulo, mensagem, proposta.getAnuncioId(),

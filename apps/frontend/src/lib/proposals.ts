@@ -7,7 +7,21 @@ export type ProposalStatus =
   | "ACEITA"
   | "RECUSADA"
   | "NAO_SELECIONADA"
-  | "CANCELADA";
+  | "CANCELADA"
+  | "CONCLUIDA";
+
+/** Endereço do serviço: só vem depois que a proposta é aceita. */
+export type ProposalAddress = {
+  cep: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string;
+  uf: string;
+};
+
+export type ProposalReview = { nota: number; comentario: string | null; criadoEm: string };
 
 export type ProposalPerson = {
   id: string;
@@ -27,6 +41,13 @@ export type ProposalItem = {
   status: ProposalStatus;
   criadoEm: string;
   respondidoEm: string | null;
+  /** Ids das fotos anexadas, na ordem do envio (ver /api/propostas/[id]/fotos/[fotoId]). */
+  fotos: string[];
+  /** Quando quem contratou marcou o serviço como concluído. */
+  concluidoEm: string | null;
+  /** Nota dada por quem contratou (depois de concluído). */
+  avaliacao: ProposalReview | null;
+  endereco: ProposalAddress | null;
 };
 
 const ENDPOINTS = {
@@ -35,6 +56,7 @@ const ENDPOINTS = {
 };
 const MAX_PAGE_SIZE = 50;
 const STATUSES: ProposalStatus[] = [
+  "CONCLUIDA",
   "PENDENTE",
   "ACEITA",
   "RECUSADA",
@@ -54,6 +76,27 @@ function person(value: unknown): ProposalPerson {
     id: text(b.id),
     nome: text(b.nome) || "Usuário",
     telefone: text(b.telefone) || null,
+  };
+}
+
+function review(value: unknown): ProposalReview | null {
+  const r = record(value);
+  return r && typeof r.nota === "number"
+    ? { nota: r.nota, comentario: text(r.comentario) || null, criadoEm: text(r.criadoEm) }
+    : null;
+}
+
+function proposalAddress(value: unknown): ProposalAddress | null {
+  const a = record(value);
+  if (!a) return null;
+  return {
+    cep: text(a.cep) || null,
+    logradouro: text(a.logradouro) || null,
+    numero: text(a.numero) || null,
+    complemento: text(a.complemento) || null,
+    bairro: text(a.bairro) || null,
+    cidade: text(a.cidade),
+    uf: text(a.uf),
   };
 }
 
@@ -81,6 +124,10 @@ function parseProposal(item: unknown): ProposalItem | null {
     status: STATUSES.includes(status) ? status : "PENDENTE",
     criadoEm: text(b.criadoEm),
     respondidoEm: text(b.respondidoEm) || null,
+    fotos: Array.isArray(b.fotos) ? b.fotos.filter((foto): foto is string => typeof foto === "string") : [],
+    concluidoEm: text(b.concluidoEm) || null,
+    avaliacao: review(b.avaliacao),
+    endereco: proposalAddress(b.endereco),
   };
 }
 

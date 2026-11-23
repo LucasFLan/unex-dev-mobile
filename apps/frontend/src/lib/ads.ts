@@ -19,10 +19,40 @@ export type AnuncioItem = {
   };
   cidade: string;
   uf: string;
+  /** `null` em anúncios sem CEP. */
+  bairro: string | null;
+  /** Ponto aproximado (~1 km) para o mapa e a distância; `null` sem CEP. */
+  regiao: GeoPoint | null;
+  /** Até onde o profissional atende (só OFERTA). */
+  raioAtendimentoKm: number | null;
+  /** Endereço completo: só vem para o autor. */
+  endereco: AdAddress | null;
   ativo: boolean;
   autorId: string;
+  /** Nome, foto e reputação de quem publicou. */
+  autor: AdAuthor | null;
   criadoEm: string;
   atualizadoEm: string;
+};
+
+export type GeoPoint = { latitude: number; longitude: number };
+
+export type AdAddress = {
+  cep: string;
+  logradouro: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+};
+
+export type AdAuthor = {
+  id: string;
+  nome: string;
+  /** Versão da foto de perfil; `null` = sem foto. */
+  fotoAtualizadaEm: string | null;
+  /** `null` = ainda sem avaliações. */
+  media: number | null;
+  total: number;
 };
 
 type AnunciosPageResponse = {
@@ -37,6 +67,41 @@ const MAX_PAGE_SIZE = 50;
 const MAX_PAGES = 20;
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
+const optionalText = (value: unknown) => (typeof value === "string" && value ? value : null);
+const num = (value: unknown) => (typeof value === "number" && Number.isFinite(value) ? value : null);
+const record = (value: unknown) =>
+  typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
+
+function point(value: unknown): GeoPoint | null {
+  const p = record(value);
+  const latitude = num(p?.latitude);
+  const longitude = num(p?.longitude);
+  return latitude === null || longitude === null ? null : { latitude, longitude };
+}
+
+function address(value: unknown): AdAddress | null {
+  const a = record(value);
+  if (!a || !text(a.cep)) return null;
+  return {
+    cep: text(a.cep),
+    logradouro: optionalText(a.logradouro),
+    numero: optionalText(a.numero),
+    complemento: optionalText(a.complemento),
+    bairro: optionalText(a.bairro),
+  };
+}
+
+function author(value: unknown): AdAuthor | null {
+  const a = record(value);
+  if (!a || !text(a.id)) return null;
+  return {
+    id: text(a.id),
+    nome: text(a.nome),
+    fotoAtualizadaEm: optionalText(a.fotoAtualizadaEm),
+    media: num(a.mediaAvaliacoes),
+    total: num(a.totalAvaliacoes) ?? 0,
+  };
+}
 
 function price(value: unknown): number | null {
   if (typeof value === "number") return value;
@@ -71,8 +136,13 @@ export function parseAnuncio(item: unknown): AnuncioItem | null {
     },
     cidade: text(b[AD_FIELDS.city]),
     uf: text(b[AD_FIELDS.state]),
+    bairro: optionalText(b.bairro),
+    regiao: point(b.regiao),
+    raioAtendimentoKm: num(b.raioAtendimentoKm),
+    endereco: address(b.endereco),
     ativo: Boolean(b.ativo),
     autorId: text(b.autorId),
+    autor: author(b.autor),
     criadoEm: text(b.criadoEm),
     atualizadoEm: text(b.atualizadoEm),
   };

@@ -34,6 +34,19 @@ export const ENDPOINTS = {
   readAllNotifications: "/usuarios/me/notificacoes/lidas",
   /** PATCH: altera a senha do usuário logado (exige a senha atual). */
   changePassword: "/usuarios/me/senha",
+  /** PUT (multipart, campo `foto`): envia ou troca a foto de perfil. DELETE: remove. */
+  myPhoto: "/usuarios/me/foto",
+  /** GET: foto de perfil de qualquer usuário (exige login). */
+  userPhoto: (userId: string) => `/usuarios/${encodeURIComponent(userId)}/foto`,
+  /** GET: endereço de um CEP (logradouro, bairro, cidade, UF e ponto aproximado). */
+  cep: (cep: string) => `/cep/${encodeURIComponent(cep)}`,
+  /** GET: média, total e avaliações recebidas por um usuário. */
+  userReviews: (userId: string) => `/usuarios/${encodeURIComponent(userId)}/avaliacoes`,
+  /** POST: avaliação (nota + comentário) do serviço concluído. */
+  proposalReview: (proposalId: string) => `/propostas/${encodeURIComponent(proposalId)}/avaliacao`,
+  /** GET: foto anexada a uma proposta (só quem enviou ou recebeu). */
+  proposalPhoto: (proposalId: string, photoId: string) =>
+    `/propostas/${encodeURIComponent(proposalId)}/fotos/${encodeURIComponent(photoId)}`,
 } as const;
 
 /** Campos do JSON de PATCH /usuarios/me/senha. */

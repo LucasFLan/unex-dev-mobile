@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { apiFetch, type ApiResult } from "@/lib/api";
+import { apiFetch, apiUpload, type ApiResult } from "@/lib/api";
 import { ENDPOINTS, extractErrorMessage } from "@/lib/api-contract";
+import { MAX_PROPOSAL_PHOTO_BYTES, MAX_PROPOSAL_PHOTOS } from "@/lib/proposal-limits";
 import { clearSessionToken } from "@/lib/session";
 
 export type ProposalFormState =
@@ -55,13 +56,32 @@ export async function sendProposal(
     return { error: `A mensagem pode ter no máximo ${MAX_MESSAGE} caracteres.` };
   }
 
+  const fotos = formData
+    .getAll("fotos")
+    .filter((foto): foto is File => foto instanceof File && foto.size > 0);
+  if (fotos.length > MAX_PROPOSAL_PHOTOS) {
+    return { error: `Anexe no máximo ${MAX_PROPOSAL_PHOTOS} fotos.` };
+  }
+  if (fotos.some((foto) => foto.size > MAX_PROPOSAL_PHOTO_BYTES)) {
+    return { error: "Cada foto pode ter no máximo 5 MB." };
+  }
+
   let result: ApiResult;
   try {
-    result = await apiFetch(ENDPOINTS.proposals(adId), {
-      method: "POST",
-      auth: true,
-      body: { valor, mensagem },
-    });
+    if (fotos.length === 0) {
+      result = await apiFetch(ENDPOINTS.proposals(adId), {
+        method: "POST",
+        auth: true,
+        body: { valor, mensagem },
+      });
+    } else {
+      // Com fotos, a mesma rota recebe multipart: proposta e fotos são gravadas juntas.
+      const form = new FormData();
+      if (valor !== null) form.set("valor", valor.toFixed(2));
+      form.set("mensagem", mensagem);
+      fotos.forEach((foto, index) => form.append("fotos", foto, foto.name || `foto-${index + 1}.jpg`));
+      result = await apiUpload(ENDPOINTS.proposals(adId), form);
+    }
   } catch {
     return { error: "Não foi possível conectar ao servidor. Tente novamente." };
   }
@@ -77,7 +97,7 @@ export async function sendProposal(
   return { success: true };
 }
 
-export type ProposalAction = "aceitar" | "recusar" | "cancelar";
+export type ProposalAction = "aceitar" | "recusar" | "cancelar" | "concluir";
 
 /** PATCH /propostas/{id}/aceitar | recusar | cancelar. */
 export async function respondProposal(
@@ -118,5 +138,50 @@ export async function respondProposal(
   revalidatePath("/historico");
   revalidatePath("/servicos/[id]", "page");
   revalidatePath("/profissionais/[id]", "page");
+  return { ok: true };
+}
+
+/** POST /propostas/{id}/avaliacao: nota de 1 a 5 e comentário opcional (até 500). */
+export async function rateProposal(
+  proposalId: string,
+  nota: number,
+  comentario: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!Number.isInteger(nota) || nota < 1 || nota > 5) {
+    return { ok: false, error: "Escolha de 1 a 5 estrelas." };
+  }
+  const texto = comentario.trim();
+  if (texto.length > 500) {
+    return { ok: false, error: "O comentário pode ter no máximo 500 caracteres." };
+  }
+
+  let result: ApiResult;
+  try {
+    result = await apiFetch(ENDPOINTS.proposalReview(proposalId), {
+      method: "POST",
+      auth: true,
+      body: { nota, comentario: texto || null },
+    });
+  } catch {
+    return { ok: false, error: "Não foi possível conectar ao servidor. Tente novamente." };
+  }
+
+  if (result.status === 401) {
+    await clearSessionToken();
+    redirect("/login");
+  }
+  if (!result.ok) {
+    return {
+      ok: false,
+      error: extractErrorMessage(result.data) ?? "Algo deu errado no servidor. Tente novamente.",
+    };
+  }
+
+  // A média aparece nos anúncios e no perfil de quem foi avaliado.
+  revalidatePath("/home");
+  revalidatePath("/historico");
+  revalidatePath("/servicos/[id]", "page");
+  revalidatePath("/profissionais/[id]", "page");
+  revalidatePath("/usuarios/[id]", "page");
   return { ok: true };
 }

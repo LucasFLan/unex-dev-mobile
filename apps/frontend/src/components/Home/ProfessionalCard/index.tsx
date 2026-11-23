@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { getCategoryMeta } from "@/lib/categories";
-import { initials, type Professional } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
+import { RatingBadge } from "@/components/Stars";
+import { formatDistance } from "@/lib/geo";
+import { type Professional } from "@/lib/marketplace";
 import { formatPrice } from "@/lib/format";
 import { withFrom } from "@/lib/navigation";
 
@@ -45,19 +48,26 @@ export function ProfessionalCard({
         </h3>
 
         <div className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-600">
-          <span
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-medium"
-            aria-hidden="true"
-          >
-            {initials(professional.name)}
-          </span>
+          <Avatar
+            userId={professional.authorId}
+            version={professional.authorPhoto}
+            name={professional.name}
+            className="h-5 w-5 text-[8px]"
+          />
 
           <span className="truncate">{professional.name}</span>
         </div>
 
+        <div className="mt-1">
+          <RatingBadge media={professional.rating.media} total={professional.rating.total} className="text-[9px]" />
+        </div>
+
         <div className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-500">
           <MapPin size={11} className="shrink-0" aria-hidden="true" />
-          <span className="truncate">{professional.location}</span>
+          <span className="truncate">
+            {professional.distanceKm !== null ? `${formatDistance(professional.distanceKm)} · ` : ""}
+            {professional.location}
+          </span>
         </div>
 
         <p className="mt-1.5 text-[10px] text-slate-500">

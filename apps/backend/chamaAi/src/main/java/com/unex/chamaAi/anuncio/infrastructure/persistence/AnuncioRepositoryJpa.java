@@ -3,6 +3,8 @@ package com.unex.chamaAi.anuncio.infrastructure.persistence;
 import com.unex.chamaAi.anuncio.domain.entities.Anuncio;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.FiltroAnuncios;
+import com.unex.chamaAi.anuncio.domain.valueobjects.Coordenadas;
+import com.unex.chamaAi.anuncio.domain.valueobjects.Endereco;
 import com.unex.chamaAi.anuncio.domain.valueobjects.Localizacao;
 import com.unex.chamaAi.anuncio.domain.valueobjects.Preco;
 import com.unex.chamaAi.anuncio.domain.valueobjects.TipoAnuncio;
@@ -89,16 +91,35 @@ public class AnuncioRepositoryJpa implements AnuncioRepository {
     }
 
     private static AnuncioJpaEntity paraEntidade(Anuncio anuncio) {
+        Endereco endereco = anuncio.getEndereco().orElse(null);
+        Coordenadas ponto = endereco == null ? null : endereco.coordenadas();
         return new AnuncioJpaEntity(anuncio.getId(), anuncio.getAutorId(), anuncio.getCategoriaId(),
                 anuncio.getTipo().name(), anuncio.getTitulo(), anuncio.getDescricao(),
                 anuncio.getPreco().map(Preco::valor).orElse(null), anuncio.getLocalizacao().cidade(),
-                anuncio.getLocalizacao().uf(), anuncio.isAtivo(), anuncio.getCriadoEm(), anuncio.getAtualizadoEm());
+                anuncio.getLocalizacao().uf(),
+                endereco == null ? null : endereco.cep(), endereco == null ? null : endereco.logradouro(),
+                endereco == null ? null : endereco.numero(), endereco == null ? null : endereco.complemento(),
+                endereco == null ? null : endereco.bairro(),
+                ponto == null ? null : ponto.latitude(), ponto == null ? null : ponto.longitude(),
+                anuncio.getRaioAtendimentoKm().map(Integer::shortValue).orElse(null),
+                anuncio.isAtivo(), anuncio.getCriadoEm(), anuncio.getAtualizadoEm());
     }
 
     private static Anuncio paraDominio(AnuncioJpaEntity entidade) {
         return Anuncio.reconstituir(entidade.getId(), entidade.getAutorId(), entidade.getCategoriaId(),
                 TipoAnuncio.valueOf(entidade.getTipo()), entidade.getTitulo(), entidade.getDescricao(),
                 Preco.deOuNulo(entidade.getPreco()), new Localizacao(entidade.getCidade(), entidade.getUf()),
+                endereco(entidade), entidade.getRaioAtendimentoKm() == null ? null : entidade.getRaioAtendimentoKm().intValue(),
                 entidade.isAtivo(), entidade.getCriadoEm(), entidade.getAtualizadoEm());
+    }
+
+    private static Endereco endereco(AnuncioJpaEntity entidade) {
+        if (entidade.getCep() == null) {
+            return null;
+        }
+        Coordenadas ponto = entidade.getLatitude() == null || entidade.getLongitude() == null ? null
+                : new Coordenadas(entidade.getLatitude(), entidade.getLongitude());
+        return new Endereco(entidade.getCep(), entidade.getLogradouro(), entidade.getNumero(),
+                entidade.getComplemento(), entidade.getBairro(), ponto);
     }
 }

@@ -46,4 +46,7 @@ public class PropostaJpaEntity {
 
     @Column(name = "respondido_em")
     private Instant respondidoEm;
+
+    @Column(name = "concluido_em")
+    private Instant concluidoEm;
 }

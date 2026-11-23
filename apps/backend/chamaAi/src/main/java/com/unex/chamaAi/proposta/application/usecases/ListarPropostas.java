@@ -2,7 +2,12 @@ package com.unex.chamaAi.proposta.application.usecases;
 
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.proposta.application.dto.PropostaDetalhada;
+import com.unex.chamaAi.proposta.domain.exceptions.FotoPropostaNaoEncontradaException;
+import com.unex.chamaAi.proposta.domain.exceptions.PropostaNaoEncontradaException;
+import com.unex.chamaAi.proposta.domain.repositories.AvaliacaoRepository;
+import com.unex.chamaAi.proposta.domain.repositories.FotoPropostaRepository;
 import com.unex.chamaAi.proposta.domain.repositories.PropostaRepository;
+import com.unex.chamaAi.proposta.domain.valueobjects.FotoProposta;
 import com.unex.chamaAi.shared.domain.paginacao.Pagina;
 import com.unex.chamaAi.shared.domain.paginacao.Paginacao;
 import com.unex.chamaAi.usuario.domain.repositories.UsuarioRepository;
@@ -13,11 +18,14 @@ import java.util.UUID;
 public class ListarPropostas {
 
     private final PropostaRepository propostas;
+    private final FotoPropostaRepository fotos;
     private final DetalhadorProposta detalhador;
 
-    public ListarPropostas(PropostaRepository propostas, AnuncioRepository anuncios, UsuarioRepository usuarios) {
+    public ListarPropostas(PropostaRepository propostas, AnuncioRepository anuncios, UsuarioRepository usuarios,
+                           FotoPropostaRepository fotos, AvaliacaoRepository avaliacoes) {
         this.propostas = propostas;
-        this.detalhador = new DetalhadorProposta(anuncios, usuarios);
+        this.fotos = fotos;
+        this.detalhador = new DetalhadorProposta(anuncios, usuarios, fotos, avaliacoes);
     }
 
     public Pagina<PropostaDetalhada> recebidas(UUID usuarioId, Integer pagina, Integer tamanho) {
@@ -26,5 +34,13 @@ public class ListarPropostas {
 
     public Pagina<PropostaDetalhada> enviadas(UUID usuarioId, Integer pagina, Integer tamanho) {
         return detalhador.detalhar(propostas.buscarPorRemetente(usuarioId, Paginacao.de(pagina, tamanho)));
+    }
+
+    /** Foto anexada: só quem enviou ou recebeu a proposta vê. Para os outros, ela "não existe". */
+    public FotoProposta foto(UUID propostaId, UUID fotoId, UUID usuarioId) {
+        propostas.buscarPorId(propostaId)
+                .filter(proposta -> proposta.foiEnviadaPor(usuarioId) || proposta.foiRecebidaPor(usuarioId))
+                .orElseThrow(PropostaNaoEncontradaException::new);
+        return fotos.buscar(propostaId, fotoId).orElseThrow(FotoPropostaNaoEncontradaException::new);
     }
 }

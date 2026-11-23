@@ -8,7 +8,9 @@ import { ProposalContact } from "@/components/ProposalContact";
 import { ProposalStatusBadge } from "@/components/ProposalStatusBadge";
 import { RelativeTime } from "@/components/RelativeTime";
 import { formatPrice } from "@/lib/format";
-import { initials } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
+import { ProposalPhotos } from "@/components/ProposalPhotos";
+import { ServiceProgress } from "@/components/ServiceProgress";
 import type { ProposalItem } from "@/lib/proposals";
 
 type ReceivedProposalsProps = {
@@ -80,16 +82,17 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                 className={`rounded-xl border p-2.5 ${
                   proposal.status === "ACEITA"
                     ? "border-emerald-200 bg-emerald-50/40"
+                    : proposal.status === "CONCLUIDA"
+                    ? "border-blue-200 bg-blue-50/30"
                     : "border-slate-200"
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[9px] font-semibold text-blue-600"
-                    aria-hidden="true"
-                  >
-                    {initials(proposal.remetente.nome)}
-                  </span>
+                  <Avatar
+                    userId={proposal.remetente.id}
+                    name={proposal.remetente.nome}
+                    className="h-8 w-8 text-[10px]"
+                  />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
@@ -111,6 +114,8 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                 <p className="mt-2 whitespace-pre-line text-[10px] leading-3.5 text-slate-600">
                   {proposal.mensagem}
                 </p>
+
+                <ProposalPhotos proposalId={proposal.id} photos={proposal.fotos} />
 
                 {proposal.status === "PENDENTE" && (
                   <div className="mt-2 grid grid-cols-2 gap-1.5">
@@ -135,9 +140,15 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                   </div>
                 )}
 
-                {proposal.status === "ACEITA" && (
+                {(proposal.status === "ACEITA" || proposal.status === "CONCLUIDA") && (
                   <div className="mt-2 border-t border-emerald-100 pt-2">
                     <ProposalContact person={proposal.remetente} />
+                    {/* Num pedido, quem contratou é o autor (você); numa oferta, é quem pediu o orçamento. */}
+                    <ServiceProgress
+                      proposal={proposal}
+                      isClient={adType === "PEDIDO"}
+                      professionalName={proposal.remetente.nome}
+                    />
                   </div>
                 )}
               </li>

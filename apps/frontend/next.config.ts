@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
   experimental: {
     // Validação de conta: documento + selfie (até 5 MB cada) passam por uma server action.
     serverActions: {
-      bodySizeLimit: "12mb",
+      bodySizeLimit: "30mb",
       // Endereços públicos do front (o Next confere a origem dos formulários). Inclui o caso de proxy
       // reverso que não repassa o Host original.
       allowedOrigins: ["192.168.254.210:23000", "chamai.grupopapa.com"],

@@ -1,5 +1,6 @@
 package com.unex.chamaAi.anuncio.application.usecases;
 
+import com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio;
 import com.unex.chamaAi.anuncio.application.dto.AnuncioDetalhado;
 import com.unex.chamaAi.anuncio.domain.exceptions.AnuncioNaoEncontradoException;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
@@ -12,9 +13,9 @@ public class BuscarAnuncio {
     private final AnuncioRepository anuncios;
     private final DetalhadorAnuncio detalhador;
 
-    public BuscarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias) {
+    public BuscarAnuncio(AnuncioRepository anuncios, CategoriaRepository categorias, AutoresAnuncio autores) {
         this.anuncios = anuncios;
-        this.detalhador = new DetalhadorAnuncio(categorias);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores);
     }
 
     /** solicitanteId pode ser nulo (visitante sem login). */

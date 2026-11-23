@@ -3,6 +3,7 @@ import { Clock3, MapPin } from "lucide-react";
 import { RelativeTime } from "@/components/RelativeTime";
 import { type ServiceRequest } from "@/lib/marketplace";
 import { formatPrice } from "@/lib/format";
+import { formatDistance } from "@/lib/geo";
 import { withFrom } from "@/lib/navigation";
 
 export function RequestCard({
@@ -46,7 +47,10 @@ export function RequestCard({
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
         <span className="flex min-w-0 items-center gap-1 text-[10px] text-slate-500">
           <MapPin size={11} className="shrink-0" aria-hidden="true" />
-          <span className="truncate">{request.location}</span>
+          <span className="truncate">
+            {request.distanceKm !== null ? `${formatDistance(request.distanceKm)} · ` : ""}
+            {request.location}
+          </span>
         </span>
 
         <strong className="shrink-0 text-[11px]">

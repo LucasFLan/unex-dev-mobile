@@ -42,7 +42,7 @@ public class AnuncioControllerImpl implements AnuncioController {
 
     @Override
     public AnuncioResponse criar(Jwt jwt, AnuncioRequest request) {
-        return AnuncioResponse.de(criarAnuncio.executar(usuarioLogado(jwt), request.paraComando()));
+        return AnuncioResponse.de(criarAnuncio.executar(usuarioLogado(jwt), request.paraComando()), usuarioLogado(jwt));
     }
 
     @Override
@@ -54,12 +54,13 @@ public class AnuncioControllerImpl implements AnuncioController {
 
     @Override
     public AnuncioResponse buscar(Jwt jwt, UUID id) {
-        return AnuncioResponse.de(buscarAnuncio.executar(id, jwt == null ? null : usuarioLogado(jwt)));
+        UUID quemVe = jwt == null ? null : usuarioLogado(jwt);
+        return AnuncioResponse.de(buscarAnuncio.executar(id, quemVe), quemVe);
     }
 
     @Override
     public AnuncioResponse editar(Jwt jwt, UUID id, AnuncioRequest request) {
-        return AnuncioResponse.de(editarAnuncio.executar(id, usuarioLogado(jwt), request.paraComando()));
+        return AnuncioResponse.de(editarAnuncio.executar(id, usuarioLogado(jwt), request.paraComando()), usuarioLogado(jwt));
     }
 
     @Override
@@ -69,17 +70,18 @@ public class AnuncioControllerImpl implements AnuncioController {
 
     @Override
     public AnuncioResponse ativar(Jwt jwt, UUID id) {
-        return AnuncioResponse.de(alterarAtivacaoAnuncio.executar(id, usuarioLogado(jwt), true));
+        return AnuncioResponse.de(alterarAtivacaoAnuncio.executar(id, usuarioLogado(jwt), true), usuarioLogado(jwt));
     }
 
     @Override
     public AnuncioResponse desativar(Jwt jwt, UUID id) {
-        return AnuncioResponse.de(alterarAtivacaoAnuncio.executar(id, usuarioLogado(jwt), false));
+        return AnuncioResponse.de(alterarAtivacaoAnuncio.executar(id, usuarioLogado(jwt), false), usuarioLogado(jwt));
     }
 
     @Override
     public PaginaAnunciosResponse listarMeus(Jwt jwt, Integer pagina, Integer tamanho) {
-        return PaginaAnunciosResponse.de(listarMeusAnuncios.executar(usuarioLogado(jwt), pagina, tamanho));
+        return PaginaAnunciosResponse.doAutor(listarMeusAnuncios.executar(usuarioLogado(jwt), pagina, tamanho),
+                usuarioLogado(jwt));
     }
 
     /** O "sub" do token é o id do usuário (ver JwtEmissorToken). */

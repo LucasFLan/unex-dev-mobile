@@ -50,6 +50,28 @@ public class AnuncioJpaEntity {
     @Column(nullable = false, length = 2)
     private String uf;
 
+    @Column(length = 8)
+    private String cep;
+
+    @Column(length = 150)
+    private String logradouro;
+
+    @Column(length = 20)
+    private String numero;
+
+    @Column(length = 100)
+    private String complemento;
+
+    @Column(length = 100)
+    private String bairro;
+
+    private Double latitude;
+
+    private Double longitude;
+
+    @Column(name = "raio_atendimento_km")
+    private Short raioAtendimentoKm;
+
     @Column(nullable = false)
     private boolean ativo;
 

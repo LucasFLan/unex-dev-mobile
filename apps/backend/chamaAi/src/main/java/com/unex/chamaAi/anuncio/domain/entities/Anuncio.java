@@ -1,5 +1,6 @@
 package com.unex.chamaAi.anuncio.domain.entities;
 
+import com.unex.chamaAi.anuncio.domain.valueobjects.Endereco;
 import com.unex.chamaAi.anuncio.domain.valueobjects.Localizacao;
 import com.unex.chamaAi.anuncio.domain.valueobjects.Preco;
 import com.unex.chamaAi.anuncio.domain.valueobjects.TipoAnuncio;
@@ -16,6 +17,7 @@ public class Anuncio {
     private static final int TAMANHO_MINIMO_TITULO = 3;
     private static final int TAMANHO_MAXIMO_TITULO = 120;
     private static final int TAMANHO_MAXIMO_DESCRICAO = 5000;
+    public static final int RAIO_MAXIMO_KM = 200;
 
     private final UUID id;
     private final UUID autorId;
@@ -25,12 +27,17 @@ public class Anuncio {
     private String descricao;
     private Preco preco;
     private Localizacao localizacao;
+    /** Vazio em anúncios antigos, criados antes do CEP. */
+    private Endereco endereco;
+    /** Até onde o profissional atende (só OFERTA); vazio = não informado. */
+    private Integer raioAtendimentoKm;
     private boolean ativo;
     private final Instant criadoEm;
     private Instant atualizadoEm;
 
     private Anuncio(UUID id, UUID autorId, UUID categoriaId, TipoAnuncio tipo, String titulo, String descricao,
-                    Preco preco, Localizacao localizacao, boolean ativo, Instant criadoEm, Instant atualizadoEm) {
+                    Preco preco, Localizacao localizacao, Endereco endereco, Integer raioAtendimentoKm,
+                    boolean ativo, Instant criadoEm, Instant atualizadoEm) {
         this.id = Objects.requireNonNull(id, "O id é obrigatório.");
         this.autorId = Objects.requireNonNull(autorId, "O autor é obrigatório.");
         this.categoriaId = validarCategoria(categoriaId);
@@ -39,6 +46,8 @@ public class Anuncio {
         this.descricao = validarDescricao(descricao);
         this.preco = preco;
         this.localizacao = validarLocalizacao(localizacao);
+        this.endereco = endereco;
+        this.raioAtendimentoKm = validarRaio(this.tipo, raioAtendimentoKm);
         this.ativo = ativo;
         this.criadoEm = Objects.requireNonNull(criadoEm, "A data de criação é obrigatória.");
         this.atualizadoEm = Objects.requireNonNull(atualizadoEm, "A data de atualização é obrigatória.");
@@ -46,26 +55,48 @@ public class Anuncio {
 
     public static Anuncio criar(UUID autorId, UUID categoriaId, TipoAnuncio tipo, String titulo, String descricao,
                                 Preco preco, Localizacao localizacao) {
+        return criar(autorId, categoriaId, tipo, titulo, descricao, preco, localizacao, null, null);
+    }
+
+    public static Anuncio criar(UUID autorId, UUID categoriaId, TipoAnuncio tipo, String titulo, String descricao,
+                                Preco preco, Localizacao localizacao, Endereco endereco, Integer raioAtendimentoKm) {
         Instant agora = agora();
         return new Anuncio(UUID.randomUUID(), autorId, categoriaId, tipo, titulo, descricao, preco, localizacao,
-                true, agora, agora);
+                endereco, raioAtendimentoKm, true, agora, agora);
     }
 
     public static Anuncio reconstituir(UUID id, UUID autorId, UUID categoriaId, TipoAnuncio tipo, String titulo,
                                        String descricao, Preco preco, Localizacao localizacao, boolean ativo,
                                        Instant criadoEm, Instant atualizadoEm) {
-        return new Anuncio(id, autorId, categoriaId, tipo, titulo, descricao, preco, localizacao, ativo,
+        return reconstituir(id, autorId, categoriaId, tipo, titulo, descricao, preco, localizacao, null, null, ativo,
                 criadoEm, atualizadoEm);
+    }
+
+    public static Anuncio reconstituir(UUID id, UUID autorId, UUID categoriaId, TipoAnuncio tipo, String titulo,
+                                       String descricao, Preco preco, Localizacao localizacao, Endereco endereco,
+                                       Integer raioAtendimentoKm, boolean ativo, Instant criadoEm,
+                                       Instant atualizadoEm) {
+        return new Anuncio(id, autorId, categoriaId, tipo, titulo, descricao, preco, localizacao, endereco,
+                raioAtendimentoKm, ativo, criadoEm, atualizadoEm);
     }
 
     public void editar(UUID novaCategoriaId, TipoAnuncio novoTipo, String novoTitulo, String novaDescricao,
                        Preco novoPreco, Localizacao novaLocalizacao) {
+        editar(novaCategoriaId, novoTipo, novoTitulo, novaDescricao, novoPreco, novaLocalizacao, endereco,
+                raioAtendimentoKm);
+    }
+
+    /** A edição substitui tudo, inclusive o endereço (vazio = sem CEP) e o raio. */
+    public void editar(UUID novaCategoriaId, TipoAnuncio novoTipo, String novoTitulo, String novaDescricao,
+                       Preco novoPreco, Localizacao novaLocalizacao, Endereco novoEndereco, Integer novoRaioKm) {
         this.categoriaId = validarCategoria(novaCategoriaId);
         this.tipo = validarTipo(novoTipo);
         this.titulo = validarTitulo(novoTitulo);
         this.descricao = validarDescricao(novaDescricao);
         this.preco = novoPreco;
         this.localizacao = validarLocalizacao(novaLocalizacao);
+        this.endereco = novoEndereco;
+        this.raioAtendimentoKm = validarRaio(this.tipo, novoRaioKm);
         this.atualizadoEm = agora();
     }
 
@@ -112,6 +143,17 @@ public class Anuncio {
             throw new DadoInvalidoException("O tipo do anúncio é obrigatório.");
         }
         return tipo;
+    }
+
+    /** O raio só faz sentido para quem oferece o serviço; num pedido é ignorado. */
+    private static Integer validarRaio(TipoAnuncio tipo, Integer raioKm) {
+        if (tipo != TipoAnuncio.OFERTA || raioKm == null) {
+            return null;
+        }
+        if (raioKm < 1 || raioKm > RAIO_MAXIMO_KM) {
+            throw new DadoInvalidoException("O raio de atendimento deve ser de 1 a " + RAIO_MAXIMO_KM + " km.");
+        }
+        return raioKm;
     }
 
     private static Localizacao validarLocalizacao(Localizacao localizacao) {
@@ -171,6 +213,15 @@ public class Anuncio {
     /** Vazio significa "a combinar". */
     public Optional<Preco> getPreco() {
         return Optional.ofNullable(preco);
+    }
+
+    /** Vazio em anúncios criados sem CEP. */
+    public Optional<Endereco> getEndereco() {
+        return Optional.ofNullable(endereco);
+    }
+
+    public Optional<Integer> getRaioAtendimentoKm() {
+        return Optional.ofNullable(raioAtendimentoKm);
     }
 
     public Localizacao getLocalizacao() {

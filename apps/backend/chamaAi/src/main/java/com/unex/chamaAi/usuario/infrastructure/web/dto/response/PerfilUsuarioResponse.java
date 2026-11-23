@@ -3,6 +3,7 @@ package com.unex.chamaAi.usuario.infrastructure.web.dto.response;
 import com.unex.chamaAi.usuario.application.dto.PerfilUsuario;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -35,11 +36,16 @@ public record PerfilUsuarioResponse(
         @Schema(description = "Situação da validação de documentos: `PENDENTE`, `APROVADO` ou `REPROVADO`. "
                 + "Só `APROVADO` publica anúncios e envia propostas.", example = "PENDENTE",
                 allowableValues = {"PENDENTE", "APROVADO", "REPROVADO"})
-        String statusValidacao) {
+        String statusValidacao,
+
+        @Schema(description = "Quando a foto de perfil foi trocada pela última vez; `null` = sem foto. "
+                + "A imagem fica em `GET /usuarios/{id}/foto`; use este valor para renovar o cache.",
+                example = "2026-11-22T14:30:00Z", nullable = true)
+        Instant fotoAtualizadaEm) {
 
     public static PerfilUsuarioResponse de(PerfilUsuario perfil) {
         return new PerfilUsuarioResponse(perfil.id(), perfil.nome(), perfil.dataNascimento(), perfil.cpf(),
                 perfil.email(), perfil.telefone(), perfil.verificado(), perfil.papel(),
-                perfil.statusValidacao());
+                perfil.statusValidacao(), perfil.fotoAtualizadaEm());
     }
 }

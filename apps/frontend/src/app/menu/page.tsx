@@ -19,7 +19,7 @@ import {
 import { logout } from "@/app/actions";
 import { BottomNav } from "@/components/BottomNav";
 import { MenuSection, type MenuItem } from "@/components/MenuSection";
-import { initials } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
 import { getCurrentUser } from "@/lib/user";
 
 const ADMIN_SECTION: { title: string; items: MenuItem[] } = {
@@ -135,12 +135,12 @@ async function MenuContent() {
           href="/perfil"
           className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm focus-visible:outline-2 focus-visible:outline-blue-600"
         >
-          <span
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600"
-            aria-hidden="true"
-          >
-            {initials(user.name)}
-          </span>
+          <Avatar
+            userId={user.id}
+            name={user.name}
+            version={user.photoVersion}
+            className="h-12 w-12 text-sm"
+          />
 
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-bold">{user.name}</p>

@@ -19,12 +19,29 @@ import {
   createAd,
   updateAd,
   type AdFormState,
+  lookupCep,
 } from "@/app/anunciar/actions";
 import { BackButton } from "@/components/BackButton";
 import Button from "@/components/Button";
 import type { AnuncioItem } from "@/lib/ads";
 import type { Category } from "@/lib/categories-api";
 import { ESTADOS } from "@/lib/estados";
+import { maskCep } from "@/lib/geo";
+
+/** Raio de atendimento da oferta; "Toda a cidade" = sem raio. */
+const RADIUS_OPTIONS = [
+  { label: "5 km", km: "5" },
+  { label: "10 km", km: "10" },
+  { label: "20 km", km: "20" },
+  { label: "50 km", km: "50" },
+  { label: "Toda a cidade", km: "" },
+];
+
+type CepStatus =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "ok" }
+  | { kind: "error"; message: string };
 
 type AdType = "procurar" | "oferecer";
 
@@ -104,10 +121,47 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
   );
   const [paymentType, setPaymentType] = useState("por visita");
   const [availability, setAvailability] = useState("Esta semana");
-  const [radius, setRadius] = useState("10 km");
-  const [address, setAddress] = useState("");
+  const [radius, setRadius] = useState(() => {
+    if (!initial) return "10 km";
+    if (initial.tipo === "OFERTA" && initial.raioAtendimentoKm === null) return "Toda a cidade";
+    return RADIUS_OPTIONS.find((o) => o.km === String(initial.raioAtendimentoKm))?.label ?? "10 km";
+  });
   const [city, setCity] = useState(initial?.cidade ?? "");
   const [uf, setUf] = useState(initial?.uf ?? "");
+  const [cep, setCep] = useState(initial?.endereco ? maskCep(initial.endereco.cep) : "");
+  const [bairro, setBairro] = useState(initial?.bairro ?? initial?.endereco?.bairro ?? "");
+  const [street, setStreet] = useState(initial?.endereco?.logradouro ?? "");
+  const [number, setNumber] = useState(initial?.endereco?.numero ?? "");
+  const [complement, setComplement] = useState(initial?.endereco?.complemento ?? "");
+  const [cepStatus, setCepStatus] = useState<CepStatus>(
+    initial?.endereco ? { kind: "ok" } : { kind: "idle" }
+  );
+  const cepRequest = useRef(0);
+
+  /** Com os 8 dígitos, busca o endereço e preenche bairro, cidade, UF e rua (o que vier vazio ou do CEP antigo). */
+  function onCepChange(value: string) {
+    const masked = maskCep(value);
+    setCep(masked);
+    const digits = masked.replace(/\D/g, "");
+    if (digits.length !== 8) {
+      setCepStatus({ kind: "idle" });
+      return;
+    }
+    const request = ++cepRequest.current;
+    setCepStatus({ kind: "loading" });
+    lookupCep(digits).then((result) => {
+      if (request !== cepRequest.current) return; // o usuário já digitou outro CEP
+      if (!result.ok) {
+        setCepStatus({ kind: "error", message: result.error });
+        return;
+      }
+      if (result.bairro) setBairro(result.bairro);
+      if (result.cidade) setCity(result.cidade);
+      if (result.uf) setUf(result.uf);
+      if (result.logradouro) setStreet(result.logradouro);
+      setCepStatus({ kind: "ok" });
+    });
+  }
   const [photos, setPhotos] = useState<File[]>([]);
 
   const isOffering = adType === "oferecer";
@@ -470,28 +524,71 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
               </p>
             </section>
 
-            <section className="mt-4">
-              <p className="mb-1.5 text-[9px] font-medium">
-                {isOffering ? "Cidade onde você atende" : "Cidade do serviço"}
+            <section className="mt-4" aria-labelledby="titulo-local">
+              <p id="titulo-local" className="mb-1.5 text-[9px] font-medium">
+                {isOffering ? "Onde você atende" : "Onde é o serviço"}
               </p>
 
-              <div className="grid grid-cols-[1fr_4.5rem] gap-2">
-                <div className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5">
+              <div className="grid grid-cols-[7.5rem_1fr] items-center gap-2">
+                <div className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 focus-within:border-blue-500">
                   <MapPin size={13} className="shrink-0 text-slate-400" />
-
                   <input
-                    name="cidade"
+                    name="cep"
                     type="text"
-                    maxLength={100}
+                    inputMode="numeric"
+                    autoComplete="postal-code"
                     required
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Ex.: Salvador"
-                    aria-label="Cidade"
+                    value={cep}
+                    onChange={(e) => onCepChange(e.target.value)}
+                    placeholder="CEP"
+                    aria-label="CEP"
+                    aria-describedby="status-cep"
                     className="w-full min-w-0 bg-transparent text-[9px] outline-none placeholder:text-slate-400"
                   />
                 </div>
+                <p id="status-cep" className="text-[8px] leading-3 text-slate-500" aria-live="polite">
+                  {cepStatus.kind === "loading" && "Buscando o endereço..."}
+                  {cepStatus.kind === "error" && <span className="text-red-600">{cepStatus.message}</span>}
+                  {cepStatus.kind === "ok" && (
+                    <span className="text-emerald-700">
+                      {[bairro, city && uf ? `${city}/${uf}` : ""].filter(Boolean).join(" · ") || "CEP encontrado"}
+                    </span>
+                  )}
+                  {cepStatus.kind === "idle" && (
+                    <a
+                      href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600"
+                    >
+                      Não sei meu CEP
+                    </a>
+                  )}
+                </p>
+              </div>
 
+              <div className="mt-2 grid grid-cols-[1fr_1fr_4.5rem] gap-2">
+                <input
+                  name="bairro"
+                  type="text"
+                  maxLength={100}
+                  value={bairro}
+                  onChange={(e) => setBairro(e.target.value)}
+                  placeholder="Bairro"
+                  aria-label="Bairro"
+                  className="h-9 min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[9px] outline-none placeholder:text-slate-400 focus:border-blue-500"
+                />
+                <input
+                  name="cidade"
+                  type="text"
+                  maxLength={100}
+                  required
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Cidade"
+                  aria-label="Cidade"
+                  className="h-9 min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[9px] outline-none placeholder:text-slate-400 focus:border-blue-500"
+                />
                 <div className="relative flex h-9 items-center rounded-lg border border-slate-200 bg-slate-50 pl-2.5 pr-1.5">
                   <select
                     name="uf"
@@ -502,66 +599,84 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
                     className="h-full w-full appearance-none bg-transparent text-[9px] text-slate-600 outline-none"
                   >
                     <option value="">UF</option>
-
                     {ESTADOS.map(({ uf: sigla, nome }) => (
                       <option key={sigla} value={sigla} title={nome}>
                         {sigla}
                       </option>
                     ))}
                   </select>
-
-                  <ChevronDown
-                    size={13}
-                    className="pointer-events-none shrink-0 text-slate-400"
-                  />
+                  <ChevronDown size={13} className="pointer-events-none shrink-0 text-slate-400" />
                 </div>
               </div>
-            </section>
 
-            {isOffering && (
-              <section className="mt-4">
-                <label
-                  htmlFor="endereco"
-                  className="mb-1.5 block text-[9px] font-medium"
-                >
-                  Onde você atende?
-                </label>
-
-                <div className="flex h-9 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5">
-                  <MapPin size={13} className="shrink-0 text-slate-400" />
-
+              {isOffering ? (
+                <>
+                  <input type="hidden" name="raioAtendimentoKm" value={RADIUS_OPTIONS.find((o) => o.label === radius)?.km ?? ""} />
+                  <p className="mb-1.5 mt-3 text-[9px] font-medium">Até onde você vai?</p>
+                  <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Raio de atendimento">
+                    {RADIUS_OPTIONS.map(({ label }) => (
+                      <button
+                        key={label}
+                        type="button"
+                        role="radio"
+                        aria-checked={radius === label}
+                        onClick={() => setRadius(label)}
+                        className={`rounded-full border px-2 py-1 text-[8px] ${
+                          radius === label
+                            ? "border-blue-500 bg-blue-50 text-blue-600"
+                            : "border-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-1.5 text-[8px] text-slate-400">
+                    Os clientes veem a região e a distância; seu endereço não aparece.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="mt-2 grid grid-cols-[1fr_4.5rem] gap-2">
+                    <input
+                      name="logradouro"
+                      type="text"
+                      maxLength={150}
+                      value={street}
+                      onChange={(e) => setStreet(e.target.value)}
+                      placeholder="Rua"
+                      aria-label="Rua"
+                      autoComplete="address-line1"
+                      className="h-9 min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[9px] outline-none placeholder:text-slate-400 focus:border-blue-500"
+                    />
+                    <input
+                      name="numero"
+                      type="text"
+                      maxLength={20}
+                      value={number}
+                      onChange={(e) => setNumber(e.target.value)}
+                      placeholder="Nº"
+                      aria-label="Número"
+                      className="h-9 min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[9px] outline-none placeholder:text-slate-400 focus:border-blue-500"
+                    />
+                  </div>
                   <input
-                    id="endereco"
+                    name="complemento"
                     type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Seu bairro ou CEP"
-                    className="w-full bg-transparent text-[9px] outline-none placeholder:text-slate-400"
+                    maxLength={100}
+                    value={complement}
+                    onChange={(e) => setComplement(e.target.value)}
+                    placeholder="Complemento (opcional)"
+                    aria-label="Complemento"
+                    autoComplete="address-line2"
+                    className="mt-2 h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[9px] outline-none placeholder:text-slate-400 focus:border-blue-500"
                   />
-                </div>
-
-                <div className="mt-2 flex gap-1.5">
-                  {["5 km", "10 km", "20 km", "Toda a cidade"].map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setRadius(item)}
-                      className={`rounded-full border px-2 py-1 text-[8px] ${
-                        radius === item
-                          ? "border-blue-500 bg-blue-50 text-blue-600"
-                          : "border-slate-200 text-slate-600"
-                      }`}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="mt-1.5 text-[8px] text-slate-400">
-                  Seu anúncio aparece para clientes dentro dessa área.
-                </p>
-              </section>
-            )}
+                  <p className="mt-1.5 flex items-start gap-1 text-[8px] leading-3 text-slate-400">
+                    Os profissionais veem só a região no mapa. Rua e número aparecem só para quem você aceitar.
+                  </p>
+                </>
+              )}
+            </section>
 
             <section className="mt-4">
               <div className="mb-1.5 flex items-center justify-between">

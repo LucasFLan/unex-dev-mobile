@@ -1,5 +1,6 @@
 package com.unex.chamaAi.anuncio.application.usecases;
 
+import com.unex.chamaAi.anuncio.application.ports.AutoresAnuncio;
 import com.unex.chamaAi.anuncio.application.dto.AnuncioDetalhado;
 import com.unex.chamaAi.anuncio.application.dto.ListarAnunciosQuery;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
@@ -15,9 +16,9 @@ public class ListarAnuncios {
     private final AnuncioRepository anuncios;
     private final DetalhadorAnuncio detalhador;
 
-    public ListarAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias) {
+    public ListarAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias, AutoresAnuncio autores) {
         this.anuncios = anuncios;
-        this.detalhador = new DetalhadorAnuncio(categorias);
+        this.detalhador = new DetalhadorAnuncio(categorias, autores);
     }
 
     public Pagina<AnuncioDetalhado> executar(ListarAnunciosQuery consulta) {

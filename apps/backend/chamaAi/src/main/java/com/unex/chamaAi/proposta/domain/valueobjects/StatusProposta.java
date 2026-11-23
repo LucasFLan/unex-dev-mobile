@@ -10,5 +10,7 @@ public enum StatusProposta {
     /** O autor aceitou outra proposta para o mesmo pedido. */
     NAO_SELECIONADA,
     /** Quem enviou retirou a proposta. */
-    CANCELADA
+    CANCELADA,
+    /** Depois de aceita, quem contratou confirmou que o serviço foi feito: libera a avaliação. */
+    CONCLUIDA
 }

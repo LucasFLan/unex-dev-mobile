@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, Send } from "lucide-react";
 import { respondProposal } from "@/app/propostas/actions";
 import { ProposalContact } from "@/components/ProposalContact";
+import { ProposalPhotos } from "@/components/ProposalPhotos";
+import { ServiceAddress, ServiceProgress } from "@/components/ServiceProgress";
 import { ProposalStatusBadge } from "@/components/ProposalStatusBadge";
 import { RelativeTime } from "@/components/RelativeTime";
 import { formatPrice } from "@/lib/format";
@@ -104,9 +106,18 @@ export function SentProposals({ proposals }: { proposals: ProposalItem[] }) {
               )}
             </div>
 
-            {proposal.status === "ACEITA" && (
-              <div className="mt-2 border-t border-slate-100 pt-2">
+            <ProposalPhotos proposalId={proposal.id} photos={proposal.fotos} />
+
+            {(proposal.status === "ACEITA" || proposal.status === "CONCLUIDA") && (
+              <div className="mt-2 space-y-2 border-t border-slate-100 pt-2">
                 <ProposalContact person={proposal.destinatario} />
+                {proposal.endereco && <ServiceAddress address={proposal.endereco} />}
+                {/* Pediu orçamento numa oferta: você contratou e conclui/avalia. Num pedido, você é o profissional. */}
+                <ServiceProgress
+                  proposal={proposal}
+                  isClient={ad?.tipo === "OFERTA"}
+                  professionalName={proposal.destinatario.nome}
+                />
               </div>
             )}
 

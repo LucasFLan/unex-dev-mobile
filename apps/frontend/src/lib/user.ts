@@ -14,6 +14,8 @@ export type CurrentUser = {
   role: "USUARIO" | "ADMIN";
   /** Só APROVADO publica anúncios e envia propostas. */
   validation: AccountValidation;
+  /** `fotoAtualizadaEm` do perfil: versão da foto, ou `null` sem foto. */
+  photoVersion: string | null;
 };
 
 export type AccountValidation = "PENDENTE" | "APROVADO" | "REPROVADO";
@@ -42,6 +44,7 @@ function parseUser(data: unknown): CurrentUser | null {
       body.statusValidacao === "APROVADO" || body.statusValidacao === "REPROVADO"
         ? body.statusValidacao
         : "PENDENTE",
+    photoVersion: text(body.fotoAtualizadaEm) || null,
   };
 }
 
