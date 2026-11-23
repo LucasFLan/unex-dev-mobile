@@ -3,6 +3,8 @@ import type { AnuncioItem } from "@/lib/ads";
 
 export type Professional = {
   id: string;
+  /** Autor do anúncio: dono da foto de perfil que aparece no card. */
+  authorId: string;
   /** Nome da categoria, para exibição. */
   category: string;
   /** Slug da categoria (GET /categorias), usada no filtro e no ícone. */
@@ -115,6 +117,7 @@ export function filterRequests(
 /** Anúncio do tipo OFERTA no formato do card de profissional. */
 export const toProfessional = (anuncio: AnuncioItem): Professional => ({
   id: anuncio.id,
+  authorId: anuncio.autorId,
   category: anuncio.categoria.nome,
   categorySlug: anuncio.categoria.slug,
   name: anuncio.titulo,

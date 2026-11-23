@@ -26,7 +26,8 @@ function cameraError(error: unknown): string {
 
 /**
  * Tela cheia com a câmera do aparelho e uma moldura-guia. Entrega a foto como JPEG pelo onCapture.
- * Documento abre a câmera traseira; selfie, a frontal (a prévia fica espelhada, a foto não).
+ * Documento e foto livre (anexo de proposta) abrem a câmera traseira; selfie e foto de perfil, a frontal (a
+ * prévia fica espelhada, a foto não). A foto livre não tem moldura-guia.
  */
 export function CameraCapture({
   kind,
@@ -34,14 +35,14 @@ export function CameraCapture({
   onCapture,
   onClose,
 }: {
-  kind: "documento" | "selfie";
+  kind: "documento" | "selfie" | "perfil" | "livre";
   title: string;
   onCapture: (file: File) => void;
   onClose: (error?: string) => void;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const [facing, setFacing] = useState<Facing>(kind === "selfie" ? "user" : "environment");
+  const [facing, setFacing] = useState<Facing>(kind === "documento" || kind === "livre" ? "environment" : "user");
   const [ready, setReady] = useState(false);
   const [canFlip, setCanFlip] = useState(false);
   const [shot, setShot] = useState<{ file: File; url: string } | null>(null);
@@ -159,10 +160,12 @@ export function CameraCapture({
           <img src={shot.url} alt="Foto tirada" className="absolute inset-0 h-full w-full object-contain" />
         )}
 
-        {!shot && (
+        {!shot && kind !== "livre" && (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4 px-6">
             {kind === "documento" ? (
               <div className="aspect-[1.58] w-full max-w-sm rounded-xl border-2 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]" />
+            ) : kind === "perfil" ? (
+              <div className="aspect-square w-full max-w-72 rounded-full border-2 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]" />
             ) : (
               <div className="flex flex-col items-center gap-3">
                 <div className="h-56 w-44 rounded-[50%] border-2 border-white/90" />
@@ -172,7 +175,9 @@ export function CameraCapture({
             <p className="rounded-full bg-black/50 px-3 py-1.5 text-center text-xs">
               {kind === "documento"
                 ? "Encaixe o documento na moldura, sem reflexo"
-                : "Rosto no oval e o documento logo abaixo"}
+                : kind === "perfil"
+                  ? "Centralize o rosto no círculo"
+                  : "Rosto no oval e o documento logo abaixo"}
             </p>
           </div>
         )}

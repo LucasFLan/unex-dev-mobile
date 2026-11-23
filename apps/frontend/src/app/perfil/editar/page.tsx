@@ -9,6 +9,8 @@ async function EditarPerfilContent() {
   return (
     <EditProfileForm
       initial={{
+        userId: user.id,
+        photoVersion: user.photoVersion,
         nome: user.name,
         dataNascimento: isoToBr(user.birthDate),
         telefone: maskPhone(user.phone),

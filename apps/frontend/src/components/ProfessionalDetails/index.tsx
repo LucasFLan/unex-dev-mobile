@@ -13,7 +13,7 @@ import { ReceivedProposals } from "@/components/ReceivedProposals";
 import type { AnuncioItem } from "@/lib/ads";
 import type { ProposalItem } from "@/lib/proposals";
 import { getCategoryMeta } from "@/lib/categories";
-import { initials } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
 import { formatPrice } from "@/lib/format";
 
 type ProfessionalDetailsProps = {
@@ -146,9 +146,7 @@ export function ProfessionalDetails({
           </div>
 
           <div className="mt-2 flex items-center gap-1.5 text-[9px] text-slate-500">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[7px] font-semibold text-blue-600">
-              {initials(ad.titulo)}
-            </span>
+            <Avatar userId={ad.autorId} name={ad.titulo} className="h-6 w-6 text-[8px]" />
 
             <span>Anunciado por</span>
 

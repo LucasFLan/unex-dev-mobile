@@ -2,8 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { apiFetch, type ApiResult } from "@/lib/api";
+import { apiFetch, apiUpload, type ApiResult } from "@/lib/api";
 import { ENDPOINTS, extractErrorMessage } from "@/lib/api-contract";
+import { MAX_PROPOSAL_PHOTO_BYTES, MAX_PROPOSAL_PHOTOS } from "@/lib/proposal-limits";
 import { clearSessionToken } from "@/lib/session";
 
 export type ProposalFormState =
@@ -55,13 +56,32 @@ export async function sendProposal(
     return { error: `A mensagem pode ter no máximo ${MAX_MESSAGE} caracteres.` };
   }
 
+  const fotos = formData
+    .getAll("fotos")
+    .filter((foto): foto is File => foto instanceof File && foto.size > 0);
+  if (fotos.length > MAX_PROPOSAL_PHOTOS) {
+    return { error: `Anexe no máximo ${MAX_PROPOSAL_PHOTOS} fotos.` };
+  }
+  if (fotos.some((foto) => foto.size > MAX_PROPOSAL_PHOTO_BYTES)) {
+    return { error: "Cada foto pode ter no máximo 5 MB." };
+  }
+
   let result: ApiResult;
   try {
-    result = await apiFetch(ENDPOINTS.proposals(adId), {
-      method: "POST",
-      auth: true,
-      body: { valor, mensagem },
-    });
+    if (fotos.length === 0) {
+      result = await apiFetch(ENDPOINTS.proposals(adId), {
+        method: "POST",
+        auth: true,
+        body: { valor, mensagem },
+      });
+    } else {
+      // Com fotos, a mesma rota recebe multipart: proposta e fotos são gravadas juntas.
+      const form = new FormData();
+      if (valor !== null) form.set("valor", valor.toFixed(2));
+      form.set("mensagem", mensagem);
+      fotos.forEach((foto, index) => form.append("fotos", foto, foto.name || `foto-${index + 1}.jpg`));
+      result = await apiUpload(ENDPOINTS.proposals(adId), form);
+    }
   } catch {
     return { error: "Não foi possível conectar ao servidor. Tente novamente." };
   }

@@ -8,7 +8,8 @@ import { ProposalContact } from "@/components/ProposalContact";
 import { ProposalStatusBadge } from "@/components/ProposalStatusBadge";
 import { RelativeTime } from "@/components/RelativeTime";
 import { formatPrice } from "@/lib/format";
-import { initials } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
+import { ProposalPhotos } from "@/components/ProposalPhotos";
 import type { ProposalItem } from "@/lib/proposals";
 
 type ReceivedProposalsProps = {
@@ -84,12 +85,11 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[9px] font-semibold text-blue-600"
-                    aria-hidden="true"
-                  >
-                    {initials(proposal.remetente.nome)}
-                  </span>
+                  <Avatar
+                    userId={proposal.remetente.id}
+                    name={proposal.remetente.nome}
+                    className="h-8 w-8 text-[10px]"
+                  />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1">
@@ -111,6 +111,8 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                 <p className="mt-2 whitespace-pre-line text-[10px] leading-3.5 text-slate-600">
                   {proposal.mensagem}
                 </p>
+
+                <ProposalPhotos proposalId={proposal.id} photos={proposal.fotos} />
 
                 {proposal.status === "PENDENTE" && (
                   <div className="mt-2 grid grid-cols-2 gap-1.5">

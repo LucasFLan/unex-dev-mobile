@@ -27,6 +27,8 @@ export type ProposalItem = {
   status: ProposalStatus;
   criadoEm: string;
   respondidoEm: string | null;
+  /** Ids das fotos anexadas, na ordem do envio (ver /api/propostas/[id]/fotos/[fotoId]). */
+  fotos: string[];
 };
 
 const ENDPOINTS = {
@@ -81,6 +83,7 @@ function parseProposal(item: unknown): ProposalItem | null {
     status: STATUSES.includes(status) ? status : "PENDENTE",
     criadoEm: text(b.criadoEm),
     respondidoEm: text(b.respondidoEm) || null,
+    fotos: Array.isArray(b.fotos) ? b.fotos.filter((foto): foto is string => typeof foto === "string") : [],
   };
 }
 

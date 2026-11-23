@@ -55,14 +55,15 @@ export async function apiFetch<T = unknown>(
  */
 export async function apiUpload<T = unknown>(
   path: string,
-  form: FormData
+  form: FormData,
+  method: "POST" | "PUT" = "POST"
 ): Promise<ApiResult<T>> {
   const headers: Record<string, string> = { Accept: "application/json" };
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const response = await fetch(`${BASE_URL}${path}`, {
-    method: "POST",
+    method,
     headers,
     body: form,
     cache: "no-store",

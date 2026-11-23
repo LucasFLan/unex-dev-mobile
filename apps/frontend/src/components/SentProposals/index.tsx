@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ChevronRight, Send } from "lucide-react";
 import { respondProposal } from "@/app/propostas/actions";
 import { ProposalContact } from "@/components/ProposalContact";
+import { ProposalPhotos } from "@/components/ProposalPhotos";
 import { ProposalStatusBadge } from "@/components/ProposalStatusBadge";
 import { RelativeTime } from "@/components/RelativeTime";
 import { formatPrice } from "@/lib/format";
@@ -103,6 +104,8 @@ export function SentProposals({ proposals }: { proposals: ProposalItem[] }) {
                 </Link>
               )}
             </div>
+
+            <ProposalPhotos proposalId={proposal.id} photos={proposal.fotos} />
 
             {proposal.status === "ACEITA" && (
               <div className="mt-2 border-t border-slate-100 pt-2">

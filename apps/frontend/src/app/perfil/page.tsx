@@ -14,7 +14,7 @@ import { InfoRow } from "@/components/InfoRow";
 import { getMeusAnuncios } from "@/lib/ads";
 import { getCategoryMeta } from "@/lib/categories";
 import { formatPhone, formatShortDate } from "@/lib/format";
-import { initials } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
 import { getCurrentUser } from "@/lib/user";
 
 async function PerfilContent() {
@@ -57,12 +57,12 @@ async function PerfilContent() {
         <div className="space-y-4 px-3.5">
           {/* Identificação */}
           <section className="flex flex-col items-center rounded-xl border border-slate-200 bg-white px-4 py-5 text-center shadow-sm">
-            <span
-              className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-2xl font-bold text-blue-600"
-              aria-hidden="true"
-            >
-              {initials(user.name)}
-            </span>
+            <Avatar
+              userId={user.id}
+              name={user.name}
+              version={user.photoVersion}
+              className="h-20 w-20 text-2xl"
+            />
 
             <div className="mt-3 flex items-center gap-1">
               <h2 className="text-base font-bold">{user.name}</h2>
