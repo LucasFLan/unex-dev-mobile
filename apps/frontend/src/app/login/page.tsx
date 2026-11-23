@@ -4,8 +4,8 @@ import { LoginForm } from "@/components/LoginForm";
 
 export default function Login() {
   return (
-    <main className="flex min-h-screen w-full flex-col items-center justify-center p-6">
-      <div className="flex w-full max-w-md flex-col gap-8">
+    <main className="flex min-h-screen w-full flex-col items-center justify-center p-6 md:bg-fundo">
+      <div className="flex w-full max-w-md flex-col gap-8 md:rounded-2xl md:border md:border-slate-200 md:bg-white md:p-10 md:shadow-sm">
         <div className="flex flex-col items-center justify-center">
           <Image
             src={Logo}

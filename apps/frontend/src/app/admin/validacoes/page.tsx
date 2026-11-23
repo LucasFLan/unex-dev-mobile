@@ -28,7 +28,7 @@ async function FilaContent({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <main className="min-h-dvh bg-fundo pb-10 text-slate-800">
-      <div className="mx-auto w-full max-w-lg">
+      <div className="mx-auto w-full max-w-lg lg:pt-6 lg:max-w-3xl">
         <header className="sticky top-0 z-20 bg-fundo px-2 pb-2 pt-3">
           <div className="flex items-center gap-1">
             <BackButton href="/menu" />

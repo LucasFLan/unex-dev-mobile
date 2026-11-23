@@ -118,22 +118,22 @@ export function ListingContent({
   const here = withQuery(pathname);
 
   return (
-    <main className="min-h-dvh bg-white pb-28 text-slate-900">
-      <div className="mx-auto w-full max-w-lg">
-        <header className="px-5 pt-4">
+    <main className="min-h-dvh bg-white pb-28 text-slate-900 lg:pb-12">
+      <div className="mx-auto w-full max-w-lg lg:max-w-6xl lg:px-4">
+        <header className="px-5 pt-4 lg:pt-8">
           <div className="-ml-2 flex items-center gap-1">
             <BackButton href={withQuery("/home")} />
             <div className="min-w-0">
-              <h1 className="truncate text-[15px] font-bold tracking-tight">{copy.title}</h1>
-              <p className="text-[10px] text-slate-500" aria-live="polite">
+              <h1 className="truncate text-[15px] font-bold tracking-tight lg:text-2xl">{copy.title}</h1>
+              <p className="text-[10px] text-slate-500 lg:text-sm" aria-live="polite">
                 {copy.count(total)}
               </p>
             </div>
           </div>
 
-          <div ref={filtersRef} className="relative mt-4">
+          <div ref={filtersRef} className="relative mt-4 lg:max-w-2xl">
             <div className="flex gap-2">
-              <div className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3">
+              <div className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 focus-within:border-blue-500 lg:h-12 lg:px-4">
                 <Search size={16} className="shrink-0 text-slate-400" aria-hidden="true" />
                 <input
                   type="search"
@@ -141,7 +141,7 @@ export function ListingContent({
                   onChange={(event) => setSearchInput(event.target.value)}
                   placeholder={copy.search}
                   aria-label={copy.search}
-                  className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-slate-500 [&::-webkit-search-cancel-button]:hidden"
+                  className="min-w-0 flex-1 bg-transparent text-[11px] outline-none lg:text-sm placeholder:text-slate-500 [&::-webkit-search-cancel-button]:hidden"
                 />
                 {searchInput && (
                   <button
@@ -161,7 +161,7 @@ export function ListingContent({
                 aria-label={priceFilterActive ? "Filtros (1 ativo)" : "Filtros"}
                 aria-expanded={showFilters}
                 aria-controls="painel-filtros"
-                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"
+                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 lg:h-12 lg:w-12"
               >
                 <SlidersHorizontal size={19} aria-hidden="true" />
                 {priceFilterActive && (
@@ -190,7 +190,7 @@ export function ListingContent({
                 type="button"
                 onClick={() => chooseSort(value)}
                 aria-pressed={filters.sort === value}
-                className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] transition ${
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] transition lg:px-4 lg:py-2 lg:text-sm ${
                   filters.sort === value
                     ? "border-blue-600 bg-blue-600 text-white"
                     : "border-slate-200 bg-white text-slate-700"
@@ -215,7 +215,7 @@ export function ListingContent({
 
         <CategoryList categories={categories} active={filters.category} onSelect={setCategory} />
 
-        <section className="mt-4 px-5" aria-label={copy.title}>
+        <section className="mt-4 px-5 lg:mt-8" aria-label={copy.title}>
           {total === 0 ? (
             <div className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center">
               <p className="text-xs text-slate-500">{copy.empty}</p>
@@ -230,7 +230,7 @@ export function ListingContent({
               )}
             </div>
           ) : kind === "profissionais" ? (
-            <ul className="grid grid-cols-2 gap-2.5">
+            <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:gap-4 xl:grid-cols-4">
               {professionals.map((professional) => (
                 <li key={professional.id} className="min-w-0">
                   <ProfessionalCard professional={professional} from={here} className="w-full" />
@@ -238,7 +238,7 @@ export function ListingContent({
               ))}
             </ul>
           ) : (
-            <ul className="flex flex-col gap-2.5">
+            <ul className="flex flex-col gap-2.5 lg:grid lg:grid-cols-2 lg:gap-4 xl:grid-cols-3">
               {requests.map((request) => (
                 <li key={request.id} className="flex">
                   <RequestCard request={request} from={here} className="w-full" />

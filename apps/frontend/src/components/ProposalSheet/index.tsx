@@ -100,12 +100,12 @@ export function ProposalSheet({
 
   return (
     <div
-      className="fixed inset-0 z-30 flex items-end justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 md:items-center md:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="titulo-proposta"
     >
-      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-5 pb-[max(20px,env(safe-area-inset-bottom))]">
+      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-white p-5 pb-[max(20px,env(safe-area-inset-bottom))] md:rounded-2xl md:shadow-xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 id="titulo-proposta" className="text-sm font-bold">
             {title}

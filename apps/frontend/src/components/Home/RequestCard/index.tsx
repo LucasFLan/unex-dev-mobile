@@ -19,7 +19,7 @@ export function RequestCard({
   const href = `/servicos/${request.id}`;
 
   return (
-    <article className={`relative flex ${className} flex-col rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm`}>
+    <article className={`group relative flex ${className} flex-col rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm transition hover:shadow-md lg:p-4`}>
       <div className="flex items-center justify-between gap-1">
         <span className="truncate rounded bg-amber-50 px-1.5 py-1 text-[10px] font-medium text-amber-800">
           {request.category}
@@ -31,7 +31,7 @@ export function RequestCard({
         </span>
       </div>
 
-      <h3 className="mt-2 text-[11px] font-semibold leading-4">
+      <h3 className="mt-2 text-[11px] font-semibold leading-4 lg:text-sm lg:leading-5">
         <Link
           href={from ? withFrom(href, from) : href}
           className="after:absolute after:inset-0 focus-visible:outline-2 focus-visible:outline-blue-600"
@@ -40,12 +40,12 @@ export function RequestCard({
         </Link>
       </h3>
 
-      <p className="mt-1 line-clamp-3 min-h-10.5 text-[10px] leading-3.5 text-slate-500">
+      <p className="mt-1 line-clamp-3 min-h-10.5 text-[10px] leading-3.5 text-slate-500 lg:min-h-15 lg:text-xs lg:leading-5">
         {request.description}
       </p>
 
       <div className="mt-2 flex items-center justify-between gap-2 border-t border-slate-100 pt-2">
-        <span className="flex min-w-0 items-center gap-1 text-[10px] text-slate-500">
+        <span className="flex min-w-0 items-center gap-1 text-[10px] text-slate-500 lg:text-xs">
           <MapPin size={11} className="shrink-0" aria-hidden="true" />
           <span className="truncate">
             {request.distanceKm !== null ? `${formatDistance(request.distanceKm)} · ` : ""}
@@ -53,12 +53,12 @@ export function RequestCard({
           </span>
         </span>
 
-        <strong className="shrink-0 text-[11px]">
+        <strong className="shrink-0 text-[11px] lg:text-sm">
           {formatPrice(request.price)}
         </strong>
       </div>
 
-      <span className="relative mt-2 rounded-lg bg-blue-50 py-2 text-center text-[11px] font-semibold text-blue-600 transition hover:bg-blue-100">
+      <span className="pointer-events-none relative mt-2 rounded-lg bg-blue-50 py-2 text-center text-[11px] font-semibold text-blue-600 transition group-hover:bg-blue-100 lg:py-2.5 lg:text-sm">
         Ver pedido
       </span>
     </article>

@@ -27,7 +27,7 @@ export function MenuSection({
           <li key={href}>
             <Link
               href={href}
-              className="flex h-12 items-center gap-3 px-3 active:bg-slate-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600"
+              className="flex h-12 items-center gap-3 px-3 hover:bg-slate-50 active:bg-slate-50 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue-600"
             >
               <span
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${tone}`}
@@ -35,7 +35,7 @@ export function MenuSection({
                 <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
               </span>
 
-              <span className="flex-1 text-xs font-medium text-slate-800">
+              <span className="flex-1 text-xs font-medium text-slate-800 lg:text-sm">
                 {label}
               </span>
 

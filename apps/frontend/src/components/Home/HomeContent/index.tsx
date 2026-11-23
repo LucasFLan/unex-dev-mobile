@@ -33,7 +33,7 @@ import type { AccountValidation } from "@/lib/user";
 import { ValidationBanner } from "@/components/ValidationBanner";
 
 const carousel =
-  "flex gap-2.5 overflow-x-auto px-5 pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden";
+  "flex gap-2.5 overflow-x-auto px-5 pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible xl:grid-cols-4";
 
 function Section({
   title,
@@ -47,19 +47,19 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="mt-4">
+    <section className="mt-4 lg:mt-10">
       <div className="flex items-center justify-between px-5">
         <div>
-          <h2 className="text-xs font-bold">{title}</h2>
-          <p className="mt-0.5 text-[10px] text-slate-500">{subtitle}</p>
+          <h2 className="text-xs font-bold lg:text-lg">{title}</h2>
+          <p className="mt-0.5 text-[10px] text-slate-500 lg:text-sm">{subtitle}</p>
         </div>
 
-        <Link href={href} className="text-[11px] font-medium text-blue-600">
+        <Link href={href} className="text-[11px] font-medium text-blue-600 hover:underline lg:text-sm">
           Ver todos
         </Link>
       </div>
 
-      <div className="mt-3">{children}</div>
+      <div className="mt-3 lg:mt-4">{children}</div>
     </section>
   );
 }
@@ -72,7 +72,7 @@ function EmptyState({
   onClear?: () => void;
 }) {
   return (
-    <div className="mx-5 rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center">
+    <div className="mx-5 rounded-xl border border-dashed lg:py-10 border-slate-200 px-4 py-6 text-center">
       <p className="text-xs text-slate-500">{message}</p>
       {onClear && (
         <button
@@ -163,11 +163,11 @@ export function HomeContent({
   const priceFilterActive = filters.maxPrice !== null;
 
   return (
-    <main className="min-h-dvh bg-white pb-28 text-slate-900">
-      <div className="mx-auto w-full max-w-lg">
-        <header className="px-5 pt-5">
+    <main className="min-h-dvh bg-white pb-28 text-slate-900 lg:pb-12">
+      <div className="mx-auto w-full max-w-lg lg:max-w-6xl lg:px-4">
+        <header className="px-5 pt-5 lg:pt-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-[15px] font-bold tracking-tight">
+            <h1 className="text-[15px] font-bold tracking-tight lg:text-2xl">
               Olá, {userName}
             </h1>
 
@@ -178,7 +178,7 @@ export function HomeContent({
                   ? `Notificações (${unreadNotifications} não lidas)`
                   : "Notificações"
               }
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200"
+              className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 transition hover:bg-slate-50"
             >
               <Bell size={18} aria-hidden="true" />
               {unreadNotifications > 0 && (
@@ -194,9 +194,9 @@ export function HomeContent({
 
           <ValidationBanner validation={validation} from="/home" className="mt-4" />
 
-          <div ref={filtersRef} className="relative mt-4">
+          <div ref={filtersRef} className="relative mt-4 lg:max-w-2xl">
             <div className="flex gap-2">
-              <div className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3">
+              <div className="flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 focus-within:border-blue-500 lg:h-12 lg:px-4">
                 <Search
                   size={16}
                   className="shrink-0 text-slate-400"
@@ -208,7 +208,7 @@ export function HomeContent({
                   onChange={(event) => setSearchInput(event.target.value)}
                   placeholder="Buscar serviços ou profissionais"
                   aria-label="Buscar serviços ou profissionais"
-                  className="min-w-0 flex-1 bg-transparent text-[11px] outline-none placeholder:text-slate-500 [&::-webkit-search-cancel-button]:hidden"
+                  className="min-w-0 flex-1 bg-transparent text-[11px] outline-none lg:text-sm placeholder:text-slate-500 [&::-webkit-search-cancel-button]:hidden"
                 />
                 {searchInput && (
                   <button
@@ -228,7 +228,7 @@ export function HomeContent({
                 aria-label={priceFilterActive ? "Filtros (1 ativo)" : "Filtros"}
                 aria-expanded={showFilters}
                 aria-controls="painel-filtros"
-                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"
+                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white transition hover:bg-blue-700 lg:h-12 lg:w-12"
               >
                 <SlidersHorizontal size={19} aria-hidden="true" />
                 {priceFilterActive && (
@@ -257,7 +257,7 @@ export function HomeContent({
                 type="button"
                 onClick={() => chooseSort(value)}
                 aria-pressed={filters.sort === value}
-                className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] transition ${
+                className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] transition lg:px-4 lg:py-2 lg:text-sm ${
                   filters.sort === value
                     ? "border-blue-600 bg-blue-600 text-white"
                     : "border-slate-200 bg-white text-slate-700"
@@ -300,7 +300,7 @@ export function HomeContent({
             <ul className={carousel}>
               {professionals.map((professional) => (
                 <li key={professional.id} className="shrink-0">
-                  <ProfessionalCard professional={professional} />
+                  <ProfessionalCard professional={professional} className="w-47.5 lg:w-full" />
                 </li>
               ))}
             </ul>
@@ -321,7 +321,7 @@ export function HomeContent({
             <ul className={carousel}>
               {requests.map((request) => (
                 <li key={request.id} className="flex shrink-0">
-                  <RequestCard request={request} />
+                  <RequestCard request={request} className="w-60 lg:w-full" />
                 </li>
               ))}
             </ul>
