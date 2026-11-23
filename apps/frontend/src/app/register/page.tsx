@@ -171,14 +171,14 @@ const Register = () => {
               <span className="text-xs leading-4.5 text-slate-500">
                 Li e concordo com os{" "}
                 <Link
-                  href="/termos"
+                  href="/termos?de=%2Fregister"
                   className="font-medium text-blue-600 hover:underline"
                 >
                   Termos de Uso
                 </Link>{" "}
                 e a{" "}
                 <Link
-                  href="/privacidade"
+                  href="/privacidade?de=%2Fregister"
                   className="font-medium text-blue-600 hover:underline"
                 >
                   Política de Privacidade

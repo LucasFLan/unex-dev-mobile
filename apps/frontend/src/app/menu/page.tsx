@@ -127,7 +127,7 @@ const SECTIONS: { title: string; items: MenuItem[] }[] = [
       {
         label: "Termos e políticas",
         description: "Termos de uso e política de privacidade",
-        href: "/termos",
+        href: "/termos?de=%2Fmenu",
         icon: FileText,
         tone: "bg-slate-100 text-slate-500",
       },
