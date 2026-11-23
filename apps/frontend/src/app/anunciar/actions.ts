@@ -11,6 +11,20 @@ import { clearSessionToken } from "@/lib/session";
 
 export type AdFormState = { error: string } | null;
 
+export type CepResult =
+  | {
+      ok: true;
+      cep: string;
+      logradouro: string | null;
+      bairro: string | null;
+      cidade: string | null;
+      uf: string | null;
+      /** Ponto aproximado (~1 km) para mostrar a região. */
+      latitude: number | null;
+      longitude: number | null;
+    }
+  | { ok: false; error: string };
+
 export type AdActionResult =
   | { ok: true; ad: AnuncioItem | null }
   | { ok: false; error: string };
@@ -62,6 +76,8 @@ function readAdForm(
   const cidade = field(formData, "cidade");
   const uf = field(formData, "uf");
   const preco = parsePrice(field(formData, "preco"));
+  const cep = field(formData, "cep").replace(/\D/g, "");
+  const raio = field(formData, "raioAtendimentoKm");
 
   if (!AD_TYPES.includes(tipo)) {
     return { error: "Escolha se você procura ou oferece um serviço." };
@@ -83,6 +99,8 @@ function readAdForm(
     return { error: "Informe a cidade (até 100 caracteres)." };
   }
   if (!UFS.includes(uf)) return { error: "Escolha o estado." };
+  if (cep.length !== 8) return { error: "Informe o CEP (8 dígitos)." };
+  if (raio && !/^\d{1,3}$/.test(raio)) return { error: "Escolha até onde você atende." };
 
   return {
     body: {
@@ -93,7 +111,46 @@ function readAdForm(
       [AD_FIELDS.price]: preco, // null = "a combinar"
       [AD_FIELDS.city]: cidade,
       [AD_FIELDS.state]: uf,
+      cep,
+      bairro: field(formData, "bairro") || null,
+      logradouro: field(formData, "logradouro") || null,
+      numero: field(formData, "numero") || null,
+      complemento: field(formData, "complemento") || null,
+      // Só vale para OFERTA; vazio = "toda a cidade".
+      raioAtendimentoKm: tipo === "OFERTA" && raio ? Number(raio) : null,
     },
+  };
+}
+
+/** GET /cep/{cep}: preenche o endereço do formulário. */
+export async function lookupCep(cep: string): Promise<CepResult> {
+  const digits = cep.replace(/\D/g, "");
+  if (digits.length !== 8) return { ok: false, error: "O CEP tem 8 dígitos." };
+
+  let result: ApiResult;
+  try {
+    result = await apiFetch(ENDPOINTS.cep(digits), { auth: true });
+  } catch {
+    return { ok: false, error: CONNECTION_ERROR };
+  }
+  if (result.status === 401) await handleUnauthorized(result);
+  if (result.status === 404) return { ok: false, error: "CEP não encontrado. Confira os números." };
+  if (!result.ok) {
+    return { ok: false, error: "A busca de CEP está fora do ar. Preencha bairro e cidade à mão." };
+  }
+
+  const b = (result.data ?? {}) as Record<string, unknown>;
+  const str = (value: unknown) => (typeof value === "string" && value ? value : null);
+  const num = (value: unknown) => (typeof value === "number" ? value : null);
+  return {
+    ok: true,
+    cep: digits,
+    logradouro: str(b.logradouro),
+    bairro: str(b.bairro),
+    cidade: str(b.cidade),
+    uf: str(b.uf),
+    latitude: num(b.latitude),
+    longitude: num(b.longitude),
   };
 }
 

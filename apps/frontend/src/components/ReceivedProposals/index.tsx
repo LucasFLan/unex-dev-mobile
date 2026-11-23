@@ -10,6 +10,7 @@ import { RelativeTime } from "@/components/RelativeTime";
 import { formatPrice } from "@/lib/format";
 import { Avatar } from "@/components/Avatar";
 import { ProposalPhotos } from "@/components/ProposalPhotos";
+import { ServiceProgress } from "@/components/ServiceProgress";
 import type { ProposalItem } from "@/lib/proposals";
 
 type ReceivedProposalsProps = {
@@ -81,6 +82,8 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                 className={`rounded-xl border p-2.5 ${
                   proposal.status === "ACEITA"
                     ? "border-emerald-200 bg-emerald-50/40"
+                    : proposal.status === "CONCLUIDA"
+                    ? "border-blue-200 bg-blue-50/30"
                     : "border-slate-200"
                 }`}
               >
@@ -137,9 +140,15 @@ export function ReceivedProposals({ proposals, adType }: ReceivedProposalsProps)
                   </div>
                 )}
 
-                {proposal.status === "ACEITA" && (
+                {(proposal.status === "ACEITA" || proposal.status === "CONCLUIDA") && (
                   <div className="mt-2 border-t border-emerald-100 pt-2">
                     <ProposalContact person={proposal.remetente} />
+                    {/* Num pedido, quem contratou é o autor (você); numa oferta, é quem pediu o orçamento. */}
+                    <ServiceProgress
+                      proposal={proposal}
+                      isClient={adType === "PEDIDO"}
+                      professionalName={proposal.remetente.nome}
+                    />
                   </div>
                 )}
               </li>

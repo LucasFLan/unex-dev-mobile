@@ -13,7 +13,7 @@ import { ReceivedProposals } from "@/components/ReceivedProposals";
 import type { AnuncioItem } from "@/lib/ads";
 import type { ProposalItem } from "@/lib/proposals";
 import { getCategoryMeta } from "@/lib/categories";
-import { Avatar } from "@/components/Avatar";
+import { AdAuthor, AdLocation } from "@/components/AdLocation";
 import { formatPrice } from "@/lib/format";
 
 type ProfessionalDetailsProps = {
@@ -145,15 +145,7 @@ export function ProfessionalDetails({
             </strong>
           </div>
 
-          <div className="mt-2 flex items-center gap-1.5 text-[9px] text-slate-500">
-            <Avatar userId={ad.autorId} name={ad.titulo} className="h-6 w-6 text-[8px]" />
-
-            <span>Anunciado por</span>
-
-            <strong className="text-slate-800">
-              {isOwner ? "você" : ad.titulo}
-            </strong>
-          </div>
+          <AdAuthor ad={ad} isOwner={isOwner} from={`/profissionais/${ad.id}`} />
 
           <section className="mt-4">
             <h2 className="text-[11px] font-bold">Sobre o serviço</h2>
@@ -167,31 +159,7 @@ export function ProfessionalDetails({
             <ReceivedProposals proposals={proposals} adType={ad.tipo} />
           )}
 
-          <section className="mt-4">
-            <h2 className="text-[11px] font-bold">Região de atendimento</h2>
-
-            <div
-              className="relative mt-2 h-22.25 overflow-hidden rounded-xl bg-[#EDF2F7]"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0">
-                <div className="absolute -left-4 top-8.75 h-1.25 w-[120%] rotate-[8deg] bg-white" />
-                <div className="absolute -left-4 top-16.75 h-1.25 w-[120%] rotate-[8deg] bg-white" />
-                <div className="absolute left-[38%] -top-5 h-37.5 w-1.25 rotate-12 bg-white" />
-                <div className="absolute left-[70%] -top-5 h-37.5 w-1.25 rotate-[7deg] bg-white" />
-                <div className="absolute left-[20%] -top-5 h-37.5 w-1.25 rotate-12 bg-white" />
-              </div>
-
-              <div className="absolute left-1/2 top-1/2 flex h-18 w-18 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-blue-300 bg-blue-200/50">
-                <MapPin size={16} fill="#2563EB" className="text-white" />
-              </div>
-            </div>
-
-            <div className="mt-2 flex items-center gap-1 text-[9px] text-slate-500">
-              <MapPin size={11} />
-              {location} e região
-            </div>
-          </section>
+          <AdLocation ad={ad} isOwner={isOwner} />
         </section>
       </div>
 

@@ -97,7 +97,7 @@ export async function sendProposal(
   return { success: true };
 }
 
-export type ProposalAction = "aceitar" | "recusar" | "cancelar";
+export type ProposalAction = "aceitar" | "recusar" | "cancelar" | "concluir";
 
 /** PATCH /propostas/{id}/aceitar | recusar | cancelar. */
 export async function respondProposal(
@@ -138,5 +138,50 @@ export async function respondProposal(
   revalidatePath("/historico");
   revalidatePath("/servicos/[id]", "page");
   revalidatePath("/profissionais/[id]", "page");
+  return { ok: true };
+}
+
+/** POST /propostas/{id}/avaliacao: nota de 1 a 5 e comentário opcional (até 500). */
+export async function rateProposal(
+  proposalId: string,
+  nota: number,
+  comentario: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!Number.isInteger(nota) || nota < 1 || nota > 5) {
+    return { ok: false, error: "Escolha de 1 a 5 estrelas." };
+  }
+  const texto = comentario.trim();
+  if (texto.length > 500) {
+    return { ok: false, error: "O comentário pode ter no máximo 500 caracteres." };
+  }
+
+  let result: ApiResult;
+  try {
+    result = await apiFetch(ENDPOINTS.proposalReview(proposalId), {
+      method: "POST",
+      auth: true,
+      body: { nota, comentario: texto || null },
+    });
+  } catch {
+    return { ok: false, error: "Não foi possível conectar ao servidor. Tente novamente." };
+  }
+
+  if (result.status === 401) {
+    await clearSessionToken();
+    redirect("/login");
+  }
+  if (!result.ok) {
+    return {
+      ok: false,
+      error: extractErrorMessage(result.data) ?? "Algo deu errado no servidor. Tente novamente.",
+    };
+  }
+
+  // A média aparece nos anúncios e no perfil de quem foi avaliado.
+  revalidatePath("/home");
+  revalidatePath("/historico");
+  revalidatePath("/servicos/[id]", "page");
+  revalidatePath("/profissionais/[id]", "page");
+  revalidatePath("/usuarios/[id]", "page");
   return { ok: true };
 }

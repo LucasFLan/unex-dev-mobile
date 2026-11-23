@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, Clock3, MapPin, LockKeyhole } from "lucide-react";
+import { Share2, Clock3 } from "lucide-react";
 import { AdOwnerActions } from "@/components/AdOwnerActions";
 import { BackButton } from "@/components/BackButton";
 import { ValidationBanner } from "@/components/ValidationBanner";
@@ -9,6 +9,7 @@ import { ProposalSheet } from "@/components/ProposalSheet";
 import { RelativeTime } from "@/components/RelativeTime";
 import { MyProposalStatus } from "@/components/MyProposalStatus";
 import { ReceivedProposals } from "@/components/ReceivedProposals";
+import { AdAuthor, AdLocation } from "@/components/AdLocation";
 import type { AnuncioItem } from "@/lib/ads";
 import type { ProposalItem } from "@/lib/proposals";
 import { formatPrice } from "@/lib/format";
@@ -109,7 +110,7 @@ export function ServiceDetails({
 
             <span>·</span>
 
-            <span>{location}</span>
+            <span>{ad.bairro ? `${ad.bairro} · ${location}` : location}</span>
           </div>
 
           <div className="mt-3 flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 px-3 py-2.5">
@@ -129,6 +130,8 @@ export function ServiceDetails({
             </div>
           </div>
 
+          <AdAuthor ad={ad} isOwner={isOwner} from={`/servicos/${ad.id}`} />
+
           <section className="mt-4">
             <h3 className="text-[11px] font-bold">Descrição</h3>
 
@@ -141,35 +144,7 @@ export function ServiceDetails({
             <ReceivedProposals proposals={proposals} adType={ad.tipo} />
           )}
 
-          <section className="mt-4">
-            <h3 className="text-[11px] font-bold">Localização aproximada</h3>
-
-            <div
-              className="relative mt-2 h-21.25 overflow-hidden rounded-xl bg-[#EDF2F7]"
-              aria-hidden="true"
-            >
-              <div className="absolute inset-0">
-                <div className="absolute -left-3 top-[34px] h-[5px] w-[120%] rotate-[8deg] bg-white" />
-                <div className="absolute -left-3 top-[65px] h-[5px] w-[120%] rotate-[8deg] bg-white" />
-                <div className="absolute left-[38%] -top-5 h-[140px] w-[5px] rotate-[-12deg] bg-white" />
-                <div className="absolute left-[70%] -top-5 h-[140px] w-[5px] rotate-[7deg] bg-white" />
-                <div className="absolute left-[20%] -top-5 h-[140px] w-[5px] rotate-[-12deg] bg-white" />
-              </div>
-
-              <div className="absolute left-1/2 top-1/2 flex h-17 w-17 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-blue-300 bg-blue-200/50">
-                <MapPin size={15} fill="#2563EB" className="text-white" />
-              </div>
-            </div>
-
-            <div className="mt-2 flex items-start gap-1 text-[8px] leading-3 text-slate-500">
-              <LockKeyhole size={11} className="mt-0.5 shrink-0" />
-
-              <p>
-                Região de {location}. O endereço exato é liberado quando a
-                proposta é aceita.
-              </p>
-            </div>
-          </section>
+          <AdLocation ad={ad} isOwner={isOwner} />
         </section>
       </div>
 

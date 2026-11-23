@@ -17,7 +17,10 @@ import {
   filterRequests,
   toProfessional,
   toRequest,
+  withDistance,
+  type SortOption,
 } from "@/lib/marketplace";
+import { useMyLocation } from "@/hooks/useMyLocation";
 import type { AnuncioItem } from "@/lib/ads";
 import type { Category } from "@/lib/categories-api";
 
@@ -66,26 +69,43 @@ export function ListingContent({
   const closeFilters = useCallback(() => setShowFilters(false), []);
   useDismissable(filtersRef, showFilters, closeFilters);
 
+  // "Mais perto": a distância é calculada aqui, com a localização aproximada do aparelho (não vai ao servidor).
+  const location = useMyLocation();
+  const chooseSort = (value: SortOption) => {
+    if (value === "perto" && !location.point) location.request();
+    setSort(value);
+  };
+  const locationMessage =
+    filters.sort !== "perto"
+      ? null
+      : location.status === "loading"
+        ? "Descobrindo sua localização..."
+        : location.status === "error"
+          ? location.message
+          : !location.point
+            ? "Toque em \"Mais perto\" e permita a localização."
+            : null;
+
   const professionals = useMemo(
     () =>
       kind === "profissionais"
         ? filterProfessionals(
-            anuncios.filter((anuncio) => anuncio.tipo === "OFERTA").map(toProfessional),
+            withDistance(anuncios.filter((anuncio) => anuncio.tipo === "OFERTA").map(toProfessional), location.point),
             filters
           )
         : [],
-    [kind, anuncios, filters]
+    [kind, anuncios, filters, location.point]
   );
 
   const requests = useMemo(
     () =>
       kind === "servicos"
         ? filterRequests(
-            anuncios.filter((anuncio) => anuncio.tipo === "PEDIDO").map(toRequest),
+            withDistance(anuncios.filter((anuncio) => anuncio.tipo === "PEDIDO").map(toRequest), location.point),
             filters
           )
         : [],
-    [kind, anuncios, filters]
+    [kind, anuncios, filters, location.point]
   );
 
   const total = kind === "profissionais" ? professionals.length : requests.length;
@@ -168,7 +188,7 @@ export function ListingContent({
               <button
                 key={value}
                 type="button"
-                onClick={() => setSort(value)}
+                onClick={() => chooseSort(value)}
                 aria-pressed={filters.sort === value}
                 className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] transition ${
                   filters.sort === value
@@ -180,6 +200,17 @@ export function ListingContent({
               </button>
             ))}
           </div>
+
+          {locationMessage && (
+            <p className="mt-1.5 text-[10px] text-slate-500" role="status">
+              {locationMessage}{" "}
+              {location.status === "error" && (
+                <button type="button" onClick={location.request} className="font-semibold text-blue-600">
+                  Tentar de novo
+                </button>
+              )}
+            </p>
+          )}
         </header>
 
         <CategoryList categories={categories} active={filters.category} onSelect={setCategory} />

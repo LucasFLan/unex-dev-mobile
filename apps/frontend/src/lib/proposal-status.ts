@@ -7,6 +7,7 @@ export const PROPOSAL_STATUS_LABEL: Record<ProposalStatus, string> = {
   RECUSADA: "Recusada",
   NAO_SELECIONADA: "Não selecionada",
   CANCELADA: "Cancelada",
+  CONCLUIDA: "Concluída",
 };
 
 export const PROPOSAL_STATUS_STYLE: Record<ProposalStatus, string> = {
@@ -15,4 +16,5 @@ export const PROPOSAL_STATUS_STYLE: Record<ProposalStatus, string> = {
   RECUSADA: "bg-red-50 text-red-600",
   NAO_SELECIONADA: "bg-slate-100 text-slate-600",
   CANCELADA: "bg-slate-100 text-slate-500",
+  CONCLUIDA: "bg-blue-50 text-blue-700",
 };

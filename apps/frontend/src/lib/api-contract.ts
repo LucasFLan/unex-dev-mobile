@@ -38,6 +38,12 @@ export const ENDPOINTS = {
   myPhoto: "/usuarios/me/foto",
   /** GET: foto de perfil de qualquer usuário (exige login). */
   userPhoto: (userId: string) => `/usuarios/${encodeURIComponent(userId)}/foto`,
+  /** GET: endereço de um CEP (logradouro, bairro, cidade, UF e ponto aproximado). */
+  cep: (cep: string) => `/cep/${encodeURIComponent(cep)}`,
+  /** GET: média, total e avaliações recebidas por um usuário. */
+  userReviews: (userId: string) => `/usuarios/${encodeURIComponent(userId)}/avaliacoes`,
+  /** POST: avaliação (nota + comentário) do serviço concluído. */
+  proposalReview: (proposalId: string) => `/propostas/${encodeURIComponent(proposalId)}/avaliacao`,
   /** GET: foto anexada a uma proposta (só quem enviou ou recebeu). */
   proposalPhoto: (proposalId: string, photoId: string) =>
     `/propostas/${encodeURIComponent(proposalId)}/fotos/${encodeURIComponent(photoId)}`,
