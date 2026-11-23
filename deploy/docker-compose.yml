@@ -37,8 +37,14 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       # Quem pode chamar a API pelo navegador (CORS). O front usa a rede interna e não depende disso.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://192.168.254.210:23000,http://192.168.254.210:28080,https://chamai.grupopapa.com,http://chamai.grupopapa.com}
+    # Imagens enviadas pelos usuários, um volume por tipo (sobrevivem a recriar o container e ao re-pull):
+    # - uploads: documentos e selfies da validação de conta (/app/uploads/validacao);
+    # - uploads_perfil: fotos de perfil;
+    # - uploads_propostas: fotos anexadas às propostas.
     volumes:
       - uploads:/app/uploads
+      - uploads_perfil:/app/uploads/perfil
+      - uploads_propostas:/app/uploads/propostas
     # API e Swagger: http://192.168.254.210:28080/swagger-ui.html
     ports:
       - "${BACK_PORT:-28080}:8080"
@@ -58,3 +64,5 @@ services:
 volumes:
   db_data:
   uploads:
+  uploads_perfil:
+  uploads_propostas:
