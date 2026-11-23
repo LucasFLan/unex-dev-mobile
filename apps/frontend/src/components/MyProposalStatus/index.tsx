@@ -16,19 +16,27 @@ const WRAPPER = {
 } as const;
 
 /** Situação da proposta que o usuário já enviou a este anúncio (rodapé no celular, painel no desktop). */
+/** Encerradas: a pessoa pode mandar outra proposta (ou pedir orçamento de novo) para o mesmo anúncio. */
+const CLOSED: ProposalItem["status"][] = ["CONCLUIDA", "RECUSADA", "NAO_SELECIONADA", "CANCELADA"];
+
 export function MyProposalStatus({
   proposal,
   variant = "footer",
+  onNewRequest,
+  newRequestLabel = "Enviar nova proposta",
 }: {
   proposal: ProposalItem;
   variant?: keyof typeof WRAPPER;
+  /** Abre o formulário de nova proposta; o botão só aparece com a proposta encerrada. */
+  onNewRequest?: () => void;
+  newRequestLabel?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
   const cancel = () => {
-    if (!window.confirm("Cancelar sua proposta? Não será possível enviar outra para este anúncio.")) {
+    if (!window.confirm("Cancelar sua proposta? Depois você pode enviar outra para este anúncio.")) {
       return;
     }
     startTransition(async () => {
@@ -86,8 +94,24 @@ export function MyProposalStatus({
         {(proposal.status === "RECUSADA" ||
           proposal.status === "NAO_SELECIONADA") && (
           <p className="mt-2 text-[10px] text-slate-500 lg:text-sm">
-            O anunciante seguiu com outra opção. Que tal ver outros anúncios?
+            O anunciante seguiu com outra opção. Você pode mandar uma nova proposta ou ver outros anúncios.
           </p>
+        )}
+
+        {proposal.status === "CONCLUIDA" && (
+          <p className="mt-2 text-[10px] text-slate-500 lg:text-sm">
+            Serviço concluído. Precisa de novo? Faça um novo pedido.
+          </p>
+        )}
+
+        {onNewRequest && CLOSED.includes(proposal.status) && (
+          <button
+            type="button"
+            onClick={onNewRequest}
+            className="mt-2 h-9.75 w-full rounded-lg bg-blue-600 text-[10px] font-semibold text-white shadow-sm transition hover:bg-blue-700 lg:mt-3 lg:h-11 lg:text-sm"
+          >
+            {newRequestLabel}
+          </button>
         )}
       </div>
     </footer>

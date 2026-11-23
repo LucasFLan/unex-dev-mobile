@@ -187,7 +187,7 @@ class PropostaNotificacaoControllerTest {
         propor(maria, pedidoDoJoao, "{\"mensagem\": \"Oi\"}").andExpect(status().isCreated());
         propor(maria, pedidoDoJoao, "{\"mensagem\": \"De novo\"}")
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.detail").value("Você já enviou uma proposta para este anúncio."));
+                .andExpect(jsonPath("$.detail").value("Você já tem uma proposta em andamento para este anúncio."));
 
         mockMvc.perform(post("/anuncios/{id}/propostas", pedidoDoJoao).contentType(MediaType.APPLICATION_JSON)
                 .content("{\"mensagem\": \"Oi\"}")).andExpect(status().isUnauthorized());

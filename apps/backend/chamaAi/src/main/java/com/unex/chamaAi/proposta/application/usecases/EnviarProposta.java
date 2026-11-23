@@ -62,7 +62,7 @@ public class EnviarProposta {
         Proposta proposta = Proposta.criar(anuncio.getId(), remetenteId, anuncio.getAutorId(),
                 Preco.deOuNulo(comando.valor()), comando.mensagem());
         List<FotoProposta> anexos = validarFotos(comando.fotos());
-        if (propostas.existePorAnuncioERemetente(anuncio.getId(), remetenteId)) {
+        if (propostas.existeEmAbertoPorAnuncioERemetente(anuncio.getId(), remetenteId)) {
             throw new PropostaDuplicadaException();
         }
 

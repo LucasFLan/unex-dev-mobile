@@ -156,7 +156,7 @@ export function ServiceDetails({
             {isOwner ? (
               <AdOwnerActions ad={ad} backHref={backHref} variant="panel" />
             ) : myProposal ? (
-              <MyProposalStatus proposal={myProposal} variant="panel" />
+              <MyProposalStatus proposal={myProposal} variant="panel" onNewRequest={canPropose ? () => setShowProposal(true) : undefined} newRequestLabel="Enviar nova proposta" />
             ) : (
               proposeAction
             )}
@@ -193,7 +193,7 @@ export function ServiceDetails({
       {isOwner ? (
         <AdOwnerActions ad={ad} backHref={backHref} />
       ) : myProposal ? (
-        <MyProposalStatus proposal={myProposal} />
+        <MyProposalStatus proposal={myProposal} onNewRequest={canPropose ? () => setShowProposal(true) : undefined} newRequestLabel="Enviar nova proposta" />
       ) : (
         <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-100 bg-white px-5 pb-[max(20px,env(safe-area-inset-bottom))] pt-2 md:sticky md:mx-auto md:max-w-md md:rounded-b-2xl md:border md:border-slate-200 md:shadow-sm lg:hidden">
           <div className="mx-auto max-w-md">{proposeAction}</div>

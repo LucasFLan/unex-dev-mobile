@@ -15,7 +15,8 @@ public interface PropostaRepository {
 
     Optional<Proposta> buscarPorId(UUID id);
 
-    boolean existePorAnuncioERemetente(UUID anuncioId, UUID remetenteId);
+    /** Há proposta PENDENTE ou ACEITA desta pessoa para o anúncio? Encerradas não contam. */
+    boolean existeEmAbertoPorAnuncioERemetente(UUID anuncioId, UUID remetenteId);
 
     /** Propostas ainda pendentes de um anúncio. */
     List<Proposta> buscarPendentesPorAnuncio(UUID anuncioId);
