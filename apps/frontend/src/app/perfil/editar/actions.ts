@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { apiFetch, type ApiResult } from "@/lib/api";
+import { apiFetch, apiUpload, type ApiResult } from "@/lib/api";
+import { ACCEPTED_PHOTO_TYPES, MAX_PHOTO_BYTES, photoSrc } from "@/lib/photos";
 import { ENDPOINTS, FIELDS, extractErrorMessage } from "@/lib/api-contract";
 import { clearSessionToken } from "@/lib/session";
 import { isPastDate, onlyDigits, toIsoDate } from "@/lib/validators";
@@ -77,4 +78,59 @@ export async function updateProfile(
   revalidatePath("/menu");
   revalidatePath("/home");
   redirect("/perfil");
+}
+export type ProfilePhotoResult =
+  | { ok: true; photo: string | null }
+  | { ok: false; error: string };
+
+const PROFILE_PHOTO = "/usuarios/me/foto";
+
+async function finishPhotoRequest(result: ApiResult): Promise<ProfilePhotoResult> {
+  if (result.status === 401) {
+    await clearSessionToken();
+    redirect("/login");
+  }
+  if (!result.ok) {
+    return {
+      ok: false,
+      error:
+        extractErrorMessage(result.data) ??
+        (result.status === 413
+          ? "A foto é grande demais (máximo 5 MB)."
+          : "Algo deu errado no servidor. Tente novamente em instantes."),
+    };
+  }
+
+  revalidatePath("/perfil");
+  revalidatePath("/menu");
+  revalidatePath("/home");
+  const body = (result.data ?? {}) as Record<string, unknown>;
+  return { ok: true, photo: photoSrc(body.fotoPerfil) };
+}
+
+/** PUT /usuarios/me/foto (multipart: foto). A foto chega já reduzida pelo navegador. */
+export async function uploadProfilePhoto(formData: FormData): Promise<ProfilePhotoResult> {
+  const foto = formData.get("foto");
+  if (!(foto instanceof File) || foto.size === 0) return { ok: false, error: "Escolha uma foto." };
+  if (foto.size > MAX_PHOTO_BYTES) return { ok: false, error: "A foto passa de 5 MB." };
+  if (foto.type && !ACCEPTED_PHOTO_TYPES.includes(foto.type)) {
+    return { ok: false, error: "Envie a foto em JPG, PNG ou WEBP." };
+  }
+
+  const form = new FormData();
+  form.append("foto", foto, foto.name || "foto.jpg");
+  try {
+    return await finishPhotoRequest(await apiUpload(PROFILE_PHOTO, form, "PUT"));
+  } catch {
+    return { ok: false, error: "Não foi possível conectar ao servidor. Tente novamente." };
+  }
+}
+
+/** DELETE /usuarios/me/foto. */
+export async function removeProfilePhoto(): Promise<ProfilePhotoResult> {
+  try {
+    return await finishPhotoRequest(await apiFetch(PROFILE_PHOTO, { method: "DELETE", auth: true }));
+  } catch {
+    return { ok: false, error: "Não foi possível conectar ao servidor. Tente novamente." };
+  }
 }

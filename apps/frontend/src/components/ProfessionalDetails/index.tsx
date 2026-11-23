@@ -13,7 +13,8 @@ import { ReceivedProposals } from "@/components/ReceivedProposals";
 import type { AnuncioItem } from "@/lib/ads";
 import type { ProposalItem } from "@/lib/proposals";
 import { getCategoryMeta } from "@/lib/categories";
-import { initials } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
+import { PhotoGallery } from "@/components/PhotoGallery";
 import { formatPrice } from "@/lib/format";
 
 type ProfessionalDetailsProps = {
@@ -65,7 +66,7 @@ export function ProfessionalDetails({
   return (
     <main className="min-h-screen bg-white text-slate-900 md:bg-fundo md:px-6 md:py-10">
       <div className="mx-auto min-h-screen w-full max-w-md bg-white pb-24 md:min-h-0 md:overflow-hidden md:rounded-t-2xl md:border md:border-b-0 md:border-slate-200 md:pb-6">
-        <section className={`relative h-45.5 ${bg}`}>
+        <section className={`relative h-45.5 ${bg} ${ad.fotos.length > 0 ? "md:h-64" : ""}`}>
           <BackButton
             href={backHref}
             iconSize={17}
@@ -83,14 +84,18 @@ export function ProfessionalDetails({
             </button>
           </div>
 
-          <div className="flex h-full items-center justify-center pt-5">
-            <Icon
-              size={43}
-              strokeWidth={1.3}
-              className={text}
-              aria-hidden="true"
-            />
-          </div>
+          {ad.fotos.length > 0 ? (
+            <PhotoGallery photos={ad.fotos} title={ad.titulo} />
+          ) : (
+            <div className="flex h-full items-center justify-center pt-5">
+              <Icon
+                size={43}
+                strokeWidth={1.3}
+                className={text}
+                aria-hidden="true"
+              />
+            </div>
+          )}
         </section>
 
         <section className="relative -mt-3 rounded-t-2xl bg-white px-4 pt-3">
@@ -146,9 +151,11 @@ export function ProfessionalDetails({
           </div>
 
           <div className="mt-2 flex items-center gap-1.5 text-[9px] text-slate-500">
-            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[7px] font-semibold text-blue-600">
-              {initials(ad.titulo)}
-            </span>
+            <Avatar
+              name={ad.titulo}
+              photo={ad.fotoAutor}
+              className="h-4 w-4 bg-blue-100 text-[7px] font-semibold text-blue-600"
+            />
 
             <span>Anunciado por</span>
 

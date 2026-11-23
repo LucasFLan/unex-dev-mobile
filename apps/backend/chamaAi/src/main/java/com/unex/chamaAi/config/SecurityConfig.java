@@ -27,7 +27,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuarios", "/auth/login", "/auth/recuperar-senha",
                                 "/auth/recuperar-senha/validar", "/auth/recuperar-senha/redefinir").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/anuncios", "/anuncios/*", "/categorias").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/anuncios", "/anuncios/*", "/anuncios/*/fotos/*", "/categorias",
+                                "/usuarios/*/foto").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/usuarios/*/aprovar", "/usuarios/*/reprovar").hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Schema(description = "Anúncio com a categoria detalhada.")
@@ -43,11 +44,19 @@ public record AnuncioResponse(
         Instant criadoEm,
 
         @Schema(description = "Data da última edição (ISO-8601, UTC).", example = "2026-11-16T21:30:00.123456Z")
-        Instant atualizadoEm) {
+        Instant atualizadoEm,
+
+        @Schema(description = "Fotos do anúncio, na ordem em que foram enviadas (até 6).")
+        List<FotoAnuncioResponse> fotos,
+
+        @Schema(description = "Caminho da foto de perfil do autor na API. `null` = autor sem foto.",
+                example = "/usuarios/3f2b6c1e-8a4d-4e0b-9c7a-1d2e3f4a5b6c/foto?v=1795454362205", nullable = true)
+        String fotoAutor) {
 
     public static AnuncioResponse de(AnuncioDetalhado anuncio) {
         return new AnuncioResponse(anuncio.id(), anuncio.tipo(), anuncio.titulo(), anuncio.descricao(), anuncio.preco(),
                 CategoriaResponse.de(anuncio.categoria()), anuncio.cidade(), anuncio.uf(), anuncio.ativo(),
-                anuncio.autorId(), anuncio.criadoEm(), anuncio.atualizadoEm());
+                anuncio.autorId(), anuncio.criadoEm(), anuncio.atualizadoEm(),
+                anuncio.fotos().stream().map(FotoAnuncioResponse::de).toList(), anuncio.fotoAutor());
     }
 }

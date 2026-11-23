@@ -9,7 +9,7 @@ import Button from "@/components/Button";
 import { InfoRow } from "@/components/InfoRow";
 import Input from "@/components/Input";
 import { maskDate, maskPhone } from "@/lib/masks";
-import { initials } from "@/lib/marketplace";
+import { ProfilePhotoPicker } from "@/components/ProfilePhotoPicker";
 
 export type EditProfileInitial = {
   nome: string;
@@ -17,6 +17,8 @@ export type EditProfileInitial = {
   telefone: string;
   email: string;
   cpf: string;
+  /** Foto de perfil atual (endereço pelo proxy) ou `null`. */
+  foto: string | null;
 };
 
 export function EditProfileForm({ initial }: { initial: EditProfileInitial }) {
@@ -47,23 +49,18 @@ export function EditProfileForm({ initial }: { initial: EditProfileInitial }) {
           className="mb-4 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-800 transition hover:bg-slate-50"
         />
 
-        <header className="mb-5 flex items-center gap-3">
-          <span
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-600"
-            aria-hidden="true"
-          >
-            {initials(form.nome || initial.nome)}
-          </span>
-
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Editar perfil
-            </h1>
-            <p className="mt-0.5 text-sm leading-5 text-slate-500">
-              Atualize seus dados pessoais.
-            </p>
-          </div>
+        <header className="mb-5">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Editar perfil
+          </h1>
+          <p className="mt-0.5 text-sm leading-5 text-slate-500">
+            Atualize sua foto e seus dados pessoais.
+          </p>
         </header>
+
+        <section className="mb-6 rounded-xl border border-slate-200 p-4" aria-label="Foto de perfil">
+          <ProfilePhotoPicker name={form.nome || initial.nome} photo={initial.foto} />
+        </section>
 
         <form action={formAction}>
           <input type="hidden" name="email" value={initial.email} />

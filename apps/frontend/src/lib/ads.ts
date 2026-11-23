@@ -2,6 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { apiFetch, type ApiResult } from "@/lib/api";
 import { ENDPOINTS, AD_FIELDS } from "@/lib/api-contract";
+import { photoSrc, type AdPhoto } from "@/lib/photos";
 
 export type AdType = "OFERTA" | "PEDIDO";
 
@@ -23,6 +24,10 @@ export type AnuncioItem = {
   autorId: string;
   criadoEm: string;
   atualizadoEm: string;
+  /** Fotos do anúncio, na ordem de envio. */
+  fotos: AdPhoto[];
+  /** Foto de perfil do autor (endereço pelo proxy) ou `null`. */
+  fotoAutor: string | null;
 };
 
 type AnunciosPageResponse = {
@@ -75,7 +80,19 @@ export function parseAnuncio(item: unknown): AnuncioItem | null {
     autorId: text(b.autorId),
     criadoEm: text(b.criadoEm),
     atualizadoEm: text(b.atualizadoEm),
+    fotos: parsePhotos(b.fotos),
+    fotoAutor: photoSrc(b.fotoAutor),
   };
+}
+
+function parsePhotos(value: unknown): AdPhoto[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (typeof item !== "object" || item === null) return [];
+    const foto = item as Record<string, unknown>;
+    const src = photoSrc(foto.url);
+    return typeof foto.id === "string" && src ? [{ id: foto.id, src }] : [];
+  });
 }
 
 function parsePage(data: unknown) {

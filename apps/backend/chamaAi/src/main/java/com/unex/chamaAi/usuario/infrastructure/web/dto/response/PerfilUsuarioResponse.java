@@ -35,11 +35,15 @@ public record PerfilUsuarioResponse(
         @Schema(description = "Situação da validação de documentos: `PENDENTE`, `APROVADO` ou `REPROVADO`. "
                 + "Só `APROVADO` publica anúncios e envia propostas.", example = "PENDENTE",
                 allowableValues = {"PENDENTE", "APROVADO", "REPROVADO"})
-        String statusValidacao) {
+        String statusValidacao,
+
+        @Schema(description = "Caminho da foto de perfil na API (o `v` muda a cada troca). `null` = sem foto.",
+                example = "/usuarios/3f2b6c1e-8a4d-4e0b-9c7a-1d2e3f4a5b6c/foto?v=1795454362205", nullable = true)
+        String fotoPerfil) {
 
     public static PerfilUsuarioResponse de(PerfilUsuario perfil) {
         return new PerfilUsuarioResponse(perfil.id(), perfil.nome(), perfil.dataNascimento(), perfil.cpf(),
                 perfil.email(), perfil.telefone(), perfil.verificado(), perfil.papel(),
-                perfil.statusValidacao());
+                perfil.statusValidacao(), perfil.fotoPerfil());
     }
 }

@@ -13,6 +13,10 @@ export type Professional = {
   /** `null` = "a combinar". */
   price: number | null;
   createdAt: string;
+  /** Primeira foto do anúncio (capa do card) ou `null`. */
+  cover: string | null;
+  /** Foto de perfil do autor ou `null`. */
+  authorPhoto: string | null;
 };
 
 export type ServiceRequest = {
@@ -122,6 +126,8 @@ export const toProfessional = (anuncio: AnuncioItem): Professional => ({
   location: `${anuncio.cidade}, ${anuncio.uf}`,
   price: anuncio.preco,
   createdAt: anuncio.criadoEm,
+  cover: anuncio.fotos[0]?.src ?? null,
+  authorPhoto: anuncio.fotoAutor,
 });
 
 /** Anúncio do tipo PEDIDO no formato do card de pedido. */

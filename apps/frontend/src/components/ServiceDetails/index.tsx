@@ -9,6 +9,7 @@ import { ProposalSheet } from "@/components/ProposalSheet";
 import { RelativeTime } from "@/components/RelativeTime";
 import { MyProposalStatus } from "@/components/MyProposalStatus";
 import { ReceivedProposals } from "@/components/ReceivedProposals";
+import { PhotoGallery } from "@/components/PhotoGallery";
 import type { AnuncioItem } from "@/lib/ads";
 import type { ProposalItem } from "@/lib/proposals";
 import { formatPrice } from "@/lib/format";
@@ -128,6 +129,12 @@ export function ServiceDetails({
               </p>
             </div>
           </div>
+
+          {ad.fotos.length > 0 && (
+            <section className="relative mt-4 h-48 overflow-hidden rounded-xl bg-slate-100 md:h-56">
+              <PhotoGallery photos={ad.fotos} title={ad.titulo} />
+            </section>
+          )}
 
           <section className="mt-4">
             <h3 className="text-[11px] font-bold">Descrição</h3>

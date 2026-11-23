@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { getCategoryMeta } from "@/lib/categories";
-import { initials, type Professional } from "@/lib/marketplace";
+import { Avatar } from "@/components/Avatar";
+import { type Professional } from "@/lib/marketplace";
 import { formatPrice } from "@/lib/format";
 import { withFrom } from "@/lib/navigation";
 
@@ -27,16 +28,26 @@ export function ProfessionalCard({
       <div
         className={`relative flex h-21.5 items-center lg:h-28 justify-center ${bg}`}
       >
-        <span className="absolute left-2 top-2 max-w-[85%] truncate rounded-md bg-white/90 px-2 py-1 text-[10px] font-medium text-amber-800">
+        <span className="absolute left-2 top-2 z-10 max-w-[85%] truncate rounded-md bg-white/90 px-2 py-1 text-[10px] font-medium text-amber-800">
           {professional.category}
         </span>
 
-        <Icon
-          size={29}
-          strokeWidth={1.7}
-          className={text}
-          aria-hidden="true"
-        />
+        {professional.cover ? (
+          // eslint-disable-next-line @next/next/no-img-element -- foto servida pelo proxy da API.
+          <img
+            src={professional.cover}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <Icon
+            size={29}
+            strokeWidth={1.7}
+            className={text}
+            aria-hidden="true"
+          />
+        )}
       </div>
 
       <div className="p-2 lg:p-3">
@@ -45,12 +56,11 @@ export function ProfessionalCard({
         </h3>
 
         <div className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-600 lg:text-xs">
-          <span
-            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-medium"
-            aria-hidden="true"
-          >
-            {initials(professional.name)}
-          </span>
+          <Avatar
+            name={professional.name}
+            photo={professional.authorPhoto}
+            className="h-5 w-5 bg-slate-100 text-[10px] font-medium"
+          />
 
           <span className="truncate">{professional.name}</span>
         </div>

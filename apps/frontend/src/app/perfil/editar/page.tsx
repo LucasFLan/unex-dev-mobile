@@ -14,6 +14,7 @@ async function EditarPerfilContent() {
         telefone: maskPhone(user.phone),
         email: user.email,
         cpf: maskCpf(user.cpf),
+        foto: user.photo,
       }}
     />
   );

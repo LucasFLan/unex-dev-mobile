@@ -12,13 +12,16 @@ RUN mvn -B -q package -DskipTests && cp target/*.jar app.jar
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN groupadd --system app && useradd --system --gid app --home /app app \
-    && mkdir -p /app/uploads/validacao && chown -R app:app /app
+    && mkdir -p /app/uploads/validacao /app/uploads/perfil /app/uploads/anuncios /app/uploads/propostas \
+    && chown -R app:app /app
 COPY --from=build --chown=app:app /build/app.jar app.jar
 USER app
 
 ENV VALIDACAO_DIRETORIO=/app/uploads/validacao \
+    PERFIL_DIRETORIO=/app/uploads/perfil \
+    ANUNCIOS_DIRETORIO=/app/uploads/anuncios \
     JAVA_OPTS="-XX:MaxRAMPercentage=75"
-# Imagens de validação de conta: monte um volume aqui para não perder ao recriar o container.
+# Imagens enviadas (validação, perfil, anúncios): monte um volume aqui para não perder ao recriar o container.
 VOLUME ["/app/uploads"]
 EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

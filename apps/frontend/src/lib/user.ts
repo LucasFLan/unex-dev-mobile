@@ -2,6 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { ENDPOINTS, FIELDS } from "@/lib/api-contract";
+import { photoSrc } from "@/lib/photos";
 
 export type CurrentUser = {
   id: string;
@@ -14,6 +15,8 @@ export type CurrentUser = {
   role: "USUARIO" | "ADMIN";
   /** Só APROVADO publica anúncios e envia propostas. */
   validation: AccountValidation;
+  /** Foto de perfil (endereço pelo proxy) ou `null`. */
+  photo: string | null;
 };
 
 export type AccountValidation = "PENDENTE" | "APROVADO" | "REPROVADO";
@@ -42,6 +45,7 @@ function parseUser(data: unknown): CurrentUser | null {
       body.statusValidacao === "APROVADO" || body.statusValidacao === "REPROVADO"
         ? body.statusValidacao
         : "PENDENTE",
+    photo: photoSrc(body.fotoPerfil),
   };
 }
 

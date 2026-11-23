@@ -26,10 +26,11 @@ import Button from "@/components/Button";
 import type { AnuncioItem } from "@/lib/ads";
 import type { Category } from "@/lib/categories-api";
 import { ESTADOS } from "@/lib/estados";
+import { resizeImageForUpload } from "@/lib/image-resize";
+import { MAX_AD_PHOTOS, type AdPhoto } from "@/lib/photos";
 
 type AdType = "procurar" | "oferecer";
 
-const MAX_PHOTOS = 6;
 const MAX_TITLE = 120;
 const MAX_DESCRIPTION = 5000;
 
@@ -45,36 +46,34 @@ const FIELD =
 const ICON = "shrink-0 text-slate-400 md:size-4";
 const CONTROL = "text-[9px] md:text-sm";
 
-function PhotoPreview({
-  file,
-  index,
+function PhotoThumb({
+  src,
+  label,
   onRemove,
 }: {
-  file: File;
-  index: number;
-  onRemove: (index: number) => void;
+  src: string;
+  label: string;
+  onRemove: () => void;
 }) {
-  const url = useMemo(() => URL.createObjectURL(file), [file]);
-
   return (
     <div className="relative aspect-square overflow-hidden rounded-lg border border-slate-200">
-      <img
-        src={url}
-        alt={`Foto ${index + 1}`}
-        className="h-full w-full object-cover"
-      />
+      {/* eslint-disable-next-line @next/next/no-img-element -- prévia local (blob:) ou foto pelo proxy da API. */}
+      <img src={src} alt={label} className="h-full w-full object-cover" />
 
       <button
         type="button"
-        onClick={() => onRemove(index)}
-        aria-label="Remover foto"
-        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-slate-700 shadow"
+        onClick={onRemove}
+        aria-label={`Remover ${label.toLowerCase()}`}
+        className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-white text-slate-700 shadow md:h-6 md:w-6"
       >
-        <X size={12} />
+        <X size={12} className="md:size-3.5" />
       </button>
     </div>
   );
 }
+
+/** Foto nova escolhida no formulário: já reduzida e com a prévia local. */
+type NewPhoto = { file: File; preview: string };
 
 type AdFormProps = {
   categories: Category[];
@@ -87,9 +86,11 @@ type AdFormProps = {
   template?: AnuncioItem;
   /** Tela-pai: Início ao criar; de onde veio a edição (Histórico ou detalhe). */
   backHref: string;
+  /** Aviso no topo do formulário (ex.: o anúncio foi criado, mas as fotos não subiram). */
+  notice?: string;
 };
 
-export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
+export function AdForm({ categories, ad, template, backHref, notice }: AdFormProps) {
   const isEditing = ad !== undefined;
   const isCopy = !isEditing && template !== undefined;
   const initial = ad ?? template;
@@ -121,23 +122,56 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState(initial?.cidade ?? "");
   const [uf, setUf] = useState(initial?.uf ?? "");
-  const [photos, setPhotos] = useState<File[]>([]);
+  /** Fotos que o anúncio já tem (só na edição); as removidas são apagadas ao salvar. */
+  const [removedPhotos, setRemovedPhotos] = useState<string[]>([]);
+  const savedPhotos: AdPhoto[] = (ad?.fotos ?? []).filter(
+    (photo) => !removedPhotos.includes(photo.id)
+  );
+  const [photos, setPhotos] = useState<NewPhoto[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [preparingPhotos, setPreparingPhotos] = useState(false);
+  const totalPhotos = savedPhotos.length + photos.length;
 
   const isOffering = adType === "oferecer";
 
-  function handlePhotos(files: FileList | null) {
-    if (!files) return;
+  /** Reduz as fotos no aparelho (JPEG de até 1600 px): o envio fica leve até pelo celular. */
+  async function handlePhotos(files: FileList | null) {
+    if (!files || files.length === 0) return;
 
-    const selected = Array.from(files).slice(
-      0,
-      Math.max(0, MAX_PHOTOS - photos.length)
+    const room = Math.max(0, MAX_AD_PHOTOS - totalPhotos);
+    const selected = Array.from(files).slice(0, room);
+    setPhotoError(
+      files.length > room
+        ? `O anúncio pode ter até ${MAX_AD_PHOTOS} fotos: ${files.length - room} ficaram de fora.`
+        : null
     );
 
-    setPhotos((current) => [...current, ...selected]);
+    setPreparingPhotos(true);
+    const ready: NewPhoto[] = [];
+    for (const [index, file] of selected.entries()) {
+      try {
+        const resized = await resizeImageForUpload(file, `foto-${Date.now()}-${index}`);
+        ready.push({ file: resized, preview: URL.createObjectURL(resized) });
+      } catch {
+        setPhotoError(`Não foi possível abrir "${file.name}". Escolha fotos em JPG ou PNG.`);
+      }
+    }
+    setPhotos((current) => [...current, ...ready].slice(0, MAX_AD_PHOTOS));
+    setPreparingPhotos(false);
   }
 
   function removePhoto(index: number) {
-    setPhotos((current) => current.filter((_, i) => i !== index));
+    setPhotos((current) => {
+      URL.revokeObjectURL(current[index].preview);
+      return current.filter((_, i) => i !== index);
+    });
+  }
+
+  /** As fotos não fazem parte dos campos do formulário: entram no envio aqui. */
+  function submitWithPhotos(formData: FormData) {
+    for (const photo of photos) formData.append("fotos", photo.file);
+    for (const id of removedPhotos) formData.append("removerFoto", id);
+    formAction(formData);
   }
 
   const availabilityOptions = isOffering
@@ -199,7 +233,7 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
           <div className="w-8 lg:hidden" />
         </header>
 
-        <form ref={formRef} action={formAction} className="px-4 md:px-6 lg:px-8 lg:pt-6">
+        <form ref={formRef} action={submitWithPhotos} className="px-4 md:px-6 lg:px-8 lg:pt-6">
           {isEditing && <input type="hidden" name="voltar" value={backHref} />}
           <input
             type="hidden"
@@ -219,7 +253,17 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
             {isCopy && (
               <p className="mb-3 rounded-lg bg-blue-50 px-3 py-2 text-[11px] leading-4 text-blue-700 md:text-sm md:leading-5 lg:col-span-2 lg:mb-5">
                 Copiamos os dados de <strong>“{template?.titulo}”</strong>. Revise o que
-                quiser mudar e publique: o anúncio original continua igual.
+                quiser mudar e publique: o anúncio original continua igual. As fotos não são
+                copiadas.
+              </p>
+            )}
+
+            {notice && (
+              <p
+                role="status"
+                className="mb-3 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-4 text-amber-800 md:text-sm md:leading-5 lg:col-span-2 lg:mb-5"
+              >
+                {notice}
               </p>
             )}
 
@@ -589,37 +633,56 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
                     {isOffering ? "Fotos dos seus trabalhos" : "Fotos"}
                   </p>
 
-                  <span className={HINT}>Opcional</span>
+                    <span className={HINT}>
+                    {totalPhotos > 0 ? `${totalPhotos}/${MAX_AD_PHOTOS}` : "Opcional"}
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-1.5 md:gap-2">
-                  <label className="relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 text-blue-600 transition md:hover:bg-blue-50">
-                    <ImagePlus size={15} className="md:size-5" />
-                    <span className="text-[8px] font-medium md:text-xs">Adicionar</span>
+                  {totalPhotos < MAX_AD_PHOTOS && (
+                    <label
+                      className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 text-blue-600 transition md:hover:bg-blue-50 ${
+                        preparingPhotos ? "pointer-events-none opacity-60" : ""
+                      }`}
+                    >
+                      <ImagePlus size={15} className="md:size-5" />
+                      <span className="text-[8px] font-medium md:text-xs">
+                        {preparingPhotos ? "Preparando..." : "Adicionar"}
+                      </span>
 
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      disabled={photos.length >= MAX_PHOTOS}
-                      onChange={(e) => {
-                        handlePhotos(e.target.files);
-                        e.target.value = "";
-                      }}
-                      className="hidden"
-                    />
-                  </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        disabled={preparingPhotos}
+                        onChange={(e) => {
+                          void handlePhotos(e.target.files);
+                          e.target.value = "";
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
 
-                  {photos.map((photo, index) => (
-                    <PhotoPreview
-                      key={`${photo.name}-${index}`}
-                      file={photo}
-                      index={index}
-                      onRemove={removePhoto}
+                  {savedPhotos.map((photo, index) => (
+                    <PhotoThumb
+                      key={photo.id}
+                      src={photo.src}
+                      label={`Foto ${index + 1}`}
+                      onRemove={() => setRemovedPhotos((current) => [...current, photo.id])}
                     />
                   ))}
 
-                  {Array.from({ length: Math.max(0, 2 - photos.length) }).map(
+                  {photos.map((photo, index) => (
+                    <PhotoThumb
+                      key={photo.preview}
+                      src={photo.preview}
+                      label={`Foto ${savedPhotos.length + index + 1}`}
+                      onRemove={() => removePhoto(index)}
+                    />
+                  ))}
+
+                  {Array.from({ length: Math.max(0, 2 - totalPhotos) }).map(
                     (_, index) => (
                       <div
                         key={`empty-${index}`}
@@ -631,8 +694,14 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
                   )}
                 </div>
 
+                {photoError && (
+                  <p role="alert" className="mt-1.5 text-[8px] text-red-600 md:mt-2 md:text-xs">
+                    {photoError}
+                  </p>
+                )}
+
                 <p className={`mt-1.5 md:mt-2 ${HINT}`}>
-                  Até {MAX_PHOTOS} fotos · JPG ou PNG, até 5 MB cada
+                  Até {MAX_AD_PHOTOS} fotos · JPG, PNG ou WEBP
                 </p>
               </section>
             </div>
@@ -654,7 +723,7 @@ export function AdForm({ categories, ad, template, backHref }: AdFormProps) {
               text={submitLabel}
               type="button"
               onClick={() => {
-                if (!pending) formRef.current?.requestSubmit();
+                if (!pending && !preparingPhotos) formRef.current?.requestSubmit();
               }}
             />
           </div>

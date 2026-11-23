@@ -4,6 +4,8 @@ import com.unex.chamaAi.anuncio.application.dto.AnuncioDetalhado;
 import com.unex.chamaAi.anuncio.application.dto.ListarAnunciosQuery;
 import com.unex.chamaAi.anuncio.domain.repositories.AnuncioRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.CategoriaRepository;
+import com.unex.chamaAi.anuncio.domain.repositories.FotoAnuncioRepository;
+import com.unex.chamaAi.usuario.domain.repositories.FotoPerfilRepository;
 import com.unex.chamaAi.anuncio.domain.repositories.FiltroAnuncios;
 import com.unex.chamaAi.anuncio.domain.valueobjects.Localizacao;
 import com.unex.chamaAi.anuncio.domain.valueobjects.TipoAnuncio;
@@ -16,8 +18,13 @@ public class ListarAnuncios {
     private final DetalhadorAnuncio detalhador;
 
     public ListarAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias) {
+        this(anuncios, categorias, null, null);
+    }
+
+    public ListarAnuncios(AnuncioRepository anuncios, CategoriaRepository categorias,
+            FotoAnuncioRepository fotos, FotoPerfilRepository fotosPerfil) {
         this.anuncios = anuncios;
-        this.detalhador = new DetalhadorAnuncio(categorias);
+        this.detalhador = new DetalhadorAnuncio(categorias, fotos, fotosPerfil);
     }
 
     public Pagina<AnuncioDetalhado> executar(ListarAnunciosQuery consulta) {
