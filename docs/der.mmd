@@ -1,0 +1,145 @@
+erDiagram
+    usuarios {
+        UUID id PK
+        TEXT nome
+        DATE data_nascimento
+        VARCHAR cpf UK "11 dígitos"
+        TEXT email UK
+        TEXT senha_hash
+        TEXT telefone "opcional"
+        BOOLEAN verificado
+        VARCHAR papel "USUARIO | ADMIN"
+        VARCHAR status_validacao "PENDENTE | APROVADO | REPROVADO"
+        TIMESTAMPTZ foto_atualizada_em "nulo = sem foto"
+    }
+
+    categorias {
+        UUID id PK
+        VARCHAR slug UK
+        VARCHAR nome UK
+    }
+
+    anuncios {
+        UUID id PK
+        UUID autor_id FK
+        UUID categoria_id FK
+        VARCHAR tipo "OFERTA | PEDIDO"
+        VARCHAR titulo
+        TEXT descricao
+        NUMERIC preco "nulo = a combinar"
+        VARCHAR cidade
+        CHAR uf
+        VARCHAR cep "opcional"
+        VARCHAR logradouro
+        VARCHAR numero
+        VARCHAR complemento
+        VARCHAR bairro
+        DOUBLE latitude
+        DOUBLE longitude
+        SMALLINT raio_atendimento_km "1 a 200, só OFERTA"
+        BOOLEAN ativo
+        TIMESTAMPTZ criado_em
+        TIMESTAMPTZ atualizado_em
+    }
+
+    anuncios_fotos {
+        UUID id PK
+        UUID anuncio_id FK
+        VARCHAR content_type
+        TIMESTAMPTZ criado_em "define a ordem"
+    }
+
+    propostas {
+        UUID id PK
+        UUID anuncio_id FK
+        UUID remetente_id FK
+        UUID destinatario_id FK
+        NUMERIC valor "nulo = a combinar"
+        VARCHAR mensagem
+        VARCHAR status "PENDENTE | ACEITA | RECUSADA | NAO_SELECIONADA | CANCELADA | CONCLUIDA"
+        TIMESTAMPTZ criado_em
+        TIMESTAMPTZ respondido_em
+        TIMESTAMPTZ concluido_em
+    }
+
+    propostas_fotos {
+        UUID id PK
+        UUID proposta_id FK
+        SMALLINT ordem "único por proposta"
+        VARCHAR content_type
+        TIMESTAMPTZ criado_em
+    }
+
+    avaliacoes {
+        UUID id PK
+        UUID proposta_id FK,UK "nulo se a proposta sumir"
+        UUID avaliador_id FK "nulo se a conta for apagada"
+        UUID avaliado_id FK
+        SMALLINT nota "1 a 5"
+        VARCHAR comentario
+        VARCHAR servico_titulo
+        VARCHAR servico_categoria
+        TIMESTAMPTZ criado_em
+    }
+
+    notificacoes {
+        UUID id PK
+        UUID usuario_id FK
+        UUID anuncio_id FK "opcional"
+        UUID proposta_id FK "opcional"
+        VARCHAR tipo
+        VARCHAR titulo
+        VARCHAR mensagem
+        BOOLEAN lida
+        TIMESTAMPTZ criado_em
+    }
+
+    envios_validacao {
+        UUID id PK
+        UUID usuario_id FK
+        UUID analisado_por FK "admin, opcional"
+        VARCHAR status "PENDENTE | APROVADO | REPROVADO"
+        VARCHAR motivo_reprovacao
+        TIMESTAMPTZ enviado_em
+        TIMESTAMPTZ analisado_em
+    }
+
+    arquivos_validacao {
+        UUID envio_id PK,FK
+        VARCHAR tipo PK "DOCUMENTO | SELFIE"
+        VARCHAR content_type
+        VARCHAR caminho
+    }
+
+    codigos_recuperacao_senha {
+        UUID id PK
+        UUID usuario_id FK
+        CHAR codigo_hash "SHA-256"
+        TIMESTAMPTZ expira_em
+        INTEGER tentativas
+        TIMESTAMPTZ usado_em
+        TIMESTAMPTZ criado_em
+    }
+
+    usuarios ||--o{ anuncios : "publica"
+    categorias ||--o{ anuncios : "classifica"
+    anuncios ||--o{ anuncios_fotos : "tem até 6"
+
+    anuncios ||--o{ propostas : "recebe"
+    usuarios ||--o{ propostas : "envia (remetente)"
+    usuarios ||--o{ propostas : "recebe (destinatário)"
+    propostas ||--o{ propostas_fotos : "tem até 5"
+
+    propostas |o--o| avaliacoes : "gera ao concluir"
+    usuarios |o--o{ avaliacoes : "avalia"
+    usuarios ||--o{ avaliacoes : "é avaliado"
+
+    usuarios ||--o{ notificacoes : "recebe"
+    anuncios |o--o{ notificacoes : "referencia"
+    propostas |o--o{ notificacoes : "referencia"
+
+    usuarios ||--o{ envios_validacao : "envia documentos"
+    usuarios |o--o{ envios_validacao : "analisa (admin)"
+    envios_validacao ||--|{ arquivos_validacao : "documento e selfie"
+
+    usuarios ||--o{ codigos_recuperacao_senha : "pede"
